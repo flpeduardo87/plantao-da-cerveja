@@ -199,6 +199,22 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   padding:10px max(16px,env(safe-area-inset-right,0px));
   border-bottom:none;
 }
+.search-bar-row{display:flex;align-items:center;gap:8px;}
+.search-bar-row .search-wrap{flex:1;min-width:0;}
+.mob-cart-fab{
+  flex-shrink:0;width:44px;height:44px;border-radius:50%;border:none;
+  background:#111;color:#fff;font-size:19px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;box-shadow:0 2px 8px rgba(0,0,0,.25);
+  transition:transform .12s;
+}
+.mob-cart-fab:active{transform:scale(.9);}
+.mob-cart-fab-cnt{
+  position:absolute;top:-3px;right:-3px;
+  background:var(--green);color:#fff;font:900 9px 'Nunito',sans-serif;
+  min-width:16px;height:16px;border-radius:999px;padding:0 3px;
+  display:flex;align-items:center;justify-content:center;
+}
 
 /* ── MAIN STORE ── */
 #s-home{z-index:11;}
@@ -230,7 +246,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .cat-pill:hover{background:var(--bg-2);}
 .cat-pill.on{background:var(--amber-lt);}
 .cat-pill .em{font-size:26px;line-height:1;}
-.cat-pill .lb{font-size:11px;font-weight:800;color:var(--fg-2);white-space:nowrap;}
+.cat-pill .lb{font-size:11px;font-weight:600;font-family:'Nunito',sans-serif;color:var(--fg-2);white-space:nowrap;}
 .cat-pill.on .lb{color:#7A4F00;}
 .section{background:var(--bg);margin-bottom:8px;}
 .sec-hd{
@@ -608,32 +624,51 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
   .bottom-nav{display:none!important;}
   #s-home,#s-cart{padding-top:64px;}
 
-  /* Banner: taller, bigger text */
-  .store-banner{height:220px;}
-  .banner-headline{font-size:46px;}
+  /* Banner: photo bg, taller */
+  .store-banner{
+    height:260px;
+    background-image:url('https://picsum.photos/seed/plantaohero/1400/280');
+    background-size:cover;background-position:center;
+  }
+  .store-banner::before{
+    background:linear-gradient(90deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.15) 60%,transparent 100%);
+  }
+  .banner-headline{font-size:52px;color:rgba(255,255,255,.9);letter-spacing:-2px;}
   .banner-offer-badge{font-size:14px;}
-  .banner-inner{bottom:36px;left:40px;}
+  .banner-inner{bottom:40px;left:48px;}
 
-  /* Store info: left-aligned */
-  .store-avatar-wrap{justify-content:flex-start;padding-left:40px;margin-top:-44px;}
-  .store-info-card{text-align:left;padding:12px 40px 20px;}
+  /* Store info: centered, rounded top card like reference */
+  .store-avatar-wrap{justify-content:center;padding-left:0;margin-top:-52px;}
+  .store-avatar{width:104px;height:104px;border:5px solid var(--bg);}
+  .store-info-card{
+    text-align:center;padding:14px 40px 20px;
+    border-radius:0;
+    border-bottom:8px solid var(--bg-2);
+  }
   .store-name{font-size:28px;}
   .store-tagline{font-size:15px;}
-  .store-meta{display:flex;flex-direction:row;flex-wrap:wrap;gap:16px 32px;align-items:center;margin-bottom:10px;}
+  .store-meta{display:inline-flex;flex-direction:column;gap:7px;margin-bottom:14px;text-align:left;}
   .meta-row{font-size:14px;}
   .meta-ic{font-size:15px;}
-  .store-chips{justify-content:flex-start;}
+  .store-chips{justify-content:center;}
   .online-badge{font-size:14px;}
   .store-chip{font-size:13px;}
 
   /* Hide in-feed search (desktop header has it) */
   .search-section{display:none;}
+  .mob-cart-fab{display:none!important;}
 
-  /* Category strip */
-  .cat-scroll{padding:0 40px;gap:4px;}
-  .cat-pill{padding:8px 14px;}
-  .cat-pill .lb{font-size:14px;}
-  .cat-pill .em{font-size:24px;}
+  /* Category strip — amber bar, text-only pills */
+  .cat-strip{background:var(--amber);padding:0;margin-bottom:12px;}
+  .cat-scroll{padding:0 40px;gap:0;}
+  .cat-pill{
+    flex-direction:row;gap:0;padding:14px 18px;
+    border-radius:0;border-bottom:3px solid transparent;
+  }
+  .cat-pill.on{background:rgba(0,0,0,.1);border-bottom-color:#111;}
+  .cat-pill .em{display:none;}
+  .cat-pill .lb{font-size:14px;font-weight:700;color:#111;}
+  .cat-pill.on .lb{color:#111;font-weight:800;}
 
   /* Section */
   .section{background:var(--bg);margin-bottom:12px;}
@@ -683,7 +718,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
   .loc-brand{font-size:18px;}
 
   /* Store banner: safe-area not needed on desktop */
-  .store-banner{height:220px;padding-top:0;}
+  .store-banner{padding-top:0;}
 
   /* Toast above bottom of screen */
   .toast{bottom:24px;}
@@ -782,9 +817,15 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
     </div>
     <!-- Search -->
     <div class="search-section">
-      <div class="search-wrap">
-        <span style="color:var(--fg-3);font-size:15px">🔍</span>
-        <input type="text" id="s-in" placeholder="Pesquise sua bebida favorita" oninput="search(this.value)">
+      <div class="search-bar-row">
+        <div class="search-wrap">
+          <span style="color:var(--fg-3);font-size:15px">🔍</span>
+          <input type="text" id="s-in" placeholder="Pesquise sua bebida favorita" oninput="search(this.value)">
+        </div>
+        <button class="mob-cart-fab hidden" id="mob-cart-fab" onclick="goToCart()">
+          🛍️
+          <span class="mob-cart-fab-cnt" id="mob-cart-fab-cnt">0</span>
+        </button>
       </div>
     </div>
     <!-- Categories -->
@@ -1118,6 +1159,10 @@ function updateBadge(){
   d.textContent = n;
   const dd = document.getElementById('dh-cart-cnt');
   if(dd){dd.classList.toggle('hidden',n===0);dd.textContent=n;}
+  const fab = document.getElementById('mob-cart-fab');
+  if(fab){fab.classList.toggle('hidden',n===0);}
+  const fabc = document.getElementById('mob-cart-fab-cnt');
+  if(fabc){fabc.textContent=n;}
 }
 function cartTotal(){ return cart.reduce((s,i)=>s+i.price*i.qty,0); }
 
@@ -1230,12 +1275,12 @@ function renderCoStep(){
         <div class="step-num">${coStep>1?'✓':'1'}</div>
         <div class="step-lb">Endereço</div>
       </div>
-      <div class="step-line${coStep>1?' done':''}></div>
+      <div class="step-line${coStep>1?' done':''}" ></div>
       <div class="step${coStep===2?' active':''}${coStep>2?' done':''}">
         <div class="step-num">${coStep>2?'✓':'2'}</div>
         <div class="step-lb">Dados</div>
       </div>
-      <div class="step-line${coStep>2?' done':''}></div>
+      <div class="step-line${coStep>2?' done':''}" ></div>
       <div class="step${coStep===3?' active':''}${coStep>3?' done':''}">
         <div class="step-num">${coStep>3?'✓':'3'}</div>
         <div class="step-lb">Pagamento</div>
