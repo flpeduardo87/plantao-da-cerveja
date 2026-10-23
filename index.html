@@ -541,45 +541,169 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* ── DESKTOP: phone frame + larger type ── */
-@media(min-width:600px){
-  body{background:#1E1E2E;justify-content:center;align-items:center;}
-  .screen{
-    left:50%;right:auto;top:0;bottom:0;width:430px;
-    transform:translateX(-50%);
-    border-radius:0;
-    box-shadow:0 0 80px rgba(0,0,0,.6);
+/* ── DESKTOP HEADER (hidden on mobile) ── */
+#desktop-header{
+  display:none;position:fixed;top:0;left:0;right:0;z-index:200;
+  background:var(--amber);height:64px;
+  box-shadow:0 2px 12px rgba(0,0,0,.12);
+}
+#desktop-header.dh-shown{display:block;}
+.dh-inner{
+  height:100%;max-width:1400px;margin:0 auto;
+  display:flex;align-items:center;gap:16px;padding:0 32px;
+}
+.dh-brand{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.dh-logo{
+  width:42px;height:42px;border-radius:50%;overflow:hidden;
+  background:#fff;border:2px solid rgba(0,0,0,.08);flex-shrink:0;
+}
+.dh-logo img{width:100%;height:100%;object-fit:cover;}
+.dh-name{font-size:17px;font-weight:900;color:#111;white-space:nowrap;}
+.dh-search-wrap{
+  flex:1;max-width:560px;display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.92);border-radius:999px;padding:9px 16px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+.dh-search-wrap input{
+  flex:1;border:none;background:transparent;outline:none;
+  font:15px 'Nunito',sans-serif;color:var(--fg);min-width:0;
+}
+.dh-search-wrap input::placeholder{color:var(--fg-3);}
+.dh-right{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;}
+.dh-loc{
+  display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.12);
+  color:#111;font:700 13px 'Nunito',sans-serif;
+  padding:8px 14px;border-radius:999px;border:none;cursor:pointer;
+  white-space:nowrap;transition:background .15s;
+}
+.dh-loc:hover{background:rgba(0,0,0,.2);}
+.dh-cart-btn{
+  display:flex;align-items:center;gap:8px;position:relative;
+  background:#111;color:#fff;font:800 14px 'Nunito',sans-serif;
+  padding:9px 18px;border-radius:999px;border:none;cursor:pointer;
+  transition:background .15s;
+}
+.dh-cart-btn:hover{background:#333;}
+.dh-cart-cnt{
+  background:var(--green);color:#fff;font-size:11px;font-weight:900;
+  min-width:20px;height:20px;border-radius:999px;padding:0 5px;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ── DESKTOP LAYOUT (≥900px) ── */
+@media(min-width:900px){
+  body{background:var(--bg-2);overflow:hidden;}
+
+  /* Full-width screens — no phone frame */
+  .screen{left:0;right:0;width:100%;transform:none;box-shadow:none;}
+  .screen.slide-right{transform:translateX(100%)!important;}
+  .screen.slide-left{transform:translateX(-100%)!important;}
+
+  /* Top bar replaces bottom nav */
+  .bottom-nav{display:none!important;}
+  #s-home,#s-cart{padding-top:64px;}
+
+  /* Banner: taller, bigger text */
+  .store-banner{height:220px;padding-top:0;}
+  .banner-headline{font-size:46px;}
+  .banner-offer-badge{font-size:14px;}
+  .banner-inner{bottom:36px;left:40px;}
+
+  /* Store info: left-aligned */
+  .store-avatar-wrap{justify-content:flex-start;padding-left:40px;margin-top:-44px;}
+  .store-info-card{text-align:left;padding:12px 40px 20px;}
+  .store-name{font-size:28px;}
+  .store-tagline{font-size:15px;}
+  .store-meta{display:flex;flex-direction:row;flex-wrap:wrap;gap:16px 32px;align-items:center;margin-bottom:10px;}
+  .meta-row{font-size:14px;}
+  .meta-ic{font-size:15px;}
+  .store-chips{justify-content:flex-start;}
+  .online-badge{font-size:14px;}
+  .store-chip{font-size:13px;}
+
+  /* Hide in-feed search (desktop header has it) */
+  .search-section{display:none;}
+
+  /* Category strip */
+  .cat-scroll{padding:0 40px;gap:4px;}
+  .cat-pill{padding:8px 14px;}
+  .cat-pill .lb{font-size:14px;}
+  .cat-pill .em{font-size:24px;}
+
+  /* Section */
+  .section{background:var(--bg);margin-bottom:12px;}
+  .sec-hd{padding:16px 40px 8px;}
+  .sec-title{font-size:22px;}
+  .sec-more{font-size:14px;}
+
+  /* Products: CSS grid instead of horizontal scroll */
+  .prod-row{
+    display:grid!important;
+    grid-template-columns:repeat(auto-fill,minmax(178px,1fr));
+    overflow:visible!important;
+    padding:4px 40px 20px!important;
+    gap:16px;
   }
-  .screen.slide-right{transform:translateX(calc(-50% + 100vw));}
-  .screen.slide-left{transform:translateX(calc(-50% - 100vw));}
-  .bottom-nav{
-    left:50%;right:auto;width:430px;
-    transform:translateX(-50%);
-  }
-  /* type scale — nothing below 13px */
-  .cat-pill .lb{font-size:13px;}
-  .disc-badge{font-size:12px;}
-  .banner-offer-badge{font-size:13px;}
-  .banner-headline{font-size:36px;}
-  .pname{font-size:13px;min-height:34px;}
+  .pcard{width:auto!important;flex-shrink:unset;}
+  .pcard-img{height:130px;}
+  .pname{font-size:14px;min-height:36px;}
   .pold{font-size:13px;}
   .pnew{font-size:16px;}
-  .store-chip{font-size:13px;}
-  .online-badge{font-size:14px;}
-  .store-tagline{font-size:14px;}
+  .addbtn{width:32px;height:32px;}
+
+  /* Cart page */
+  .cart-body{max-width:840px;margin:0 auto;padding:28px 40px;}
+  .cart-page-title{font-size:26px;}
+  .ci-name{font-size:14px;}
+  .ci-price{font-size:15px;}
+  .sum-row{font-size:15px;}
+  .sum-row.total-row .sum-label{font-size:17px;}
+  .sum-row.total-row .sum-val{font-size:19px;}
+
+  /* Cart page-header (amber bar) */
+  .page-header{position:sticky;top:64px;}
+
+  /* Checkout: centered */
+  #checkout-overlay{align-items:center;}
+  .checkout-sheet{
+    max-width:700px;width:100%;margin:0 auto;
+    border-radius:var(--r)!important;
+    max-height:calc(100vh - 32px);
+  }
+  .co-knob{display:none;}
+  .co-title{font-size:20px;}
+
+  /* Loc modal */
   .loc-tagline{font-size:14px;}
-  .meta-row{font-size:15px;}
-  .meta-ic{font-size:16px;}
-  .store-name{font-size:24px;}
-  .sec-title{font-size:20px;}
-  .sec-more{font-size:13px;}
-  .nav-btn{font-size:13px;}
-  .ph-sub{font-size:13px;}
-  .step-lb{font-size:12px;}
+  .loc-brand{font-size:18px;}
+
+  /* Toast above bottom of screen */
+  .toast{bottom:24px;}
 }
 </style>
 </head>
 <body>
+
+<!-- ═══ DESKTOP HEADER ═══ -->
+<header id="desktop-header">
+  <div class="dh-inner">
+    <div class="dh-brand">
+      <div class="dh-logo"><img src="logo-plantao-da-cerveja.jpg" alt="Plantão da Cerveja"></div>
+      <div class="dh-name">Plantão da Cerveja 24h</div>
+    </div>
+    <div class="dh-search-wrap">
+      <span style="color:var(--fg-3);font-size:16px">🔍</span>
+      <input type="text" id="dh-in" placeholder="Pesquise sua bebida favorita" oninput="search(this.value)">
+    </div>
+    <div class="dh-right">
+      <button class="dh-loc" onclick="show('loc-overlay')">📍 Informe seu endereço</button>
+      <button class="dh-cart-btn" onclick="goToCart()">
+        🛍️ Carrinho
+        <span class="dh-cart-cnt hidden" id="dh-cart-cnt">0</span>
+      </button>
+    </div>
+  </div>
+</header>
 
 <!-- ═══ AGE GATE ═══ -->
 <div id="s-age" class="screen" style="z-index:100">
@@ -730,6 +854,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 <div class="toast" id="toast"></div>
 
 <script>
+const IMG = {};
 function prodImg(id,w,h){
   return `https://picsum.photos/seed/plantao${id}/${w}/${h}`;
 }
@@ -876,6 +1001,7 @@ function showConfirmed(addr){
 function enterStore(){
   hide('loc-overlay');
   document.getElementById('bnav').style.display='flex';
+  if(window.innerWidth>=900) document.getElementById('desktop-header').classList.add('dh-shown');
   showScreen('s-home');
   buildCats();
   renderSections();
@@ -921,7 +1047,7 @@ function cardHTML(p){
   const inCart = cart.some(i=>i.id===p.id);
   return `<div class="pcard">
     <div class="pcard-img">
-      <img src="${prodImg(p.id,148,112)}" alt="${p.name}" loading="lazy">
+      <img src="${prodImg(p.id,178,130)}" alt="${p.name}" loading="lazy">
       ${p.disc?`<span class="disc-badge">-${p.disc}%</span>`:''}
     </div>
     <div class="pcard-body">
@@ -960,6 +1086,8 @@ function updateBadge(){
   const d = document.getElementById('cdot');
   d.classList.toggle('hidden', n===0);
   d.textContent = n;
+  const dd = document.getElementById('dh-cart-cnt');
+  if(dd){dd.classList.toggle('hidden',n===0);dd.textContent=n;}
 }
 function cartTotal(){ return cart.reduce((s,i)=>s+i.price*i.qty,0); }
 
@@ -1243,6 +1371,16 @@ function finalizarPedido(){
   renderCoStep();
   document.getElementById('co-body').scrollTop=0;
 }
+
+window.addEventListener('resize',()=>{
+  const dh = document.getElementById('desktop-header');
+  if(!dh) return;
+  const storeVisible = !document.getElementById('s-home').classList.contains('hidden');
+  if(storeVisible || !document.getElementById('s-cart').classList.contains('hidden')){
+    if(window.innerWidth>=900) dh.classList.add('dh-shown');
+    else dh.classList.remove('dh-shown');
+  }
+});
 </script>
 
 </body>
