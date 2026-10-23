@@ -1,0 +1,10 @@
+Options -Indexes
+DirectoryIndex index.php
+
+<IfModule mod_autoindex.c>
+  Options -Indexes
+</IfModule>
+
+<FilesMatch "\.php$">
+  Allow from all
+</FilesMatch>
