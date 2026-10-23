@@ -792,7 +792,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
         <span style="color:var(--fg-3);font-size:15px">🔍</span>
         <input type="text" id="s-in" placeholder="Pesquise sua bebida favorita" oninput="search(this.value)">
       </div>
-      <button class="mob-cart-fab hidden" id="mob-cart-fab" onclick="goToCart()">
+      <button class="mob-cart-fab" id="mob-cart-fab" onclick="goToCart()">
         🛍️
         <span class="mob-cart-fab-cnt" id="mob-cart-fab-cnt">0</span>
       </button>
@@ -1165,9 +1165,9 @@ function updateBadge(){
   const dd = document.getElementById('dh-cart-cnt');
   if(dd){dd.classList.toggle('hidden',n===0);dd.textContent=n;}
   const fab = document.getElementById('mob-cart-fab');
-  if(fab){fab.classList.toggle('hidden',n===0);}
+  if(fab){/* always visible */}
   const fabc = document.getElementById('mob-cart-fab-cnt');
-  if(fabc){fabc.textContent=n;}
+  if(fabc){fabc.textContent=n;fabc.classList.toggle('hidden',n===0);}
 }
 function cartTotal(){ return cart.reduce((s,i)=>s+i.price*i.qty,0); }
 
@@ -1280,12 +1280,12 @@ function renderCoStep(){
         <div class="step-num">${coStep>1?'✓':'1'}</div>
         <div class="step-lb">Endereço</div>
       </div>
-      <div class="step-line${coStep>1?' done':''}></div>
+      <div class="step-line${coStep>1?' done':''}" ></div>
       <div class="step${coStep===2?' active':''}${coStep>2?' done':''}">
         <div class="step-num">${coStep>2?'✓':'2'}</div>
         <div class="step-lb">Dados</div>
       </div>
-      <div class="step-line${coStep>2?' done':''}></div>
+      <div class="step-line${coStep>2?' done':''}" ></div>
       <div class="step${coStep===3?' active':''}${coStep>3?' done':''}">
         <div class="step-num">${coStep>3?'✓':'3'}</div>
         <div class="step-lb">Pagamento</div>
