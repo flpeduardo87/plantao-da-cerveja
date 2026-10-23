@@ -194,10 +194,10 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .online-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse 1.8s ease-in-out infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .search-section{
-  position:sticky;top:0;z-index:20;
   background:var(--amber);
   padding:10px max(16px,env(safe-area-inset-right,0px));
   border-bottom:none;
+  flex-shrink:0;
 }
 .search-bar-row{display:flex;align-items:center;gap:8px;}
 .search-bar-row .search-wrap{flex:1;min-width:0;}
@@ -785,6 +785,19 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 
 <!-- ═══ MAIN STORE ═══ -->
 <div id="s-home" class="screen slide-right hidden">
+  <!-- Search bar sits OUTSIDE feed so it never scrolls away -->
+  <div class="search-section">
+    <div class="search-bar-row">
+      <div class="search-wrap">
+        <span style="color:var(--fg-3);font-size:15px">🔍</span>
+        <input type="text" id="s-in" placeholder="Pesquise sua bebida favorita" oninput="search(this.value)">
+      </div>
+      <button class="mob-cart-fab hidden" id="mob-cart-fab" onclick="goToCart()">
+        🛍️
+        <span class="mob-cart-fab-cnt" id="mob-cart-fab-cnt">0</span>
+      </button>
+    </div>
+  </div>
   <div class="feed" id="feed">
     <!-- Hero -->
     <div class="store-hero">
@@ -814,19 +827,6 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
         <span class="store-chip">Entrega Rápida</span>
       </div>
       <div class="online-badge"><span class="online-dot"></span>PEDIDOS ONLINE</div>
-    </div>
-    <!-- Search -->
-    <div class="search-section">
-      <div class="search-bar-row">
-        <div class="search-wrap">
-          <span style="color:var(--fg-3);font-size:15px">🔍</span>
-          <input type="text" id="s-in" placeholder="Pesquise sua bebida favorita" oninput="search(this.value)">
-        </div>
-        <button class="mob-cart-fab hidden" id="mob-cart-fab" onclick="goToCart()">
-          🛍️
-          <span class="mob-cart-fab-cnt" id="mob-cart-fab-cnt">0</span>
-        </button>
-      </div>
     </div>
     <!-- Categories -->
     <div class="cat-strip"><div class="cat-scroll" id="cats"></div></div>
@@ -903,7 +903,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 <div class="toast" id="toast"></div>
 
 <script>
-/* ── PRODUCT IMAGE SEEDS (Unsplash photo IDs by category) ── */
+/* ── PRODUCT IMAGE SEEDS (picsum.photos — deterministic per product) ── */
 const IMG = {
   1:'beer/photo-1608270586351-e78d6f77b7d7',2:'spirits/photo-1569529465841-dfecdab7503b',
   3:'beer/photo-1518176258769-f227c798150e',4:'whisky/photo-1527281400683-1aae777175f8',
@@ -1280,12 +1280,12 @@ function renderCoStep(){
         <div class="step-num">${coStep>1?'✓':'1'}</div>
         <div class="step-lb">Endereço</div>
       </div>
-      <div class="step-line${coStep>1?' done':''}" ></div>
+      <div class="step-line${coStep>1?' done':''}></div>
       <div class="step${coStep===2?' active':''}${coStep>2?' done':''}">
         <div class="step-num">${coStep>2?'✓':'2'}</div>
         <div class="step-lb">Dados</div>
       </div>
-      <div class="step-line${coStep>2?' done':''}" ></div>
+      <div class="step-line${coStep>2?' done':''}></div>
       <div class="step${coStep===3?' active':''}${coStep>3?' done':''}">
         <div class="step-num">${coStep>3?'✓':'3'}</div>
         <div class="step-lb">Pagamento</div>
