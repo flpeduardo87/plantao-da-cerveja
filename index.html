@@ -246,9 +246,9 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 }
 .pcard-img{
   width:100%;height:112px;background:var(--bg-2);
-  display:flex;align-items:center;justify-content:center;
-  font-size:54px;position:relative;
+  position:relative;overflow:hidden;
 }
+.pcard-img img{width:100%;height:100%;object-fit:cover;display:block;}
 .disc-badge{
   position:absolute;top:6px;left:6px;
   background:var(--green);color:#fff;
@@ -317,9 +317,10 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 }
 .ci-row:last-child{border-bottom:none;}
 .ci-thumb{
-  width:56px;height:56px;border-radius:var(--r-sm);background:var(--bg-2);
-  display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;
+  width:56px;height:56px;border-radius:var(--r-sm);
+  overflow:hidden;flex-shrink:0;background:var(--bg-2);
 }
+.ci-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
 .ci-info{flex:1;min-width:0;}
 .ci-name{font-size:13px;font-weight:700;line-height:1.3;}
 .ci-price{font-size:14px;font-weight:900;margin-top:3px;font-variant-numeric:tabular-nums;}
@@ -729,6 +730,10 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 <div class="toast" id="toast"></div>
 
 <script>
+function prodImg(id,w,h){
+  return `https://picsum.photos/seed/plantao${id}/${w}/${h}`;
+}
+
 const CATS = [
   {id:'all',em:'🏠',lb:'Todos'},{id:'ofertas',em:'🔥',lb:'Ofertas'},
   {id:'cervejas',em:'🍺',lb:'Cervejas'},{id:'vinhos',em:'🍷',lb:'Vinhos'},
@@ -915,7 +920,10 @@ function renderSections(prods=null){
 function cardHTML(p){
   const inCart = cart.some(i=>i.id===p.id);
   return `<div class="pcard">
-    <div class="pcard-img"><span>${p.em}</span>${p.disc?`<span class="disc-badge">-${p.disc}%</span>`:''}</div>
+    <div class="pcard-img">
+      <img src="${prodImg(p.id,148,112)}" alt="${p.name}" loading="lazy">
+      ${p.disc?`<span class="disc-badge">-${p.disc}%</span>`:''}
+    </div>
     <div class="pcard-body">
       <div class="pname">${p.name}</div>
       ${p.old?`<div class="pold">R$ ${fmt(p.old)}</div>`:''}
@@ -993,7 +1001,7 @@ function renderCartPage(){
     <div class="cart-items-card">
       ${cart.map(i=>`
         <div class="ci-row">
-          <div class="ci-thumb">${i.em}</div>
+          <div class="ci-thumb"><img src="${prodImg(i.id,56,56)}" alt="${i.name}"></div>
           <div class="ci-info">
             <div class="ci-name">${i.name}</div>
             <div class="ci-price">R$ ${fmt(i.price)}</div>
