@@ -853,6 +853,13 @@ function setCat(id, el){
   renderSections();
   document.getElementById('feed').scrollTo({top:0,behavior:'smooth'});
 }
+function setCatFromMore(id){
+  activeCat = id;
+  document.getElementById('s-in').value='';
+  buildCats();
+  renderSections();
+  document.getElementById('feed').scrollTo({top:0,behavior:'smooth'});
+}
 function renderSections(prods=null){
   const box = document.getElementById('sections');
   if(prods!==null){
@@ -864,7 +871,7 @@ function renderSections(prods=null){
   const keys = activeCat==='all' ? Object.keys(SEC_LABELS) : [activeCat];
   box.innerHTML = keys.filter(k=>CATALOG[k]).map(k=>`
     <div class="section">
-      <div class="sec-hd"><span class="sec-title">${SEC_LABELS[k]}</span><span class="sec-more">Ver mais</span></div>
+      <div class="sec-hd"><span class="sec-title">${SEC_LABELS[k]}</span>${activeCat==='all'?`<span class="sec-more" onclick="setCatFromMore('${k}')">Ver mais</span>`:''}</div>
       <div class="prod-row">${CATALOG[k].map(cardHTML).join('')}</div>
     </div>`).join('');
 }
