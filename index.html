@@ -5,7 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Plantão da Cerveja 24h</title>
 <link rel="icon" href="logo-plantao-da-cerveja.jpg">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap">
+<style>
+@font-face{font-family:'Rockids Softed';src:url('fonts/Rockids_Softed_Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'Rockids Softed';src:url('fonts/Rockids_Softed_Italic.otf') format('opentype');font-weight:400;font-style:italic;font-display:swap;}
+@font-face{font-family:'Meutas';src:url('fonts/Meutas-Black.otf') format('opentype');font-weight:900;font-style:normal;font-display:swap;}
+@font-face{font-family:'Meutas';src:url('fonts/Meutas-Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'Meutas';src:url('fonts/Meutas-Thin.otf') format('opentype');font-weight:100;font-style:normal;font-display:swap;}
+</style>
 
 <style>
 /* Layout: mobile-first delivery app — multi-screen SPA */
@@ -40,14 +46,14 @@
 }
 
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;font-family:'Nunito',system-ui,sans-serif;}
+html,body{height:100%;font-family:'Meutas',system-ui,sans-serif;}
 body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-direction:column;}
 
 /* ── SHARED UTILS ── */
 .hidden{display:none!important;}
 .btn-primary{
   display:block;width:100%;padding:14px;border-radius:999px;border:none;
-  background:var(--amber);color:#111;font:800 14px 'Nunito',sans-serif;
+  background:var(--amber);color:#111;font:800 14px 'Meutas',sans-serif;
   cursor:pointer;transition:background .15s,transform .1s;
 }
 .btn-primary:hover{background:var(--amber-dk);}
@@ -56,7 +62,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .btn-outline{
   display:block;width:100%;padding:13px;border-radius:999px;
   border:2px solid var(--border);background:var(--bg);
-  color:var(--fg-2);font:700 14px 'Nunito',sans-serif;cursor:pointer;
+  color:var(--fg-2);font:700 14px 'Meutas',sans-serif;cursor:pointer;
   transition:border-color .15s;
 }
 .btn-outline:hover{border-color:var(--fg-3);}
@@ -84,13 +90,13 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .gate-btns{display:flex;gap:10px;width:100%;max-width:340px;}
 .btn-yes{
   flex:1;padding:15px;border-radius:999px;border:none;cursor:pointer;
-  background:#fff;color:#111;font:800 15px 'Nunito',sans-serif;
+  background:#fff;color:#111;font:800 15px 'Meutas',sans-serif;
   box-shadow:var(--sh-md);transition:transform .1s;
 }
 .btn-yes:active{transform:scale(.97);}
 .btn-no{
   flex:1;padding:15px;border-radius:999px;cursor:pointer;
-  background:transparent;color:#fff;font:700 15px 'Nunito',sans-serif;
+  background:transparent;color:#fff;font:700 15px 'Meutas',sans-serif;
   border:2px solid rgba(255,255,255,.55);
 }
 
@@ -113,7 +119,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   margin:0 auto 14px;overflow:hidden;
 }
 .loc-logo img{width:100%;height:100%;object-fit:cover;}
-.loc-brand{font-size:17px;font-weight:900;margin-bottom:3px;}
+.loc-brand{font-size:17px;font-weight:900;margin-bottom:3px;font-family:'Rockids Softed',sans-serif;}
 .loc-tagline{font-size:13px;color:var(--fg-2);margin-bottom:18px;}
 .loc-ask{font-size:14px;font-weight:800;margin-bottom:12px;}
 .divider{display:flex;align-items:center;gap:8px;margin:10px 0;color:var(--fg-3);font-size:12px;font-weight:700;}
@@ -121,12 +127,12 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .cep-field{
   width:100%;padding:12px 16px;border-radius:999px;
   border:2px solid var(--border);background:var(--bg-2);
-  font:15px 'Nunito',sans-serif;color:var(--fg);
+  font:15px 'Meutas',sans-serif;color:var(--fg);
   text-align:center;outline:none;margin-bottom:8px;transition:border-color .15s;
 }
 .cep-field:focus{border-color:var(--amber);background:var(--bg);}
 .cep-field.err{border-color:var(--red);}
-.btn-skip{background:none;border:none;color:var(--fg-3);font:700 13px 'Nunito',sans-serif;cursor:pointer;margin-top:6px;padding:6px 12px;}
+.btn-skip{background:none;border:none;color:var(--fg-3);font:700 13px 'Meutas',sans-serif;cursor:pointer;margin-top:6px;padding:6px 12px;}
 #loc-confirmed{display:none;flex-direction:column;align-items:center;gap:10px;}
 .check-ring{
   width:58px;height:58px;border-radius:50%;background:var(--green-lt);
@@ -183,7 +189,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   padding:10px max(16px,env(safe-area-inset-right,0px)) 16px;
   text-align:center;border-bottom:8px solid var(--bg-2);
 }
-.store-name{font-size:22px;font-weight:900;margin-bottom:4px;}
+.store-name{font-size:22px;font-weight:900;margin-bottom:4px;font-family:'Rockids Softed',sans-serif;}
 .store-tagline{font-size:13px;color:var(--fg-2);margin-bottom:14px;}
 .store-meta{text-align:left;display:inline-flex;flex-direction:column;gap:7px;margin-bottom:14px;}
 .meta-row{display:flex;align-items:center;gap:8px;font-size:13px;}
@@ -212,7 +218,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .mob-cart-fab:active{transform:scale(.9);}
 .mob-cart-fab-cnt{
   position:absolute;top:-3px;right:-3px;
-  background:var(--green);color:#fff;font:900 9px 'Nunito',sans-serif;
+  background:var(--green);color:#fff;font:900 9px 'Meutas',sans-serif;
   min-width:16px;height:16px;border-radius:999px;padding:0 3px;
   display:flex;align-items:center;justify-content:center;
 }
@@ -226,7 +232,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 }
 .search-wrap input{
   flex:1;border:none;background:transparent;outline:none;
-  font:14px 'Nunito',sans-serif;color:var(--fg);min-width:0;
+  font:14px 'Meutas',sans-serif;color:var(--fg);min-width:0;
 }
 .search-wrap input::placeholder{color:var(--fg-3);}
 .feed{
@@ -247,7 +253,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .cat-pill:hover{background:var(--bg-2);}
 .cat-pill.on{background:var(--amber-lt);}
 .cat-pill .em{font-size:26px;line-height:1;}
-.cat-pill .lb{font-size:11px;font-weight:600;font-family:'Nunito',sans-serif;color:var(--fg-2);white-space:nowrap;}
+.cat-pill .lb{font-size:11px;font-weight:600;font-family:'Meutas',sans-serif;color:var(--fg-2);white-space:nowrap;}
 .cat-pill.on .lb{color:#7A4F00;}
 .section{background:var(--bg);margin-bottom:8px;}
 .sec-hd{
@@ -435,7 +441,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .os-toggle{
   display:flex;justify-content:space-between;align-items:center;
   padding:11px 14px;cursor:pointer;background:var(--bg-2);border:none;width:100%;
-  font:700 13px 'Nunito',sans-serif;color:var(--fg);
+  font:700 13px 'Meutas',sans-serif;color:var(--fg);
 }
 .os-toggle .os-val{font-weight:900;font-variant-numeric:tabular-nums;}
 .os-toggle .os-arrow{font-size:10px;color:var(--fg-3);transition:transform .2s;}
@@ -481,7 +487,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 .form-input{
   width:100%;padding:12px 14px;border-radius:var(--r-sm);
   border:1.5px solid var(--border);background:var(--bg);
-  font:14px 'Nunito',sans-serif;color:var(--fg);outline:none;
+  font:14px 'Meutas',sans-serif;color:var(--fg);outline:none;
   transition:border-color .15s;
 }
 .form-input:focus{border-color:var(--amber);}
@@ -538,7 +544,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 .nav-btn{
   flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
   padding:9px 6px;border:none;background:none;cursor:pointer;
-  color:var(--fg-3);font:700 11px 'Nunito',sans-serif;
+  color:var(--fg-3);font:700 11px 'Meutas',sans-serif;
   position:relative;transition:color .15s;
 }
 .nav-btn.on{color:var(--amber);}
@@ -580,7 +586,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
   background:#fff;border:2px solid rgba(0,0,0,.08);flex-shrink:0;
 }
 .dh-logo img{width:100%;height:100%;object-fit:cover;}
-.dh-name{font-size:17px;font-weight:900;color:#111;white-space:nowrap;}
+.dh-name{font-size:17px;font-weight:900;color:#111;white-space:nowrap;font-family:'Rockids Softed',sans-serif;}
 .dh-search-wrap{
   flex:1;max-width:560px;display:flex;align-items:center;gap:8px;
   background:rgba(255,255,255,.92);border-radius:999px;padding:9px 16px;
@@ -588,20 +594,20 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 }
 .dh-search-wrap input{
   flex:1;border:none;background:transparent;outline:none;
-  font:15px 'Nunito',sans-serif;color:var(--fg);min-width:0;
+  font:15px 'Meutas',sans-serif;color:var(--fg);min-width:0;
 }
 .dh-search-wrap input::placeholder{color:var(--fg-3);}
 .dh-right{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;}
 .dh-loc{
   display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.12);
-  color:#111;font:700 13px 'Nunito',sans-serif;
+  color:#111;font:700 13px 'Meutas',sans-serif;
   padding:8px 14px;border-radius:999px;border:none;cursor:pointer;
   white-space:nowrap;transition:background .15s;
 }
 .dh-loc:hover{background:rgba(0,0,0,.2);}
 .dh-cart-btn{
   display:flex;align-items:center;gap:8px;position:relative;
-  background:#111;color:#fff;font:800 14px 'Nunito',sans-serif;
+  background:#111;color:#fff;font:800 14px 'Meutas',sans-serif;
   padding:9px 18px;border-radius:999px;border:none;cursor:pointer;
   transition:background .15s;
 }
