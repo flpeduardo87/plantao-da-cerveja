@@ -922,7 +922,25 @@ function prodImg(id,w,h){
   return `https://picsum.photos/seed/plantao${id}/${w}/${h}`;
 }
 
-let CATS = [{id:'all',em:'🏠',lb:'Todos'}];
+const CAT_ICONS = {
+  'all':'layout-grid','todos':'layout-grid',
+  'cerveja':'beer','cervejas':'beer','beer':'beer',
+  'vinho':'wine','vinhos':'wine','wine':'wine',
+  'destilados':'flask-conical','dose':'flask-conical','whisky':'flask-conical','vodka':'flask-conical',
+  'energetico':'zap','energeticos':'zap','energético':'zap','energéticos':'zap',
+  'agua':'droplets','água':'droplets','aguas':'droplets','águas':'droplets',
+  'refrigerante':'cup-soda','refrigerantes':'cup-soda','suco':'cup-soda','sucos':'cup-soda',
+  'chopp':'beer','chope':'beer',
+  'sem-alcool':'coffee','sem-álcool':'coffee','nao-alcoolico':'coffee',
+  'kit':'package','kits':'package','combo':'package','combos':'package',
+  'snack':'cookie','snacks':'cookie','petisco':'cookie','petiscos':'cookie',
+};
+function catIcon(slug,name){
+  const k = (slug||'').toLowerCase().replace(/\s+/g,'-');
+  const n = (name||'').toLowerCase().replace(/\s+/g,'-');
+  return CAT_ICONS[k] || CAT_ICONS[n] || 'tag';
+}
+let CATS = [{id:'all',em:'',lb:'Todos'}];
 let CATALOG = {};
 let SEC_LABELS = {};
 let allProds = [];
@@ -935,11 +953,11 @@ async function loadData(){
     ]);
     const cats = (Array.isArray(catsRes) ? catsRes : (catsRes.data || [])).filter(c=>c.active);
     const prods = Array.isArray(prodsRes) ? prodsRes : (prodsRes.data || []);
-    CATS = [{id:'all',em:'🏠',lb:'Todos'}, ...cats.map(c=>({id:c.slug,em:c.emoji,lb:c.name}))];
+    CATS = [{id:'all',em:'',lb:'Todos'}, ...cats.map(c=>({id:c.slug,em:'',lb:c.name}))];
     CATALOG = {};
     SEC_LABELS = {};
     const catById = {};
-    cats.forEach(c=>{ catById[c.id]=c; CATALOG[c.slug]=[]; SEC_LABELS[c.slug]=c.emoji+' '+c.name; });
+    cats.forEach(c=>{ catById[c.id]=c; CATALOG[c.slug]=[]; SEC_LABELS[c.slug]=c.name; });
     prods.forEach(p=>{
       const cat = catById[p.category_id];
       if(cat && CATALOG[cat.slug]) CATALOG[cat.slug].push({
@@ -1044,8 +1062,9 @@ async function enterStore(){
 function buildCats(){
   document.getElementById('cats').innerHTML = CATS.map(c=>`
     <button class="cat-pill${c.id===activeCat?' on':''}" onclick="setCat('${c.id}',this)">
-      <span class="em">${c.em}</span><span class="lb">${c.lb}</span>
+      <span class="em"><i data-lucide="${catIcon(c.id,c.lb)}" width="22" height="22"></i></span><span class="lb">${c.lb}</span>
     </button>`).join('');
+  lucide.createIcons();
 }
 function setCat(id, el){
   activeCat = id;
