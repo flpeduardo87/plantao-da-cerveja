@@ -672,7 +672,8 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
     border-radius:0;border-bottom:3px solid transparent;
   }
   .cat-pill.on{background:rgba(0,0,0,.1);border-bottom-color:#111;}
-  .cat-pill .em{display:none;}
+  .cat-pill .em{display:flex;align-items:center;margin-right:6px;}
+  .cat-pill .em i{width:16px;height:16px;}
   .cat-pill .lb{font-size:14px;font-weight:500;color:#111;}
   .cat-pill.on .lb{color:#111;font-weight:700;}
 
@@ -937,7 +938,7 @@ async function loadData(){
     CATALOG = {};
     SEC_LABELS = {};
     const catById = {};
-    cats.forEach(c=>{ catById[c.id]=c; CATALOG[c.slug]=[]; SEC_LABELS[c.slug]=c.emoji+' '+c.name; });
+    cats.forEach(c=>{ catById[c.id]=c; CATALOG[c.slug]=[]; SEC_LABELS[c.slug]=c.name; });
     prods.forEach(p=>{
       const cat = catById[p.category_id];
       if(cat && CATALOG[cat.slug]) CATALOG[cat.slug].push({
@@ -1039,11 +1040,29 @@ async function enterStore(){
   renderSections();
 }
 
+const CAT_ICONS = {
+  'all':'layout-grid','todos':'layout-grid',
+  'cerveja':'beer','cervejas':'beer',
+  'vinho':'wine','vinhos':'wine',
+  'destilados':'flask-conical','dose':'flask-conical','whisky':'flask-conical','whiskies':'flask-conical',
+  'energetico':'zap','energeticos':'zap','energético':'zap','energéticos':'zap',
+  'agua':'droplets','aguas':'droplets','água':'droplets','águas':'droplets',
+  'refrigerante':'cup-soda','refrigerantes':'cup-soda','suco':'cup-soda','sucos':'cup-soda',
+  'chopp':'beer','chope':'beer','chopps':'beer',
+  'kit':'package','kits':'package','combo':'package','combos':'package',
+  'snack':'cookie','snacks':'cookie','petisco':'cookie','petiscos':'cookie',
+};
+function catIcon(slug,name){
+  const k=(slug||'').toLowerCase().replace(/[^a-z]/g,'');
+  const n=(name||'').toLowerCase().replace(/[^a-z]/g,'');
+  return CAT_ICONS[k]||CAT_ICONS[n]||'tag';
+}
 function buildCats(){
   document.getElementById('cats').innerHTML = CATS.map(c=>`
     <button class="cat-pill${c.id===activeCat?' on':''}" onclick="setCat('${c.id}',this)">
-      <span class="em">${c.em}</span><span class="lb">${c.lb}</span>
+      <span class="em"><i data-lucide="${catIcon(c.id,c.lb)}" width="22" height="22"></i></span><span class="lb">${c.lb}</span>
     </button>`).join('');
+  lucide.createIcons();
 }
 function setCat(id, el){
   activeCat = id;
