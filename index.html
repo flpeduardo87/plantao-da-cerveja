@@ -739,7 +739,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
       <input type="text" id="dh-in" placeholder="Pesquise sua bebida favorita" oninput="search(this.value)">
     </div>
     <div class="dh-right">
-      <button class="dh-loc" onclick="show('loc-overlay')">&#128205; Informe seu endereço</button>
+      <button class="dh-loc" onclick="show('loc-overlay')">📍 Informe seu endereço</button>
       <button class="dh-cart-btn" onclick="goToCart()">
         🛍️ Carrinho
         <span class="dh-cart-cnt hidden" id="dh-cart-cnt">0</span>
@@ -767,7 +767,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
       <div class="loc-brand">Plantão da Cerveja 24h</div>
       <div class="loc-tagline">Bebidas geladas na sua porta</div>
       <div class="loc-ask">Vamos encontrar sua região?</div>
-      <button class="btn-primary" id="geo-btn" onclick="useGeo()">&#128205; Usar minha localização</button>
+      <button class="btn-primary" id="geo-btn" onclick="useGeo()">📍 Usar minha localização</button>
       <div class="divider">ou informe o CEP</div>
       <input class="cep-field" id="cep-in" type="text" inputmode="numeric" maxlength="9" placeholder="00000-000">
       <button class="btn-primary" onclick="confirmCep()">Confirmar localização</button>
@@ -838,7 +838,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 <div id="s-cart" class="screen slide-right hidden">
   <div class="page-header">
     <div class="ph-inner">
-      <button class="back-btn" onclick="goBack('s-home')">&#8592;</button>
+      <button class="back-btn" onclick="goBack('s-home')">←</button>
       <div class="ph-center">
         <div class="ph-logo">
           <div class="ph-logo-icon"><img src="logo-plantao-da-cerveja.jpg" alt=""></div>
@@ -920,8 +920,8 @@ async function loadData(){
       fetch(API+'/categories').then(r=>r.json()),
       fetch(API+'/products').then(r=>r.json()),
     ]);
-    const cats = (catsRes.data || []).filter(c=>c.active);
-    const prods = prodsRes.data || [];
+    const cats = (Array.isArray(catsRes) ? catsRes : (catsRes.data || [])).filter(c=>c.active);
+    const prods = Array.isArray(prodsRes) ? prodsRes : (prodsRes.data || []);
     CATS = [{id:'all',em:'🏠',lb:'Todos'}, ...cats.map(c=>({id:c.slug,em:c.emoji,lb:c.name}))];
     CATALOG = {};
     SEC_LABELS = {};
@@ -1273,7 +1273,7 @@ function renderCoStep(){
         <input class="form-input" id="co-email" inputmode="email" placeholder="opcional" value="${coData.email||''}">
       </div>
       <div class="step-btns">
-        <button class="btn-back" onclick="coStep=1;renderCoStep()">&#8592;</button>
+        <button class="btn-back" onclick="coStep=1;renderCoStep()">←</button>
         <button class="btn-primary btn-next" onclick="nextStep(2)">Próximo →</button>
       </div>`;
   } else if(coStep===3){
@@ -1320,7 +1320,7 @@ function renderCoStep(){
         <div class="pay-info"><strong>Dinheiro</strong><span>Troco para quanto?</span></div>
       </label>
       <div class="step-btns" style="margin-top:4px">
-        <button class="btn-back" onclick="coStep=2;renderCoStep()">&#8592;</button>
+        <button class="btn-back" onclick="coStep=2;renderCoStep()">←</button>
         <button class="btn-primary btn-next" id="pay-btn" ${payMethod?'':'disabled'} onclick="finalizarPedido()">Confirmar Pedido ✓</button>
       </div>`;
   } else if(coStep===4){
