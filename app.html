@@ -1116,15 +1116,23 @@ const CAT_ICONS = {
   'kit':'package','kits':'package','combo':'package','combos':'package',
   'snack':'cookie','snacks':'cookie','petisco':'cookie','petiscos':'cookie',
 };
+const CAT_ICONS_SVG = {
+  'bottle-wine':'<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a6 6 0 0 0 1.2 3.6l.6.8A6 6 0 0 1 17 13v8a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-8a6 6 0 0 1 1.2-3.6l.6-.8A6 6 0 0 0 10 5z"/><path d="M17 13h-4a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h4"/></svg>',
+};
 function catIcon(slug,name){
   const k=(slug||'').toLowerCase().replace(/[^a-z]/g,'');
   const n=(name||'').toLowerCase().replace(/[^a-z]/g,'');
   return CAT_ICONS[k]||CAT_ICONS[n]||'tag';
 }
+function catIconEl(slug,name,size=22){
+  const ic=catIcon(slug,name);
+  if(CAT_ICONS_SVG[ic]) return `<span class="em" style="width:${size}px;height:${size}px">${CAT_ICONS_SVG[ic]}</span>`;
+  return `<span class="em"><i data-lucide="${ic}" width="${size}" height="${size}"></i></span>`;
+}
 function buildCats(){
   document.getElementById('cats').innerHTML = CATS.map(c=>`
     <button class="cat-pill${c.id===activeCat?' on':''}" onclick="setCat('${c.id}',this)">
-      <span class="em"><i data-lucide="${catIcon(c.id,c.lb)}" width="22" height="22"></i></span><span class="lb">${c.lb}</span>
+      ${catIconEl(c.id,c.lb)}<span class="lb">${c.lb}</span>
     </button>`).join('');
   lucide.createIcons();
 }
