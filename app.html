@@ -987,6 +987,64 @@ let CATALOG = {};
 let SEC_LABELS = {};
 let allProds = [];
 
+const DEMO_DATA = {
+  cats: [
+    {id:'cervejas', lb:'Cervejas'},
+    {id:'vinhos',   lb:'Vinhos'},
+    {id:'destilados',lb:'Destilados'},
+    {id:'energeticos',lb:'Energéticos'},
+    {id:'refrigerantes',lb:'Refrigerantes'},
+    {id:'aguas',    lb:'Águas'},
+    {id:'diversos', lb:'Diversos'},
+  ],
+  prods: [
+    // Cervejas
+    {id:1,  name:'Skol Pilsen 600ml',       price:8.99,  old:null, disc:0, cat:'cervejas'},
+    {id:2,  name:'Brahma Lager 600ml',      price:9.49,  old:null, disc:0, cat:'cervejas'},
+    {id:3,  name:'Antarctica Original 600ml',price:8.79, old:null, disc:0, cat:'cervejas'},
+    {id:4,  name:'Heineken 600ml',          price:15.00, old:null, disc:0, cat:'cervejas'},
+    {id:5,  name:'Spaten Lager 600ml',      price:12.50, old:null, disc:0, cat:'cervejas'},
+    {id:6,  name:'Budweiser 550ml',         price:7.99,  old:9.99, disc:20,cat:'cervejas'},
+    {id:7,  name:'Corona Extra 355ml',      price:11.00, old:null, disc:0, cat:'cervejas'},
+    {id:8,  name:'Stella Artois 550ml',     price:9.99,  old:null, disc:0, cat:'cervejas'},
+    {id:9,  name:'Bohemia Puro Malte 600ml',price:10.50, old:null, disc:0, cat:'cervejas'},
+    {id:10, name:'Itaipava Lager 600ml',    price:7.49,  old:null, disc:0, cat:'cervejas'},
+    // Vinhos
+    {id:11, name:'Vinho Tinto Suave 750ml', price:29.90, old:null, disc:0, cat:'vinhos'},
+    {id:12, name:'Vinho Rosé 750ml',        price:34.90, old:null, disc:0, cat:'vinhos'},
+    {id:13, name:'Espumante Brut 750ml',    price:44.90, old:49.90,disc:10,cat:'vinhos'},
+    // Destilados
+    {id:14, name:'Vodka Smirnoff 998ml',    price:49.90, old:null, disc:0, cat:'destilados'},
+    {id:15, name:'Whisky Jack Daniel\'s 1L',price:139.90,old:159.90,disc:12,cat:'destilados'},
+    {id:16, name:'Cachaça 51 1L',           price:24.90, old:null, disc:0, cat:'destilados'},
+    {id:17, name:'Gin Tanqueray 750ml',     price:99.90, old:null, disc:0, cat:'destilados'},
+    // Energéticos
+    {id:18, name:'Red Bull Energy 250ml',   price:12.99, old:null, disc:0, cat:'energeticos'},
+    {id:19, name:'Monster Energy 473ml',    price:10.99, old:null, disc:0, cat:'energeticos'},
+    {id:20, name:'TNT Energy 269ml',        price:6.49,  old:null, disc:0, cat:'energeticos'},
+    // Refrigerantes
+    {id:21, name:'Coca-Cola 2L',            price:9.99,  old:null, disc:0, cat:'refrigerantes'},
+    {id:22, name:'Pepsi 2L',               price:8.99,  old:null, disc:0, cat:'refrigerantes'},
+    {id:23, name:'Guaraná Antarctica 2L',   price:8.49,  old:null, disc:0, cat:'refrigerantes'},
+    // Águas
+    {id:24, name:'Água Crystal 500ml',      price:2.99,  old:null, disc:0, cat:'aguas'},
+    {id:25, name:'Água com Gás 500ml',      price:3.99,  old:null, disc:0, cat:'aguas'},
+    // Diversos
+    {id:26, name:'Gelo 3kg',               price:8.00,  old:null, disc:0, cat:'diversos'},
+    {id:27, name:'Copo Plástico 50un',      price:5.99,  old:null, disc:0, cat:'diversos'},
+  ]
+};
+
+function loadDemoData(){
+  CATS = [{id:'all',lb:'Todos'}, ...DEMO_DATA.cats];
+  CATALOG = {}; SEC_LABELS = {};
+  DEMO_DATA.cats.forEach(c=>{ CATALOG[c.id]=[]; SEC_LABELS[c.id]=c.lb; });
+  DEMO_DATA.prods.forEach(p=>{
+    if(CATALOG[p.cat]) CATALOG[p.cat].push({id:p.id,name:p.name,price:p.price,old:p.old,disc:p.disc,image_url:null});
+  });
+  allProds = Object.values(CATALOG).flat();
+}
+
 async function loadData(){
   try {
     const [catsRes, prodsRes] = await Promise.all([
@@ -995,7 +1053,7 @@ async function loadData(){
     ]);
     const cats = (Array.isArray(catsRes) ? catsRes : (catsRes.data || [])).filter(c=>c.active);
     const prods = Array.isArray(prodsRes) ? prodsRes : (prodsRes.data || []);
-    CATS = [{id:'all',em:'🏠',lb:'Todos'}, ...cats.map(c=>({id:c.slug,em:c.emoji,lb:c.name}))];
+    CATS = [{id:'all',lb:'Todos'}, ...cats.map(c=>({id:c.slug,lb:c.name}))];
     CATALOG = {};
     SEC_LABELS = {};
     const catById = {};
@@ -1012,13 +1070,9 @@ async function loadData(){
     });
     Object.keys(CATALOG).forEach(k=>{ if(!CATALOG[k].length) delete CATALOG[k]; });
     allProds = Object.values(CATALOG).flat();
-    if(!allProds.length){
-      document.getElementById('sections').innerHTML='<div style="text-align:center;padding:48px 16px;color:var(--fg-2)"><div style="margin-bottom:12px"><i data-lucide="shopping-cart" width="48" height="48"></i></div><p style="font-size:14px">Nenhum produto cadastrado ainda.<br>Adicione produtos no painel admin.</p></div>';
-      lucide.createIcons();
-    }
+    if(!allProds.length) loadDemoData();
   } catch(e) {
-    document.getElementById('sections').innerHTML='<div style="text-align:center;padding:48px 16px;color:var(--fg-2)"><div style="margin-bottom:12px"><i data-lucide="alert-triangle" width="48" height="48"></i></div><p style="font-size:14px">Erro ao carregar produtos.<br>Tente recarregar a página.</p></div>';
-    lucide.createIcons();
+    loadDemoData();
   }
 }
 
