@@ -5,15 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Plantão da Cerveja 24h</title>
 <link rel="icon" href="logo-plantao-da-cerveja.jpg">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap">
+<style>
+@font-face{font-family:'Rockids Softed';src:url('fonts/Rockids_Softed_Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'Rockids Softed';src:url('fonts/Rockids_Softed_Italic.otf') format('opentype');font-weight:400;font-style:italic;font-display:swap;}
+@font-face{font-family:'Meutas';src:url('fonts/Meutas-Black.otf') format('opentype');font-weight:900;font-style:normal;font-display:swap;}
+@font-face{font-family:'Meutas';src:url('fonts/Meutas-Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'Meutas';src:url('fonts/Meutas-Thin.otf') format('opentype');font-weight:100;font-style:normal;font-display:swap;}
+</style>
 
 <style>
 /* Layout: mobile-first delivery app — multi-screen SPA */
 :root {
-  --amber:#FFB800; --amber-dk:#D49800; --amber-lt:#FFF8E1; --amber-bg:#FFFBEE;
+  --amber:#FCDA24; --amber-dk:#C8B000; --amber-lt:#FFF9C8; --amber-bg:#FFFDE6;
   --green:#22C55E; --green-dk:#15803D; --green-lt:#DCFCE7;
-  --orange:#F97316; --red:#EF4444; --red-lt:#FEE2E2;
-  --fg:#111827; --fg-2:#4B5563; --fg-3:#9CA3AF;
+  --orange:#F97316; --red:#AF191D; --red-lt:#FBE4E4;
+  --fg:#191A12; --fg-2:#4B5563; --fg-3:#9CA3AF;
+  --brand-red:#AF191D; --brand-black:#191A12; --brand-cream:#FBFCED;
   --bg:#FFFFFF; --bg-2:#F3F4F6; --border:#E5E7EB;
   --sh-sm:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);
   --sh-md:0 4px 24px rgba(0,0,0,.12);
@@ -39,14 +46,14 @@
 }
 
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;font-family:'Nunito',system-ui,sans-serif;}
+html,body{height:100%;font-family:'Meutas',system-ui,sans-serif;}
 body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-direction:column;}
 
 /* ── SHARED UTILS ── */
 .hidden{display:none!important;}
 .btn-primary{
   display:block;width:100%;padding:14px;border-radius:999px;border:none;
-  background:var(--amber);color:#111;font:800 14px 'Nunito',sans-serif;
+  background:var(--amber);color:#111;font:800 14px 'Meutas',sans-serif;
   cursor:pointer;transition:background .15s,transform .1s;
 }
 .btn-primary:hover{background:var(--amber-dk);}
@@ -55,7 +62,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .btn-outline{
   display:block;width:100%;padding:13px;border-radius:999px;
   border:2px solid var(--border);background:var(--bg);
-  color:var(--fg-2);font:700 14px 'Nunito',sans-serif;cursor:pointer;
+  color:var(--fg-2);font:700 14px 'Meutas',sans-serif;cursor:pointer;
   transition:border-color .15s;
 }
 .btn-outline:hover{border-color:var(--fg-3);}
@@ -71,25 +78,25 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 
 /* ── AGE GATE ── */
 #s-age{
-  background:var(--amber);align-items:center;justify-content:center;gap:20px;
+  background:#AF191D;align-items:center;justify-content:center;gap:20px;
   padding:max(32px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px))
           max(32px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
   transition:opacity .3s,transform .3s;
 }
 #s-age.exit{opacity:0;transform:scale(1.04);pointer-events:none;}
-.gate-icon{font-size:80px;line-height:1;filter:drop-shadow(0 4px 12px rgba(0,0,0,.15));}
+.gate-icon{line-height:1;filter:drop-shadow(0 4px 12px rgba(0,0,0,.15));display:flex;align-items:center;justify-content:center;}
 .gate-h1{font-size:clamp(22px,6vw,28px);font-weight:900;color:#fff;text-align:center;text-wrap:balance;}
 .gate-sub{font-size:14px;color:rgba(255,255,255,.85);text-align:center;}
 .gate-btns{display:flex;gap:10px;width:100%;max-width:340px;}
 .btn-yes{
   flex:1;padding:15px;border-radius:999px;border:none;cursor:pointer;
-  background:#fff;color:#111;font:800 15px 'Nunito',sans-serif;
+  background:#fff;color:#111;font:800 15px 'Meutas',sans-serif;
   box-shadow:var(--sh-md);transition:transform .1s;
 }
 .btn-yes:active{transform:scale(.97);}
 .btn-no{
   flex:1;padding:15px;border-radius:999px;cursor:pointer;
-  background:transparent;color:#fff;font:700 15px 'Nunito',sans-serif;
+  background:transparent;color:#fff;font:700 15px 'Meutas',sans-serif;
   border:2px solid rgba(255,255,255,.55);
 }
 
@@ -112,7 +119,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   margin:0 auto 14px;overflow:hidden;
 }
 .loc-logo img{width:100%;height:100%;object-fit:cover;}
-.loc-brand{font-size:17px;font-weight:900;margin-bottom:3px;}
+.loc-brand{font-size:17px;font-weight:900;margin-bottom:3px;font-family:'Rockids Softed',sans-serif;}
 .loc-tagline{font-size:13px;color:var(--fg-2);margin-bottom:18px;}
 .loc-ask{font-size:14px;font-weight:800;margin-bottom:12px;}
 .divider{display:flex;align-items:center;gap:8px;margin:10px 0;color:var(--fg-3);font-size:12px;font-weight:700;}
@@ -120,16 +127,16 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .cep-field{
   width:100%;padding:12px 16px;border-radius:999px;
   border:2px solid var(--border);background:var(--bg-2);
-  font:15px 'Nunito',sans-serif;color:var(--fg);
+  font:15px 'Meutas',sans-serif;color:var(--fg);
   text-align:center;outline:none;margin-bottom:8px;transition:border-color .15s;
 }
 .cep-field:focus{border-color:var(--amber);background:var(--bg);}
 .cep-field.err{border-color:var(--red);}
-.btn-skip{background:none;border:none;color:var(--fg-3);font:700 13px 'Nunito',sans-serif;cursor:pointer;margin-top:6px;padding:6px 12px;}
+.btn-skip{background:none;border:none;color:var(--fg-3);font:700 13px 'Meutas',sans-serif;cursor:pointer;margin-top:6px;padding:6px 12px;}
 #loc-confirmed{display:none;flex-direction:column;align-items:center;gap:10px;}
 .check-ring{
   width:58px;height:58px;border-radius:50%;background:var(--green-lt);
-  display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--green-dk);
+  display:flex;align-items:center;justify-content:center;color:var(--green-dk);
 }
 .conf-title{font-size:17px;font-weight:900;}
 .conf-addr{font-size:13px;color:var(--fg-2);line-height:1.4;}
@@ -182,11 +189,11 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   padding:10px max(16px,env(safe-area-inset-right,0px)) 16px;
   text-align:center;border-bottom:8px solid var(--bg-2);
 }
-.store-name{font-size:22px;font-weight:900;margin-bottom:4px;}
+.store-name{font-size:22px;font-weight:900;margin-bottom:4px;font-family:'Rockids Softed',sans-serif;}
 .store-tagline{font-size:13px;color:var(--fg-2);margin-bottom:14px;}
 .store-meta{text-align:left;display:inline-flex;flex-direction:column;gap:7px;margin-bottom:14px;}
 .meta-row{display:flex;align-items:center;gap:8px;font-size:13px;}
-.meta-ic{font-size:14px;flex-shrink:0;}
+.meta-ic{flex-shrink:0;width:16px;height:16px;display:flex;align-items:center;justify-content:center;}
 .meta-green{color:var(--green-dk);font-weight:800;}
 .store-chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;}
 .store-chip{font-size:11px;font-weight:700;color:var(--fg-2);border:1.5px solid var(--border);border-radius:999px;padding:4px 12px;}
@@ -211,7 +218,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .mob-cart-fab:active{transform:scale(.9);}
 .mob-cart-fab-cnt{
   position:absolute;top:-3px;right:-3px;
-  background:var(--green);color:#fff;font:900 9px 'Nunito',sans-serif;
+  background:var(--green);color:#fff;font:900 9px 'Meutas',sans-serif;
   min-width:16px;height:16px;border-radius:999px;padding:0 3px;
   display:flex;align-items:center;justify-content:center;
 }
@@ -225,7 +232,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 }
 .search-wrap input{
   flex:1;border:none;background:transparent;outline:none;
-  font:14px 'Nunito',sans-serif;color:var(--fg);min-width:0;
+  font:14px 'Meutas',sans-serif;color:var(--fg);min-width:0;
 }
 .search-wrap input::placeholder{color:var(--fg-3);}
 .feed{
@@ -246,7 +253,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .cat-pill:hover{background:var(--bg-2);}
 .cat-pill.on{background:var(--amber-lt);}
 .cat-pill .em{font-size:26px;line-height:1;}
-.cat-pill .lb{font-size:11px;font-weight:600;font-family:'Nunito',sans-serif;color:var(--fg-2);white-space:nowrap;}
+.cat-pill .lb{font-size:11px;font-weight:600;font-family:'Meutas',sans-serif;color:var(--fg-2);white-space:nowrap;}
 .cat-pill.on .lb{color:#7A4F00;}
 .section{background:var(--bg);margin-bottom:8px;}
 .sec-hd{
@@ -284,13 +291,12 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .addbtn{
   width:30px;height:30px;border-radius:50%;border:none;
   background:var(--green);color:#fff;
-  font-size:20px;font-weight:700;line-height:1;
   cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;
   transition:background .12s,transform .1s;
 }
 .addbtn:hover{background:var(--green-dk);}
 .addbtn:active{transform:scale(.88);}
-.addbtn.in{background:var(--amber);color:#111;font-size:16px;}
+.addbtn.in{background:var(--amber);color:#111;}
 
 /* ── CART PAGE ── */
 #s-cart{z-index:20;overflow:hidden;}
@@ -306,7 +312,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   width:36px;height:36px;border-radius:50%;border:none;
   background:rgba(0,0,0,.12);cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  font-size:18px;color:#111;flex-shrink:0;
+  color:#111;flex-shrink:0;
 }
 .ph-center{flex:1;text-align:center;}
 .ph-logo{
@@ -348,7 +354,8 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .ci-qty{font-size:12px;color:var(--fg-3);margin-top:1px;}
 .ci-del{
   background:none;border:none;cursor:pointer;
-  color:var(--fg-3);font-size:18px;padding:6px;
+  color:var(--fg-3);padding:6px;
+  display:flex;align-items:center;justify-content:center;
   transition:color .15s;flex-shrink:0;
 }
 .ci-del:hover{color:var(--red);}
@@ -387,7 +394,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .when-sub{font-size:13px;color:var(--fg-2);margin-bottom:16px;}
 .modal-x{
   background:none;border:none;cursor:pointer;color:var(--fg-3);
-  font-size:18px;font-weight:700;padding:0 0 0 8px;
+  padding:0 0 0 8px;display:flex;align-items:center;justify-content:center;
 }
 .when-opt{
   display:flex;align-items:center;gap:12px;
@@ -396,7 +403,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   background:var(--bg);
 }
 .when-opt.selected{border-color:var(--amber);background:var(--amber-lt);}
-.when-opt-icon{font-size:28px;flex-shrink:0;}
+.when-opt-icon{flex-shrink:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;}
 .when-opt-txt strong{display:block;font-size:14px;font-weight:800;}
 .when-opt-txt span{font-size:12px;color:var(--fg-2);}
 .when-continue{margin-top:6px;}
@@ -423,7 +430,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .co-close{
   width:30px;height:30px;border-radius:50%;border:none;
   background:var(--bg-2);color:var(--fg-2);cursor:pointer;
-  font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;
+  display:flex;align-items:center;justify-content:center;
 }
 .co-body{overflow-y:auto;flex:1;padding:16px max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));}
 
@@ -434,7 +441,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .os-toggle{
   display:flex;justify-content:space-between;align-items:center;
   padding:11px 14px;cursor:pointer;background:var(--bg-2);border:none;width:100%;
-  font:700 13px 'Nunito',sans-serif;color:var(--fg);
+  font:700 13px 'Meutas',sans-serif;color:var(--fg);
 }
 .os-toggle .os-val{font-weight:900;font-variant-numeric:tabular-nums;}
 .os-toggle .os-arrow{font-size:10px;color:var(--fg-3);transition:transform .2s;}
@@ -480,7 +487,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 .form-input{
   width:100%;padding:12px 14px;border-radius:var(--r-sm);
   border:1.5px solid var(--border);background:var(--bg);
-  font:14px 'Nunito',sans-serif;color:var(--fg);outline:none;
+  font:14px 'Meutas',sans-serif;color:var(--fg);outline:none;
   transition:border-color .15s;
 }
 .form-input:focus{border-color:var(--amber);}
@@ -495,7 +502,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 }
 .pay-opt.selected{border-color:var(--green);background:var(--green-lt);}
 .pay-opt input[type=radio]{accent-color:var(--green);width:16px;height:16px;flex-shrink:0;}
-.pay-icon{font-size:24px;flex-shrink:0;}
+.pay-icon{flex-shrink:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;}
 .pay-info strong{display:block;font-size:14px;font-weight:800;}
 .pay-info span{font-size:12px;color:var(--fg-2);}
 .pix-badge{
@@ -512,7 +519,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 .btn-next{flex:1;}
 
 .success-view{text-align:center;padding:24px 0 8px;}
-.success-icon{font-size:64px;margin-bottom:12px;}
+.success-icon{margin-bottom:12px;display:flex;justify-content:center;}
 .success-title{font-size:22px;font-weight:900;margin-bottom:8px;}
 .success-sub{font-size:14px;color:var(--fg-2);line-height:1.5;}
 .success-info{
@@ -537,11 +544,11 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 .nav-btn{
   flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
   padding:9px 6px;border:none;background:none;cursor:pointer;
-  color:var(--fg-3);font:700 11px 'Nunito',sans-serif;
+  color:var(--fg-3);font:700 11px 'Meutas',sans-serif;
   position:relative;transition:color .15s;
 }
 .nav-btn.on{color:var(--amber);}
-.nav-btn .ni{font-size:21px;line-height:1;}
+.nav-btn .ni{display:flex;align-items:center;justify-content:center;width:22px;height:22px;}
 .cart-dot{
   position:absolute;top:6px;right:calc(50% - 16px);
   background:var(--green);color:#fff;
@@ -579,7 +586,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
   background:#fff;border:2px solid rgba(0,0,0,.08);flex-shrink:0;
 }
 .dh-logo img{width:100%;height:100%;object-fit:cover;}
-.dh-name{font-size:17px;font-weight:900;color:#111;white-space:nowrap;}
+.dh-name{font-size:17px;font-weight:900;color:#111;white-space:nowrap;font-family:'Rockids Softed',sans-serif;}
 .dh-search-wrap{
   flex:1;max-width:560px;display:flex;align-items:center;gap:8px;
   background:rgba(255,255,255,.92);border-radius:999px;padding:9px 16px;
@@ -587,20 +594,20 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 }
 .dh-search-wrap input{
   flex:1;border:none;background:transparent;outline:none;
-  font:15px 'Nunito',sans-serif;color:var(--fg);min-width:0;
+  font:15px 'Meutas',sans-serif;color:var(--fg);min-width:0;
 }
 .dh-search-wrap input::placeholder{color:var(--fg-3);}
 .dh-right{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;}
 .dh-loc{
   display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.12);
-  color:#111;font:700 13px 'Nunito',sans-serif;
+  color:#111;font:700 13px 'Meutas',sans-serif;
   padding:8px 14px;border-radius:999px;border:none;cursor:pointer;
   white-space:nowrap;transition:background .15s;
 }
 .dh-loc:hover{background:rgba(0,0,0,.2);}
 .dh-cart-btn{
   display:flex;align-items:center;gap:8px;position:relative;
-  background:#111;color:#fff;font:800 14px 'Nunito',sans-serif;
+  background:#111;color:#fff;font:800 14px 'Meutas',sans-serif;
   padding:9px 18px;border-radius:999px;border:none;cursor:pointer;
   transition:background .15s;
 }
@@ -723,7 +730,13 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
   /* Toast above bottom of screen */
   .toast{bottom:24px;}
 }
+
+/* ── LUCIDE ICONS ── */
+[data-lucide]{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;flex-shrink:0;}
+@keyframes spin-ic{to{transform:rotate(360deg);}}
+.spin{animation:spin-ic 1s linear infinite;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.400.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 
@@ -735,13 +748,13 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
       <div class="dh-name">Plantão da Cerveja 24h</div>
     </div>
     <div class="dh-search-wrap">
-      <span style="color:var(--fg-3);font-size:16px">🔍</span>
+      <i data-lucide="search" width="16" height="16" style="color:var(--fg-3)"></i>
       <input type="text" id="dh-in" placeholder="Pesquise sua bebida favorita" oninput="search(this.value)">
     </div>
     <div class="dh-right">
-      <button class="dh-loc" onclick="show('loc-overlay')">📍 Informe seu endereço</button>
+      <button class="dh-loc" onclick="show('loc-overlay')"><i data-lucide="map-pin" width="14" height="14"></i> Informe seu endereço</button>
       <button class="dh-cart-btn" onclick="goToCart()">
-        🛍️ Carrinho
+        <i data-lucide="shopping-bag" width="16" height="16"></i> Carrinho
         <span class="dh-cart-cnt hidden" id="dh-cart-cnt">0</span>
       </button>
     </div>
@@ -750,7 +763,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 
 <!-- ═══ AGE GATE ═══ -->
 <div id="s-age" class="screen" style="z-index:100">
-  <div class="gate-icon">🍺</div>
+  <div class="gate-icon"><i data-lucide="beer" width="80" height="80" style="color:#fff"></i></div>
   <h1 class="gate-h1">Você tem 18 anos ou mais?</h1>
   <p class="gate-sub">Conteúdo destinado a maiores de idade</p>
   <div class="gate-btns">
@@ -767,17 +780,17 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
       <div class="loc-brand">Plantão da Cerveja 24h</div>
       <div class="loc-tagline">Bebidas geladas na sua porta</div>
       <div class="loc-ask">Vamos encontrar sua região?</div>
-      <button class="btn-primary" id="geo-btn" onclick="useGeo()">📍 Usar minha localização</button>
+      <button class="btn-primary" id="geo-btn" onclick="useGeo()"><i data-lucide="map-pin" width="16" height="16"></i> Usar minha localização</button>
       <div class="divider">ou informe o CEP</div>
       <input class="cep-field" id="cep-in" type="text" inputmode="numeric" maxlength="9" placeholder="00000-000">
       <button class="btn-primary" onclick="confirmCep()">Confirmar localização</button>
       <button class="btn-skip" onclick="enterStore()">Pular</button>
     </div>
     <div id="loc-confirmed">
-      <div class="check-ring">✓</div>
+      <div class="check-ring"><i data-lucide="check" width="26" height="26"></i></div>
       <div class="conf-title">Entregamos na sua região!</div>
       <div class="conf-addr" id="conf-addr">—</div>
-      <div class="motoboys">🛵 3 motoboys disponíveis agora</div>
+      <div class="motoboys"><i data-lucide="bike" width="14" height="14"></i> 3 motoboys disponíveis agora</div>
       <button class="btn-primary" style="margin-top:8px" onclick="enterStore()">Ver produtos →</button>
     </div>
   </div>
@@ -789,11 +802,11 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
   <div class="search-section">
     <div class="search-bar-row">
       <div class="search-wrap">
-        <span style="color:var(--fg-3);font-size:15px">🔍</span>
+        <i data-lucide="search" width="15" height="15" style="color:var(--fg-3)"></i>
         <input type="text" id="s-in" placeholder="Pesquise sua bebida favorita" oninput="search(this.value)">
       </div>
       <button class="mob-cart-fab" id="mob-cart-fab" onclick="goToCart()">
-        🛍️
+        <i data-lucide="shopping-bag" width="20" height="20"></i>
         <span class="mob-cart-fab-cnt" id="mob-cart-fab-cnt">0</span>
       </button>
     </div>
@@ -803,7 +816,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
     <div class="store-hero">
       <div class="store-banner">
         <div class="banner-inner">
-          <div class="banner-offer-badge">🏷️ SUPER OFERTAS</div>
+          <div class="banner-offer-badge"><i data-lucide="tag" width="11" height="11"></i> SUPER OFERTAS</div>
           <div class="banner-headline">OFERTAS<br>IMPERDÍVEIS</div>
         </div>
         <div class="banner-deco"></div>
@@ -818,9 +831,9 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
       <h1 class="store-name">Plantão da Cerveja 24h</h1>
       <p class="store-tagline">Bebidas geladas na sua porta</p>
       <div class="store-meta">
-        <div class="meta-row"><span class="meta-ic">⏱</span><span>Entrega em até <strong>20 min</strong> · <span class="meta-green">Entrega Grátis</span></span></div>
-        <div class="meta-row"><span class="meta-ic">📍</span><span>Bem-vindo! · <strong>Sua região, informe sua localização</strong></span></div>
-        <div class="meta-row"><span class="meta-ic">⭐</span><span>Pedido mínimo: <strong>R$ 20,00</strong></span></div>
+        <div class="meta-row"><span class="meta-ic"><i data-lucide="clock" width="14" height="14"></i></span><span>Entrega em até <strong>20 min</strong> · <span class="meta-green">Entrega Grátis</span></span></div>
+        <div class="meta-row"><span class="meta-ic"><i data-lucide="map-pin" width="14" height="14"></i></span><span>Bem-vindo! · <strong>Sua região, informe sua localização</strong></span></div>
+        <div class="meta-row"><span class="meta-ic"><i data-lucide="star" width="14" height="14"></i></span><span>Pedido mínimo: <strong>R$ 20,00</strong></span></div>
       </div>
       <div class="store-chips">
         <span class="store-chip">Bebida Gelada</span>
@@ -838,7 +851,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 <div id="s-cart" class="screen slide-right hidden">
   <div class="page-header">
     <div class="ph-inner">
-      <button class="back-btn" onclick="goBack('s-home')">←</button>
+      <button class="back-btn" onclick="goBack('s-home')"><i data-lucide="arrow-left" width="18" height="18"></i></button>
       <div class="ph-center">
         <div class="ph-logo">
           <div class="ph-logo-icon"><img src="logo-plantao-da-cerveja.jpg" alt=""></div>
@@ -858,16 +871,16 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 <div id="when-overlay" class="hidden">
   <div class="when-card">
     <div class="when-hd">
-      <div><div class="when-title">⏰ Quando deseja receber?</div></div>
-      <button class="modal-x" onclick="closeWhen()">✕</button>
+      <div><div class="when-title"><i data-lucide="clock" width="17" height="17"></i> Quando deseja receber?</div></div>
+      <button class="modal-x" onclick="closeWhen()"><i data-lucide="x" width="18" height="18"></i></button>
     </div>
     <div class="when-sub">Escolha a melhor opção para você</div>
     <div class="when-opt" id="when-imediata" onclick="selectWhen('imediata')">
-      <span class="when-opt-icon">⚡</span>
+      <span class="when-opt-icon"><i data-lucide="zap" width="24" height="24"></i></span>
       <div class="when-opt-txt"><strong>Entrega Imediata</strong><span>Receba em 15–20 minutos</span></div>
     </div>
     <div class="when-opt" id="when-agendar" onclick="selectWhen('agendar')">
-      <span class="when-opt-icon">📅</span>
+      <span class="when-opt-icon"><i data-lucide="calendar" width="24" height="24"></i></span>
       <div class="when-opt-txt"><strong>Agendar Entrega</strong><span>Escolha data e horário</span></div>
     </div>
     <button class="btn-primary when-continue" id="when-continue-btn" disabled onclick="openCheckout()">Continuar</button>
@@ -880,7 +893,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
     <div class="co-knob"></div>
     <div class="co-hd">
       <span class="co-title">Finalizar Pedido</span>
-      <button class="co-close" onclick="closeCheckout()">✕</button>
+      <button class="co-close" onclick="closeCheckout()"><i data-lucide="x" width="14" height="14"></i></button>
     </div>
     <div class="co-body" id="co-body"></div>
   </div>
@@ -889,14 +902,14 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 <!-- ═══ BOTTOM NAV ═══ -->
 <nav class="bottom-nav" id="bnav" style="display:none">
   <button class="nav-btn on" id="nb-home" onclick="goHome()">
-    <span class="ni">🏠</span><span>Início</span>
+    <span class="ni"><i data-lucide="home" width="22" height="22"></i></span><span>Início</span>
   </button>
   <button class="nav-btn" id="nb-cart" onclick="goToCart()">
-    <span class="ni">🛍️</span><span>Pedidos</span>
+    <span class="ni"><i data-lucide="shopping-bag" width="22" height="22"></i></span><span>Pedidos</span>
     <span class="cart-dot hidden" id="cdot">0</span>
   </button>
   <button class="nav-btn" onclick="goToCart()">
-    <span class="ni">💳</span><span>Checkout</span>
+    <span class="ni"><i data-lucide="credit-card" width="22" height="22"></i></span><span>Checkout</span>
   </button>
 </nav>
 
@@ -940,10 +953,12 @@ async function loadData(){
     Object.keys(CATALOG).forEach(k=>{ if(!CATALOG[k].length) delete CATALOG[k]; });
     allProds = Object.values(CATALOG).flat();
     if(!allProds.length){
-      document.getElementById('sections').innerHTML='<div style="text-align:center;padding:48px 16px;color:var(--fg-2)"><div style="font-size:48px;margin-bottom:12px">🛒</div><p style="font-size:14px">Nenhum produto cadastrado ainda.<br>Adicione produtos no painel admin.</p></div>';
+      document.getElementById('sections').innerHTML='<div style="text-align:center;padding:48px 16px;color:var(--fg-2)"><div style="margin-bottom:12px"><i data-lucide="shopping-cart" width="48" height="48"></i></div><p style="font-size:14px">Nenhum produto cadastrado ainda.<br>Adicione produtos no painel admin.</p></div>';
+      lucide.createIcons();
     }
   } catch(e) {
-    document.getElementById('sections').innerHTML='<div style="text-align:center;padding:48px 16px;color:var(--fg-2)"><div style="font-size:48px;margin-bottom:12px">⚠️</div><p style="font-size:14px">Erro ao carregar produtos.<br>Tente recarregar a página.</p></div>';
+    document.getElementById('sections').innerHTML='<div style="text-align:center;padding:48px 16px;color:var(--fg-2)"><div style="margin-bottom:12px"><i data-lucide="alert-triangle" width="48" height="48"></i></div><p style="font-size:14px">Erro ao carregar produtos.<br>Tente recarregar a página.</p></div>';
+    lucide.createIcons();
   }
 }
 
@@ -984,10 +999,11 @@ function passAge(){
 function denyAge(){
   document.getElementById('s-age').innerHTML = `
     <div style="text-align:center;padding:32px">
-      <div style="font-size:72px;margin-bottom:16px">🚫</div>
+      <div style="margin-bottom:16px"><i data-lucide="ban" width="72" height="72" style="color:#fff"></i></div>
       <h2 style="font-size:20px;font-weight:900;color:#fff;margin-bottom:8px">Acesso Restrito</h2>
       <p style="color:rgba(255,255,255,.8);font-size:14px">Conteúdo exclusivo para maiores de 18 anos.</p>
     </div>`;
+  lucide.createIcons();
 }
 
 document.getElementById('cep-in').addEventListener('input',function(){
@@ -998,7 +1014,7 @@ document.getElementById('cep-in').addEventListener('input',function(){
 });
 function useGeo(){
   const b = document.getElementById('geo-btn');
-  b.textContent='📍 Localizando...'; b.disabled=true;
+  b.innerHTML='<i data-lucide="loader-2" width="16" height="16" class="spin"></i> Localizando...'; b.disabled=true; lucide.createIcons();
   setTimeout(()=>showConfirmed('Rua das Flores, 123 — Centro, Sua Cidade/UF'), 1000);
 }
 function confirmCep(){
@@ -1018,7 +1034,8 @@ async function enterStore(){
   if(window.innerWidth>=900) document.getElementById('desktop-header').classList.add('dh-shown');
   showScreen('s-home');
   buildCats();
-  document.getElementById('sections').innerHTML='<div style="text-align:center;padding:48px 0;color:var(--fg-2)"><div style="font-size:32px;margin-bottom:12px">⏳</div><p style="font-size:14px">Carregando produtos...</p></div>';
+  document.getElementById('sections').innerHTML='<div style="text-align:center;padding:48px 0;color:var(--fg-2)"><div style="margin-bottom:12px"><i data-lucide="loader-2" width="32" height="32" class="spin"></i></div><p style="font-size:14px">Carregando produtos...</p></div>';
+  lucide.createIcons();
   await loadData();
   buildCats();
   renderSections();
@@ -1050,8 +1067,8 @@ function renderSections(prods=null){
   if(prods!==null){
     box.innerHTML = prods.length
       ? `<div class="section"><div class="sec-hd"><span class="sec-title">Resultados</span></div><div class="prod-row">${prods.map(cardHTML).join('')}</div></div>`
-      : `<div style="text-align:center;padding:48px 16px;color:var(--fg-2)"><div style="font-size:48px;margin-bottom:12px">🔍</div><p style="font-size:14px">Nenhum produto encontrado.</p></div>`;
-    return;
+      : `<div style="text-align:center;padding:48px 16px;color:var(--fg-2)"><div style="margin-bottom:12px"><i data-lucide="search" width="48" height="48"></i></div><p style="font-size:14px">Nenhum produto encontrado.</p></div>`;
+    lucide.createIcons(); return;
   }
   const keys = activeCat==='all' ? Object.keys(SEC_LABELS) : [activeCat];
   box.innerHTML = keys.filter(k=>CATALOG[k]).map(k=>`
@@ -1059,6 +1076,7 @@ function renderSections(prods=null){
       <div class="sec-hd"><span class="sec-title">${SEC_LABELS[k]}</span>${activeCat==='all'?`<span class="sec-more" onclick="setCatFromMore('${k}')">Ver mais</span>`:''}</div>
       <div class="prod-row">${CATALOG[k].map(cardHTML).join('')}</div>
     </div>`).join('');
+  lucide.createIcons();
 }
 function cardHTML(p){
   const inCart = cart.some(i=>i.id===p.id);
@@ -1073,7 +1091,7 @@ function cardHTML(p){
       ${p.old?`<div class="pold">R$ ${fmt(p.old)}</div>`:''}
       <div class="prow">
         <span class="pnew">R$ ${fmt(p.price)}</span>
-        <button class="addbtn${inCart?' in':''}" onclick="addToCart(${p.id},event)">${inCart?'✓':'+'}</button>
+        <button class="addbtn${inCart?' in':''}" onclick="addToCart(${p.id},event)">${inCart?'<i data-lucide="check" width="15" height="15"></i>':'<i data-lucide="plus" width="18" height="18"></i>'}</button>
       </div>
     </div>
   </div>`;
@@ -1138,7 +1156,7 @@ function renderCartPage(){
     el.innerHTML=`
       <div class="cart-page-title">Minha Sacola</div>
       <div style="text-align:center;padding:48px 0;color:var(--fg-2)">
-        <div style="font-size:56px;margin-bottom:14px">🛍️</div>
+        <div style="margin-bottom:14px"><i data-lucide="shopping-bag" width="56" height="56"></i></div>
         <p style="font-size:15px;font-weight:700">Sua sacola está vazia.</p>
         <p style="font-size:13px;margin-top:6px">Adicione produtos para continuar.</p>
         <button class="btn-primary" style="max-width:200px;margin:20px auto 0" onclick="goHome()">Ver produtos</button>
@@ -1157,18 +1175,19 @@ function renderCartPage(){
             <div class="ci-price">R$ ${fmt(i.price)}</div>
             <div class="ci-qty">Quantidade: ${i.qty}</div>
           </div>
-          <button class="ci-del" onclick="removeFromCart(${i.id})">🗑</button>
+          <button class="ci-del" onclick="removeFromCart(${i.id})"><i data-lucide="trash-2" width="18" height="18"></i></button>
         </div>`).join('')}
     </div>
     <div class="summary-card">
       <div class="sum-row"><span class="sum-label">Subtotal</span><span class="sum-val">R$ ${fmt(total)}</span></div>
-      <div class="sum-row"><span class="sum-label">🚚 Custo de envio</span><span class="sum-val gratis">Grátis</span></div>
+      <div class="sum-row"><span class="sum-label"><i data-lucide="truck" width="14" height="14"></i> Custo de envio</span><span class="sum-val gratis">Grátis</span></div>
       <div class="sum-row total-row"><span class="sum-label">Total</span><span class="sum-val">R$ ${fmt(total)}</span></div>
     </div>
     <div class="cart-ctas">
       <button class="btn-primary" onclick="openWhen()">Finalizar Pedido</button>
-      <button class="btn-outline" onclick="goHome()">Quero comprar mais 👆</button>
+      <button class="btn-outline" onclick="goHome()">Quero comprar mais</button>
     </div>`;
+  lucide.createIcons();
 }
 function removeFromCart(id){
   cart = cart.filter(i=>i.id!==id);
@@ -1205,38 +1224,38 @@ function renderCoStep(){
   const summaryHtml = `
     <div class="order-summary">
       <button class="os-toggle" id="os-toggle" onclick="toggleSummary()">
-        <span>📦 ${cart.reduce((s,i)=>s+i.qty,0)} item(s) · <span class="os-val">R$ ${fmt(total)}</span></span>
-        <span class="os-arrow">▼</span>
+        <span><i data-lucide="package" width="14" height="14"></i> ${cart.reduce((s,i)=>s+i.qty,0)} item(s) · <span class="os-val">R$ ${fmt(total)}</span></span>
+        <span class="os-arrow"><i data-lucide="chevron-down" width="16" height="16"></i></span>
       </button>
       <div class="os-details" id="os-details">
         ${cart.map(i=>`<div class="os-item"><span>${i.name} ×${i.qty}</span><span>R$ ${fmt(i.price*i.qty)}</span></div>`).join('')}
         <div class="os-meta"><span>Subtotal</span><span>R$ ${fmt(total)}</span></div>
-        <div class="os-meta"><span>🚚 Frete</span><span class="gratis">GRÁTIS</span></div>
-        <div class="os-meta"><span>⏱ Entrega</span><span>${chosenWhen==='imediata'?'15–20 min':'Agendada'}</span></div>
+        <div class="os-meta"><span><i data-lucide="truck" width="13" height="13"></i> Frete</span><span class="gratis">GRÁTIS</span></div>
+        <div class="os-meta"><span><i data-lucide="clock" width="13" height="13"></i> Entrega</span><span>${chosenWhen==='imediata'?'15–20 min':'Agendada'}</span></div>
       </div>
       <div class="os-total"><span class="label">Total</span><span class="val">R$ ${fmt(total)}</span></div>
     </div>`;
   const stepperHtml = `
     <div class="stepper">
       <div class="step${coStep===1?' active':''}${coStep>1?' done':''}">
-        <div class="step-num">${coStep>1?'✓':'1'}</div>
+        <div class="step-num">${coStep>1?'<i data-lucide="check" width="14" height="14"></i>':'1'}</div>
         <div class="step-lb">Endereço</div>
       </div>
       <div class="step-line${coStep>1?' done':''}" ></div>
       <div class="step${coStep===2?' active':''}${coStep>2?' done':''}">
-        <div class="step-num">${coStep>2?'✓':'2'}</div>
+        <div class="step-num">${coStep>2?'<i data-lucide="check" width="14" height="14"></i>':'2'}</div>
         <div class="step-lb">Dados</div>
       </div>
       <div class="step-line${coStep>2?' done':''}" ></div>
       <div class="step${coStep===3?' active':''}${coStep>3?' done':''}">
-        <div class="step-num">${coStep>3?'✓':'3'}</div>
+        <div class="step-num">${coStep>3?'<i data-lucide="check" width="14" height="14"></i>':'3'}</div>
         <div class="step-lb">Pagamento</div>
       </div>
     </div>`;
   let content = '';
   if(coStep===1){
     content=`
-      <div class="form-section-title">📍 Para onde será entregue</div>
+      <div class="form-section-title"><i data-lucide="map-pin" width="16" height="16"></i> Para onde será entregue</div>
       <div class="form-group"><label>CEP *</label>
         <input class="form-input" id="co-cep" type="text" inputmode="numeric" maxlength="9" placeholder="00000-000" value="${coData.cep||''}">
       </div>
@@ -1262,7 +1281,7 @@ function renderCoStep(){
       </div>`;
   } else if(coStep===2){
     content=`
-      <div class="form-section-title">👤 Seus dados</div>
+      <div class="form-section-title"><i data-lucide="user" width="16" height="16"></i> Seus dados</div>
       <div class="form-group"><label>Nome completo *</label>
         <input class="form-input" id="co-nome" placeholder="Seu nome" value="${coData.nome||''}">
       </div>
@@ -1273,13 +1292,13 @@ function renderCoStep(){
         <input class="form-input" id="co-email" inputmode="email" placeholder="opcional" value="${coData.email||''}">
       </div>
       <div class="step-btns">
-        <button class="btn-back" onclick="coStep=1;renderCoStep()">←</button>
+        <button class="btn-back" onclick="coStep=1;renderCoStep()"><i data-lucide="arrow-left" width="18" height="18"></i></button>
         <button class="btn-primary btn-next" onclick="nextStep(2)">Próximo →</button>
       </div>`;
   } else if(coStep===3){
     const orderDate = new Date().toLocaleDateString('pt-BR')+' '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     content=`
-      <div class="form-section-title">📋 Revisão do Pedido</div>
+      <div class="form-section-title"><i data-lucide="clipboard-list" width="16" height="16"></i> Revisão do Pedido</div>
       <div style="background:var(--bg-2);border-radius:var(--r-sm);padding:12px;margin-bottom:16px;font-size:13px">
         <div style="font-weight:900;margin-bottom:4px">Plantão da Cerveja 24h</div>
         <div style="color:var(--fg-2)">${orderDate}</div>
@@ -1298,35 +1317,35 @@ function renderCoStep(){
           <span>TOTAL</span><span style="color:var(--red)">R$ ${fmt(total)}</span>
         </div>
       </div>
-      <div class="form-section-title">💳 Forma de Pagamento</div>
+      <div class="form-section-title"><i data-lucide="credit-card" width="16" height="16"></i> Forma de Pagamento</div>
       <label class="pay-opt${payMethod==='pix'?' selected':''}" onclick="selPay('pix')">
         <input type="radio" name="pay" ${payMethod==='pix'?'checked':''}>
-        <span class="pay-icon">📱</span>
+        <span class="pay-icon"><i data-lucide="qr-code" width="22" height="22"></i></span>
         <div class="pay-info"><strong>PIX <span class="pix-badge">Aprovação imediata</span></strong><span>Transferência instantânea</span></div>
       </label>
       <label class="pay-opt${payMethod==='maquininha'?' selected':''}" onclick="selPay('maquininha')">
         <input type="radio" name="pay" ${payMethod==='maquininha'?'checked':''}>
-        <span class="pay-icon">🖥️</span>
+        <span class="pay-icon"><i data-lucide="credit-card" width="22" height="22"></i></span>
         <div class="pay-info"><strong>Pagar na Maquininha</strong><span>Débito ou crédito na entrega</span></div>
       </label>
       <label class="pay-opt${payMethod==='credito'?' selected':''}" onclick="selPay('credito')">
         <input type="radio" name="pay" ${payMethod==='credito'?'checked':''}>
-        <span class="pay-icon">💳</span>
+        <span class="pay-icon"><i data-lucide="wallet" width="22" height="22"></i></span>
         <div class="pay-info"><strong>Cartão de Crédito Online</strong><span>Parcelamento disponível</span></div>
       </label>
       <label class="pay-opt${payMethod==='dinheiro'?' selected':''}" onclick="selPay('dinheiro')">
         <input type="radio" name="pay" ${payMethod==='dinheiro'?'checked':''}>
-        <span class="pay-icon">💵</span>
+        <span class="pay-icon"><i data-lucide="banknote" width="22" height="22"></i></span>
         <div class="pay-info"><strong>Dinheiro</strong><span>Troco para quanto?</span></div>
       </label>
       <div class="step-btns" style="margin-top:4px">
-        <button class="btn-back" onclick="coStep=2;renderCoStep()">←</button>
-        <button class="btn-primary btn-next" id="pay-btn" ${payMethod?'':'disabled'} onclick="finalizarPedido()">Confirmar Pedido ✓</button>
+        <button class="btn-back" onclick="coStep=2;renderCoStep()"><i data-lucide="arrow-left" width="18" height="18"></i></button>
+        <button class="btn-primary btn-next" id="pay-btn" ${payMethod?'':'disabled'} onclick="finalizarPedido()">Confirmar Pedido <i data-lucide="check" width="16" height="16"></i></button>
       </div>`;
   } else if(coStep===4){
     content=`
       <div class="success-view">
-        <div class="success-icon">🎉</div>
+        <div class="success-icon"><i data-lucide="sparkles" width="64" height="64"></i></div>
         <div class="success-title">Pedido Confirmado!</div>
         <div class="success-sub">Seu pedido foi registrado com sucesso.<br>Em breve entraremos em contato pelo WhatsApp.</div>
         <div class="success-info">
@@ -1352,6 +1371,7 @@ function renderCoStep(){
     else v=v.replace(/(\d{2})(\d{5})(\d{0,4})/,'($1) $2-$3');
     this.value=v;
   });
+  lucide.createIcons();
 }
 function toggleSummary(){
   const d = document.getElementById('os-details');
@@ -1419,11 +1439,14 @@ async function finalizarPedido(){
     renderCoStep();
     document.getElementById('co-body').scrollTop=0;
   } catch(e) {
-    toast('❌ '+e.message);
+    toast(e.message);
     btn.disabled=false;
-    btn.textContent='Confirmar Pedido ✓';
+    btn.innerHTML='Confirmar Pedido <i data-lucide="check" width="16" height="16"></i>';
+    lucide.createIcons();
   }
 }
+
+lucide.createIcons();
 
 window.addEventListener('resize',()=>{
   const dh = document.getElementById('desktop-header');
