@@ -250,10 +250,11 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   transition:background .15s;border:none;background:transparent;
 }
 .cat-pill:hover{background:var(--bg-2);}
-.cat-pill.on{background:var(--amber-lt);}
-.cat-pill .em{font-size:26px;line-height:1;color:var(--fg);display:flex;align-items:center;justify-content:center;}
+.cat-pill.on{background:var(--amber);}
+.cat-pill .em{font-size:26px;line-height:1;color:var(--fg-2);display:flex;align-items:center;justify-content:center;}
+.cat-pill.on .em{color:#191A12;}
 .cat-pill .lb{font-size:11px;font-weight:500;font-family:'Inter',sans-serif;color:var(--fg-2);white-space:nowrap;}
-.cat-pill.on .lb{color:#7A4F00;}
+.cat-pill.on .lb{color:#191A12;}
 .section{background:var(--bg);margin-bottom:8px;}
 .sec-hd{
   display:flex;justify-content:space-between;align-items:baseline;
@@ -546,9 +547,10 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
   color:var(--fg-3);font:700 11px 'Inter',sans-serif;
   position:relative;transition:color .15s;
 }
-.nav-btn.on{color:var(--amber);}
-.nav-btn .ni{display:flex;align-items:center;justify-content:center;width:38px;height:28px;border-radius:999px;transition:background .15s;}
-.nav-btn.on .ni{background:var(--amber-lt);}
+.nav-btn{color:var(--fg-3);}
+.nav-btn.on{color:#191A12;}
+.nav-btn .ni{display:flex;align-items:center;justify-content:center;width:48px;height:28px;border-radius:999px;transition:background .15s;}
+.nav-btn.on .ni{background:var(--amber);}
 .cart-dot{
   position:absolute;top:6px;right:calc(50% - 16px);
   background:var(--green);color:#fff;
@@ -1043,7 +1045,8 @@ const CAT_ICONS = {
   'all':'layout-grid','todos':'layout-grid',
   'cerveja':'beer','cervejas':'beer',
   'vinho':'wine','vinhos':'wine',
-  'destilados':'flask-conical','dose':'flask-conical','whisky':'flask-conical','whiskies':'flask-conical',
+  'destilados':'bottle-wine','dose':'bottle-wine','whisky':'bottle-wine','whiskies':'bottle-wine','destilado':'bottle-wine',
+  'churrasco':'flame-kindling','churrascos':'flame-kindling',
   'energetico':'zap','energeticos':'zap','energético':'zap','energéticos':'zap',
   'agua':'droplets','aguas':'droplets','água':'droplets','águas':'droplets',
   'refrigerante':'cup-soda','refrigerantes':'cup-soda','suco':'cup-soda','sucos':'cup-soda',
