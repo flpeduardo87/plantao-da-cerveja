@@ -739,7 +739,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
       <input type="text" id="dh-in" placeholder="Pesquise sua bebida favorita" oninput="search(this.value)">
     </div>
     <div class="dh-right">
-      <button class="dh-loc" onclick="show('loc-overlay')">📍 Informe seu endereço</button>
+      <button class="dh-loc" onclick="show('loc-overlay')">&#128205; Informe seu endereço</button>
       <button class="dh-cart-btn" onclick="goToCart()">
         🛍️ Carrinho
         <span class="dh-cart-cnt hidden" id="dh-cart-cnt">0</span>
@@ -767,7 +767,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
       <div class="loc-brand">Plantão da Cerveja 24h</div>
       <div class="loc-tagline">Bebidas geladas na sua porta</div>
       <div class="loc-ask">Vamos encontrar sua região?</div>
-      <button class="btn-primary" id="geo-btn" onclick="useGeo()">📍 Usar minha localização</button>
+      <button class="btn-primary" id="geo-btn" onclick="useGeo()">&#128205; Usar minha localização</button>
       <div class="divider">ou informe o CEP</div>
       <input class="cep-field" id="cep-in" type="text" inputmode="numeric" maxlength="9" placeholder="00000-000">
       <button class="btn-primary" onclick="confirmCep()">Confirmar localização</button>
@@ -838,7 +838,7 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 <div id="s-cart" class="screen slide-right hidden">
   <div class="page-header">
     <div class="ph-inner">
-      <button class="back-btn" onclick="goBack('s-home')">←</button>
+      <button class="back-btn" onclick="goBack('s-home')">&#8592;</button>
       <div class="ph-center">
         <div class="ph-logo">
           <div class="ph-logo-icon"><img src="logo-plantao-da-cerveja.jpg" alt=""></div>
@@ -903,111 +903,49 @@ label{display:block;font-size:12px;font-weight:800;color:var(--fg-2);margin-bott
 <div class="toast" id="toast"></div>
 
 <script>
-/* ── PRODUCT IMAGE SEEDS (picsum.photos — deterministic per product) ── */
-const IMG = {
-  1:'beer/photo-1608270586351-e78d6f77b7d7',2:'spirits/photo-1569529465841-dfecdab7503b',
-  3:'beer/photo-1518176258769-f227c798150e',4:'whisky/photo-1527281400683-1aae777175f8',
-  5:'wine/photo-1558618666-fcd25c85cd64',6:'energy/photo-1556679343-c7306c1976bc',
-  7:'beer/photo-1608270586351-e78d6f77b7d7',8:'beer/photo-1518176258769-f227c798150e',
-  9:'beer/photo-1505975409065-7f32a2eb2a6a',10:'beer/photo-1559628233-100c798642d1',
-  11:'beer/photo-1532634922-8fe0b757fb13',12:'beer/photo-1571613316887-6f8d5cbf7ef1',
-  13:'wine/photo-1510812431401-41d2bd2722f3',14:'wine/photo-1558618666-fcd25c85cd64',
-  15:'wine/photo-1543677440-b9f3e5b8c98f',16:'wine/photo-1561461056-15b64e4f4c3c',
-  17:'spirits/photo-1569529465841-dfecdab7503b',18:'spirits/photo-1514362545857-3bc16c4c7d1b',
-  19:'spirits/photo-1608270586351-e78d6f77b7d7',20:'whisky/photo-1527281400683-1aae777175f8',
-  21:'spirits/photo-1580274455191-1c62238fa1c3',22:'beer/photo-1570798793444-c1aa1df0c6a9',
-  23:'beer/photo-1570798793444-c1aa1df0c6a9',24:'beer/photo-1518176258769-f227c798150e',
-  25:'wine/photo-1558618666-fcd25c85cd64',26:'water/photo-1548839140-29a749e1cf4d',
-  27:'ice/photo-1611071536329-c6b1fe2a2ac1',28:'water/photo-1548839140-29a749e1cf4d',
-  29:'coconut/photo-1560493676-04071c5f467b',30:'soda/photo-1622483767028-3f66f32aef97',
-  31:'soda/photo-1622483767028-3f66f32aef97',32:'soda/photo-1560508180-03f285f67ded',
-  33:'soda/photo-1622483767028-3f66f32aef97',34:'energy/photo-1556679343-c7306c1976bc',
-  35:'energy/photo-1571024490159-5dbce7f0ebae',36:'energy/photo-1556679343-c7306c1976bc',
-  37:'bbq/photo-1555939594-58d7cb561ad1',38:'cup/photo-1577401239170-897942555fb3',
-  39:'ice/photo-1611071536329-c6b1fe2a2ac1',40:'salt/photo-1518110925495-5fe2fda0442c',
-};
+const API = 'https://api.plantaodacerveja.com.br';
+
 function prodImg(id,w,h){
-  const entry = IMG[id];
-  if(entry){
-    const photoId = entry.split('/')[1];
-    return `https://images.unsplash.com/${photoId}?w=${w}&h=${h}&fit=crop&auto=format&q=80`;
-  }
   return `https://picsum.photos/seed/plantao${id}/${w}/${h}`;
 }
 
-const CATS = [
-  {id:'all',em:'🏠',lb:'Todos'},{id:'ofertas',em:'🔥',lb:'Ofertas'},
-  {id:'cervejas',em:'🍺',lb:'Cervejas'},{id:'vinhos',em:'🍷',lb:'Vinhos'},
-  {id:'destilados',em:'🥃',lb:'Destilados'},{id:'chopp',em:'🧊',lb:'Chopp'},
-  {id:'aguas',em:'💧',lb:'Águas e Gelo'},{id:'refri',em:'🥤',lb:'Refrigerantes'},
-  {id:'energeticos',em:'⚡',lb:'Energéticos'},{id:'churrasco',em:'🍖',lb:'Churrasco'},
-];
-const CATALOG = {
-  ofertas:[
-    {id:1,name:'Combo Heineken 24 Latas 350ml',em:'🍺',price:89.90,old:119.90,disc:25},
-    {id:2,name:'Kit Vodka Absolut 1L + 4 Red Bull',em:'🥃',price:149.90,old:189.90,disc:21},
-    {id:3,name:'Brahma Duplo Malte 350ml cx c/24',em:'🍺',price:54.90,old:69.90,disc:21},
-    {id:4,name:'Whisky Jack Daniel\'s Tennessee 1L',em:'🥃',price:129.90,old:159.90,disc:19},
-    {id:5,name:'Espumante Chandon Réserve Brut 750ml',em:'🍾',price:89.90,old:109.90,disc:18},
-    {id:6,name:'Pack Red Bull 250ml c/4',em:'⚡',price:22.90,old:29.90,disc:23},
-  ],
-  cervejas:[
-    {id:7,name:'Heineken Lager 600ml Gelada',em:'🍺',price:12.90,old:16.90,disc:24},
-    {id:8,name:'Brahma Chopp 350ml cx c/12',em:'🍺',price:39.90,old:49.90,disc:20},
-    {id:9,name:'Corona Extra Long Neck 330ml',em:'🍺',price:9.90,old:12.90,disc:23},
-    {id:10,name:'Budweiser 600ml Garrafa',em:'🍺',price:11.90,old:14.90,disc:20},
-    {id:11,name:'Stella Artois 600ml',em:'🍺',price:13.90,old:16.90,disc:18},
-    {id:12,name:'Skol Beats Spirit 269ml c/12',em:'🍺',price:45.90,old:59.90,disc:23},
-  ],
-  vinhos:[
-    {id:13,name:'Miolo Séries Merlot 750ml',em:'🍷',price:34.90,old:44.90,disc:22},
-    {id:14,name:'Santa Carolina Cabernet 750ml',em:'🍷',price:29.90,old:39.90,disc:25},
-    {id:15,name:'Don Guerino Moscato 750ml',em:'🍷',price:39.90,old:49.90,disc:20},
-    {id:16,name:'Casillero del Diablo Rosé 750ml',em:'🍷',price:49.90,old:59.90,disc:17},
-  ],
-  destilados:[
-    {id:17,name:'Vodka Absolut Original 1L',em:'🥃',price:89.90,old:109.90,disc:18},
-    {id:18,name:'Rum Bacardi Carta Blanca 1L',em:'🥃',price:69.90,old:89.90,disc:22},
-    {id:19,name:'Gin Tanqueray London Dry 750ml',em:'🥃',price:99.90,old:129.90,disc:23},
-    {id:20,name:'Whisky JW Red Label 1L',em:'🥃',price:89.90,old:119.90,disc:25},
-    {id:21,name:'Cachaça 51 Premium 1L',em:'🥃',price:24.90,old:34.90,disc:29},
-  ],
-  chopp:[
-    {id:22,name:'Chopp Brahma Claro 50L Barril',em:'🧊',price:732.20,old:861.41,disc:15},
-    {id:23,name:'Chopp Heineken 50L Barril',em:'🧊',price:849.90,old:999.90,disc:15},
-    {id:24,name:'Chopp Colorado Appia 30L',em:'🧊',price:549.90,old:649.90,disc:15},
-    {id:25,name:'Chopp de Vinho Pink Moon 2L',em:'🧊',price:21.95,old:25.82,disc:15},
-  ],
-  aguas:[
-    {id:26,name:'Água Mineral Crystal 1,5L c/6',em:'💧',price:14.90,old:18.90,disc:21},
-    {id:27,name:'Gelo Cubo 5kg',em:'🧊',price:9.90,old:12.90,disc:23},
-    {id:28,name:'Água com Gás Perrier 750ml',em:'💧',price:12.90,old:15.90,disc:19},
-    {id:29,name:'Água de Coco Kero Coco 1L c/6',em:'🥥',price:34.90,old:44.90,disc:22},
-  ],
-  refri:[
-    {id:30,name:'Coca-Cola 2L',em:'🥤',price:8.90,old:10.90,disc:18},
-    {id:31,name:'Guaraná Antarctica 2L',em:'🥤',price:7.90,old:9.90,disc:20},
-    {id:32,name:'Schweppes Tônica 350ml c/6',em:'🥤',price:24.90,old:29.90,disc:17},
-    {id:33,name:'Fanta Laranja Lata 350ml c/12',em:'🥤',price:35.90,old:44.90,disc:20},
-  ],
-  energeticos:[
-    {id:34,name:'Red Bull Energy Drink 250ml',em:'⚡',price:8.90,old:10.90,disc:18},
-    {id:35,name:'Monster Energy Original 473ml',em:'⚡',price:9.90,old:12.90,disc:23},
-    {id:36,name:'TNT Energy Drink 350ml c/6',em:'⚡',price:29.90,old:39.90,disc:23},
-  ],
-  churrasco:[
-    {id:37,name:'Carvão Zap Premium 5kg',em:'🍖',price:24.90,old:29.90,disc:17},
-    {id:38,name:'Copo Descartável 500ml c/50',em:'🥤',price:11.90,old:14.90,disc:20},
-    {id:39,name:'Gelo Escama 10kg',em:'🧊',price:19.90,old:24.90,disc:20},
-    {id:40,name:'Sal Grosso Cisne 1kg',em:'🧂',price:3.90,old:4.90,disc:20},
-  ],
-};
-const SEC_LABELS = {
-  ofertas:'🔥 Ofertas',cervejas:'Cervejas',vinhos:'Vinhos',
-  destilados:'Destilados',chopp:'Chopp',aguas:'Águas e Gelo',
-  refri:'Refrigerantes',energeticos:'Energéticos',churrasco:'Churrasco',
-};
-const allProds = Object.values(CATALOG).flat();
+let CATS = [{id:'all',em:'🏠',lb:'Todos'}];
+let CATALOG = {};
+let SEC_LABELS = {};
+let allProds = [];
+
+async function loadData(){
+  try {
+    const [catsRes, prodsRes] = await Promise.all([
+      fetch(API+'/categories').then(r=>r.json()),
+      fetch(API+'/products').then(r=>r.json()),
+    ]);
+    const cats = (catsRes.data || []).filter(c=>c.active);
+    const prods = prodsRes.data || [];
+    CATS = [{id:'all',em:'🏠',lb:'Todos'}, ...cats.map(c=>({id:c.slug,em:c.emoji,lb:c.name}))];
+    CATALOG = {};
+    SEC_LABELS = {};
+    const catById = {};
+    cats.forEach(c=>{ catById[c.id]=c; CATALOG[c.slug]=[]; SEC_LABELS[c.slug]=c.emoji+' '+c.name; });
+    prods.forEach(p=>{
+      const cat = catById[p.category_id];
+      if(cat && CATALOG[cat.slug]) CATALOG[cat.slug].push({
+        id:p.id, name:p.name,
+        price:parseFloat(p.price),
+        old:p.old_price?parseFloat(p.old_price):null,
+        disc:parseInt(p.discount_pct)||0,
+        image_url:p.image_url||null,
+      });
+    });
+    Object.keys(CATALOG).forEach(k=>{ if(!CATALOG[k].length) delete CATALOG[k]; });
+    allProds = Object.values(CATALOG).flat();
+    if(!allProds.length){
+      document.getElementById('sections').innerHTML='<div style="text-align:center;padding:48px 16px;color:var(--fg-2)"><div style="font-size:48px;margin-bottom:12px">🛒</div><p style="font-size:14px">Nenhum produto cadastrado ainda.<br>Adicione produtos no painel admin.</p></div>';
+    }
+  } catch(e) {
+    document.getElementById('sections').innerHTML='<div style="text-align:center;padding:48px 16px;color:var(--fg-2)"><div style="font-size:48px;margin-bottom:12px">⚠️</div><p style="font-size:14px">Erro ao carregar produtos.<br>Tente recarregar a página.</p></div>';
+  }
+}
 
 let cart = [];
 let activeCat = 'all';
@@ -1074,11 +1012,14 @@ function showConfirmed(addr){
   c.style.display='flex';
   document.getElementById('conf-addr').textContent = addr;
 }
-function enterStore(){
+async function enterStore(){
   hide('loc-overlay');
   document.getElementById('bnav').style.display='flex';
   if(window.innerWidth>=900) document.getElementById('desktop-header').classList.add('dh-shown');
   showScreen('s-home');
+  buildCats();
+  document.getElementById('sections').innerHTML='<div style="text-align:center;padding:48px 0;color:var(--fg-2)"><div style="font-size:32px;margin-bottom:12px">⏳</div><p style="font-size:14px">Carregando produtos...</p></div>';
+  await loadData();
   buildCats();
   renderSections();
 }
@@ -1121,9 +1062,10 @@ function renderSections(prods=null){
 }
 function cardHTML(p){
   const inCart = cart.some(i=>i.id===p.id);
+  const imgSrc = p.image_url || prodImg(p.id,148,112);
   return `<div class="pcard">
     <div class="pcard-img">
-      <img src="${prodImg(p.id,148,112)}" alt="${p.name}" loading="lazy">
+      <img src="${imgSrc}" alt="${p.name}" loading="lazy">
       ${p.disc?`<span class="disc-badge">-${p.disc}%</span>`:''}
     </div>
     <div class="pcard-body">
@@ -1209,7 +1151,7 @@ function renderCartPage(){
     <div class="cart-items-card">
       ${cart.map(i=>`
         <div class="ci-row">
-          <div class="ci-thumb"><img src="${prodImg(i.id,56,56)}" alt="${i.name}"></div>
+          <div class="ci-thumb"><img src="${i.image_url||prodImg(i.id,56,56)}" alt="${i.name}"></div>
           <div class="ci-info">
             <div class="ci-name">${i.name}</div>
             <div class="ci-price">R$ ${fmt(i.price)}</div>
@@ -1331,7 +1273,7 @@ function renderCoStep(){
         <input class="form-input" id="co-email" inputmode="email" placeholder="opcional" value="${coData.email||''}">
       </div>
       <div class="step-btns">
-        <button class="btn-back" onclick="coStep=1;renderCoStep()">←</button>
+        <button class="btn-back" onclick="coStep=1;renderCoStep()">&#8592;</button>
         <button class="btn-primary btn-next" onclick="nextStep(2)">Próximo →</button>
       </div>`;
   } else if(coStep===3){
@@ -1378,7 +1320,7 @@ function renderCoStep(){
         <div class="pay-info"><strong>Dinheiro</strong><span>Troco para quanto?</span></div>
       </label>
       <div class="step-btns" style="margin-top:4px">
-        <button class="btn-back" onclick="coStep=2;renderCoStep()">←</button>
+        <button class="btn-back" onclick="coStep=2;renderCoStep()">&#8592;</button>
         <button class="btn-primary btn-next" id="pay-btn" ${payMethod?'':'disabled'} onclick="finalizarPedido()">Confirmar Pedido ✓</button>
       </div>`;
   } else if(coStep===4){
@@ -1445,11 +1387,42 @@ function selPay(v){
   renderCoStep();
   document.getElementById('co-body').scrollTop=999;
 }
-function finalizarPedido(){
+async function finalizarPedido(){
   if(!payMethod){ toast('Escolha uma forma de pagamento.'); return; }
-  coStep=4;
-  renderCoStep();
-  document.getElementById('co-body').scrollTop=0;
+  const btn = document.getElementById('pay-btn');
+  btn.disabled=true; btn.textContent='Enviando...';
+  const payMap = {pix:'pix',maquininha:'machine',credito:'credit_card',dinheiro:'cash'};
+  const payload = {
+    customer_name: coData.nome,
+    customer_phone: coData.tel,
+    customer_email: coData.email||'',
+    address_cep: coData.cep,
+    address_street: coData.rua,
+    address_number: coData.num,
+    address_complement: coData.comp||'',
+    address_neighborhood: coData.bairro,
+    address_reference: coData.ref||'',
+    payment_method: payMap[payMethod]||'pix',
+    delivery_type: chosenWhen==='imediata'?'immediate':'scheduled',
+    notes: '',
+    items: cart.map(i=>({product_id:i.id,product_name:i.name,quantity:i.qty,unit_price:i.price})),
+  };
+  try {
+    const r = await fetch(API+'/orders',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload),
+    });
+    const j = await r.json();
+    if(!r.ok||!j.success) throw new Error(j.message||'Erro ao registrar pedido.');
+    coStep=4;
+    renderCoStep();
+    document.getElementById('co-body').scrollTop=0;
+  } catch(e) {
+    toast('❌ '+e.message);
+    btn.disabled=false;
+    btn.textContent='Confirmar Pedido ✓';
+  }
 }
 
 window.addEventListener('resize',()=>{
