@@ -146,11 +146,11 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   height:calc(120px + env(safe-area-inset-top,0px));
   padding-top:env(safe-area-inset-top,0px);
   position:relative;overflow:hidden;
-  background:#B87500;
+  background:#191A12;
 }
 .store-banner::before{
   content:'';position:absolute;inset:0;
-  background:linear-gradient(130deg,#9A6100 0%,#C8860A 35%,#FFB800 65%,#D49800 100%);
+  background:none;
 }
 .banner-inner{position:absolute;bottom:28px;left:max(16px,env(safe-area-inset-left,0px));z-index:2;}
 .banner-offer-badge{
@@ -679,15 +679,13 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
   .bottom-nav{display:none!important;}
   #s-home,#s-cart{padding-top:64px;}
 
-  /* Banner: photo bg, taller */
+  /* Banner: solid black */
   .store-banner{
     height:200px;
-    background-image:url('https://images.unsplash.com/photo-1608270586351-e78d6f77b7d7?w=1400&h=280&fit=crop&auto=format&q=80');
-    background-size:cover;background-position:center;
+    background:#191A12;
+    background-image:none;
   }
-  .store-banner::before{
-    background:linear-gradient(90deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.15) 60%,transparent 100%);
-  }
+  .store-banner::before{background:none;}
   .banner-headline{font-size:52px;color:rgba(255,255,255,.9);letter-spacing:-2px;}
   .banner-offer-badge{font-size:14px;}
   .banner-inner{bottom:40px;left:48px;}
