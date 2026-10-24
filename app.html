@@ -902,7 +902,7 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
       <button class="back-btn" onclick="goBack('s-home')"><i data-lucide="arrow-left" width="18" height="18"></i></button>
       <div class="ph-center">
         <div class="ph-logo">
-          <div class="ph-logo-icon"><img src="logo-plantao-da-cerveja.jpg" alt=""></div>
+          <div class="ph-logo-icon"><img src="logo-icone.png" alt="" style="padding:4px;object-fit:contain;background:#111;"></div>
           <div>
             <div class="ph-title">Minha Sacola</div>
             <div class="ph-sub">Plantão da Cerveja</div>
@@ -1147,12 +1147,33 @@ async function enterStore(){
   document.getElementById('bnav').style.display='flex';
   if(window.innerWidth>=900) document.getElementById('desktop-header').classList.add('dh-shown');
   showScreen('s-home');
-  buildCats();
-  document.getElementById('sections').innerHTML='<div style="text-align:center;padding:48px 0;color:var(--fg-2)"><div style="margin-bottom:12px"><i data-lucide="loader-2" width="32" height="32" class="spin"></i></div><p style="font-size:14px">Carregando produtos...</p></div>';
-  lucide.createIcons();
-  await loadData();
+  // Show demo data immediately while API loads
+  loadDemoData();
   buildCats();
   renderSections();
+  lucide.createIcons();
+  // Try API in background — replaces demo if it has products
+  try {
+    const [catsRes, prodsRes] = await Promise.all([
+      fetch(API+'/categories',{signal:AbortSignal.timeout(8000)}).then(r=>r.json()),
+      fetch(API+'/products',{signal:AbortSignal.timeout(8000)}).then(r=>r.json()),
+    ]);
+    const cats = (Array.isArray(catsRes)?catsRes:(catsRes.data||[])).filter(c=>c.active);
+    const prods = Array.isArray(prodsRes)?prodsRes:(prodsRes.data||[]);
+    if(cats.length && prods.length){
+      CATS = [{id:'all',lb:'Todos'},...cats.map(c=>({id:c.slug,lb:c.name}))];
+      CATALOG={}; SEC_LABELS={};
+      const catById={};
+      cats.forEach(c=>{catById[c.id]=c;CATALOG[c.slug]=[];SEC_LABELS[c.slug]=c.name;});
+      prods.forEach(p=>{
+        const cat=catById[p.category_id];
+        if(cat&&CATALOG[cat.slug]) CATALOG[cat.slug].push({id:p.id,name:p.name,price:parseFloat(p.price),old:p.old_price?parseFloat(p.old_price):null,disc:parseInt(p.discount_pct)||0,image_url:p.image_url||null});
+      });
+      Object.keys(CATALOG).forEach(k=>{if(!CATALOG[k].length)delete CATALOG[k];});
+      allProds=Object.values(CATALOG).flat();
+      buildCats(); renderSections();
+    }
+  } catch(e){ /* keep demo data */ }
 }
 
 const CAT_ICONS = {
