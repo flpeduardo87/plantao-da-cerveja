@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plantão da Cerveja 24h — Em Breve</title>
+<link rel="icon" href="logo-plantao-da-cerveja.jpg">
+<style>
+@font-face{font-family:'Rockids Softed';src:url('fonts/Rockids_Softed_Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'Rockids Softed';src:url('fonts/Rockids_Softed_Italic.otf') format('opentype');font-weight:400;font-style:italic;font-display:swap;}
+@font-face{font-family:'Meutas';src:url('fonts/Meutas-Black.otf') format('opentype');font-weight:700;font-style:normal;font-display:swap;}
+@font-face{font-family:'Meutas';src:url('fonts/Meutas-SemiBold.otf') format('opentype');font-weight:600;font-style:normal;font-display:swap;}
+@font-face{font-family:'Meutas';src:url('fonts/Meutas-Medium.otf') format('opentype');font-weight:500;font-style:normal;font-display:swap;}
+@font-face{font-family:'Meutas';src:url('fonts/Meutas-Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'Meutas';src:url('fonts/Meutas-Light.otf') format('opentype');font-weight:300;font-style:normal;font-display:swap;}
+@font-face{font-family:'Meutas';src:url('fonts/Meutas-Thin.otf') format('opentype');font-weight:100;font-style:normal;font-display:swap;}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:'Meutas',system-ui,sans-serif;}
+
+body{
+  background:#AF191D;
+  color:#FBFCED;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  padding:24px;
+}
+
+.wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:28px;
+  max-width:480px;
+  width:100%;
+  text-align:center;
+}
+
+.logo-wrap img{
+  height:80px;
+  width:auto;
+  filter:brightness(0) invert(1);
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:999px;
+  padding:6px 16px;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:#FCDA24;
+}
+
+.badge-dot{
+  width:7px;height:7px;
+  border-radius:50%;
+  background:#FCDA24;
+  animation:pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse{
+  0%,100%{opacity:1;transform:scale(1);}
+  50%{opacity:.4;transform:scale(.8);}
+}
+
+h1{
+  font-family:'Rockids Softed',sans-serif;
+  font-weight:400;
+  font-style:italic;
+  font-size:clamp(28px,8vw,42px);
+  letter-spacing:0.03em;
+  color:#fff;
+  line-height:1.15;
+}
+
+.sub{
+  font-size:clamp(15px,4vw,18px);
+  font-weight:300;
+  color:rgba(255,255,255,.85);
+  line-height:1.5;
+}
+
+.divider{
+  width:48px;height:3px;
+  border-radius:2px;
+  background:#FCDA24;
+  opacity:.7;
+}
+
+.beer-icon{
+  font-size:56px;
+  line-height:1;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,.2));
+}
+
+.footer{
+  font-size:12px;
+  font-weight:400;
+  color:rgba(255,255,255,.5);
+  letter-spacing:0.02em;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo-wrap">
+    <img src="logo-horizontal.webp" alt="Plantão da Cerveja 24h">
+  </div>
+
+  <div class="badge">
+    <span class="badge-dot"></span>
+    Estamos chegando
+  </div>
+
+  <h1>Plantão da Cerveja 24h</h1>
+
+  <div class="divider"></div>
+
+  <p class="sub">
+    Estamos construindo algo incrível.<br>
+    Em breve você vai poder pedir suas bebidas geladas sem sair de casa.
+  </p>
+
+  <p class="footer">© 2025 Plantão da Cerveja 24h · Todos os direitos reservados</p>
+</div>
+</body>
+</html>
