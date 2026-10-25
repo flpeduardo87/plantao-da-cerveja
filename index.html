@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Plantão da Cerveja 24h — Em Breve</title>
+<title>Plantão da Cerveja 24h — Bebida Gelada Onde Você Estiver</title>
+<meta name="description" content="Cerveja, vinho, destilados e mais entregues gelados na sua porta. Peça agora pelo Plantão da Cerveja 24h.">
 <link rel="icon" href="favicon-icone.webp" type="image/webp">
 <style>
 @font-face{font-family:'Rockids Softed';src:url('fonts/Rockids_Softed_Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap;}
@@ -13,117 +14,158 @@
 @font-face{font-family:'Meutas';src:url('fonts/Meutas-Medium.otf') format('opentype');font-weight:500;font-style:normal;font-display:swap;}
 @font-face{font-family:'Meutas';src:url('fonts/Meutas-Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap;}
 @font-face{font-family:'Meutas';src:url('fonts/Meutas-Light.otf') format('opentype');font-weight:300;font-style:normal;font-display:swap;}
-@font-face{font-family:'Meutas';src:url('fonts/Meutas-Thin.otf') format('opentype');font-weight:100;font-style:normal;font-display:swap;}
 
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;font-family:'Meutas',system-ui,sans-serif;}
 
 body{
   background:#191A12;
-  color:#FBFCED;
+  color:#fff;
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
   min-height:100vh;
-  padding:24px;
+  padding:32px 24px;
+  position:relative;
+  overflow:hidden;
+}
+
+body::before{
+  content:'';
+  position:absolute;
+  top:-150px;left:50%;
+  transform:translateX(-50%);
+  width:700px;height:700px;
+  background:radial-gradient(circle,rgba(252,218,36,.06) 0%,transparent 65%);
+  pointer-events:none;
 }
 
 .wrap{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:28px;
-  max-width:480px;
+  gap:0;
+  max-width:440px;
   width:100%;
   text-align:center;
+  position:relative;
+  z-index:1;
 }
 
-.logo-wrap img{
-  height:80px;
-  width:auto;
-  filter:invert(1);
-}
+/* Logo — já é branca, sem filtro */
+.logo-wrap{margin-bottom:32px;}
+.logo-wrap img{height:80px;width:auto;}
 
+/* Badge */
 .badge{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  background:rgba(255,255,255,.15);
-  border:1px solid rgba(255,255,255,.25);
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(252,218,36,.12);
+  border:1px solid rgba(252,218,36,.3);
   border-radius:999px;
-  padding:6px 16px;
-  font-size:12px;
-  font-weight:600;
-  letter-spacing:0.08em;
-  text-transform:uppercase;
-  color:#FCDA24;
+  padding:7px 18px;
+  font-size:12px;font-weight:700;letter-spacing:0.1em;
+  text-transform:uppercase;color:#FCDA24;
+  margin-bottom:28px;
 }
-
 .badge-dot{
-  width:7px;height:7px;
-  border-radius:50%;
+  width:7px;height:7px;border-radius:50%;
   background:#FCDA24;
   animation:pulse 1.6s ease-in-out infinite;
 }
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.35;transform:scale(.75);}}
 
-@keyframes pulse{
-  0%,100%{opacity:1;transform:scale(1);}
-  50%{opacity:.4;transform:scale(.8);}
-}
-
+/* Tagline */
 h1{
   font-family:'Rockids Softed',sans-serif;
-  font-weight:400;
-  font-style:italic;
-  font-size:clamp(28px,8vw,42px);
-  letter-spacing:0.03em;
-  color:#fff;
-  line-height:1.15;
-}
-
-.sub{
-  font-size:clamp(15px,4vw,18px);
-  font-weight:300;
-  color:rgba(255,255,255,.85);
-  line-height:1.5;
-}
-
-.divider{
-  width:48px;height:3px;
-  border-radius:2px;
-  background:#FCDA24;
-  opacity:.7;
-}
-
-.footer{
-  font-size:12px;
-  font-weight:400;
-  color:rgba(255,255,255,.5);
+  font-weight:400;font-style:italic;
+  font-size:clamp(30px,9vw,46px);
   letter-spacing:0.02em;
+  color:#fff;line-height:1.1;
+  margin-bottom:16px;
 }
+
+/* Sub */
+.sub{
+  font-size:clamp(15px,4vw,17px);
+  font-weight:300;
+  color:rgba(255,255,255,.7);
+  line-height:1.55;
+  margin-bottom:36px;
+}
+
+/* CTA */
+.cta{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  background:#FCDA24;color:#111;
+  font-family:'Meutas',sans-serif;font-size:17px;font-weight:700;
+  letter-spacing:0.03em;text-decoration:none;
+  padding:17px 36px;border-radius:14px;width:100%;
+  box-shadow:0 8px 32px rgba(252,218,36,.22);
+  transition:background .15s,transform .1s,box-shadow .15s;
+  margin-bottom:24px;
+}
+.cta:hover{background:#f5d200;transform:translateY(-1px);box-shadow:0 12px 36px rgba(252,218,36,.32);}
+.cta:active{transform:none;box-shadow:0 4px 16px rgba(252,218,36,.18);}
+
+/* Chips */
+.chips{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:8px;
+  margin-bottom:40px;
+}
+.chip{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:999px;
+  padding:7px 14px;
+  font-size:12.5px;font-weight:500;
+  color:rgba(255,255,255,.8);
+}
+
+/* Divider */
+.divider{width:40px;height:2px;background:#FCDA24;opacity:.55;border-radius:2px;margin-bottom:20px;}
+
+/* Footer */
+.footer{font-size:12px;color:rgba(255,255,255,.35);letter-spacing:0.02em;}
 </style>
 </head>
 <body>
 <div class="wrap">
+
   <div class="logo-wrap">
     <img src="logo-horizontal-branco.webp" alt="Plantão da Cerveja 24h">
   </div>
 
   <div class="badge">
     <span class="badge-dot"></span>
-    Estamos chegando
+    Aberto 24 horas
   </div>
 
-  <h1>Bebida gelada onde você estiver!</h1>
+  <h1>Bebida gelada<br>onde você estiver!</h1>
+
+  <p class="sub">
+    Cerveja, vinho, destilados e muito mais<br>entregues rapidinho na sua porta.
+  </p>
+
+  <a class="cta" href="app.html">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+    Pedir agora
+  </a>
+
+  <div class="chips">
+    <span class="chip">🍺 Cervejas</span>
+    <span class="chip">🍷 Vinhos</span>
+    <span class="chip">🥃 Destilados</span>
+    <span class="chip">🧊 Gelo</span>
+    <span class="chip">⚡ Entrega rápida</span>
+    <span class="chip">🌙 Aberto 24h</span>
+  </div>
 
   <div class="divider"></div>
 
-  <p class="sub">
-    Estamos construindo algo incrível.<br>
-    Em breve você vai poder pedir suas bebidas geladas sem sair de casa.
-  </p>
-
   <p class="footer">© 2025 Plantão da Cerveja 24h · Todos os direitos reservados</p>
+
 </div>
 </body>
 </html>
