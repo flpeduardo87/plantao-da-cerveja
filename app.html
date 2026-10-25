@@ -180,6 +180,8 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .store-chip{font-size:15px;font-weight:500;color:var(--fg-2);border:1.5px solid var(--border);border-radius:999px;padding:4px 12px;}
 .online-badge{display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:var(--fg);letter-spacing:.5px;}
 .online-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse 1.8s ease-in-out infinite;}
+.online-dot.closed{background:#DC2626;animation:none;}
+.online-badge.closed{color:#DC2626;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .search-section{
   background:var(--amber);
@@ -870,7 +872,7 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
         <span class="store-chip">Bebida Gelada</span>
         <span class="store-chip">Entrega Rápida</span>
       </div>
-      <div class="online-badge"><span class="online-dot"></span>PEDIDOS ONLINE</div>
+      <div class="online-badge" id="store-badge"><span class="online-dot" id="store-dot"></span><span id="store-badge-txt">PEDIDOS ONLINE</span></div>
     </div>
     <!-- Categories -->
     <div class="cat-strip"><div class="cat-scroll" id="cats"></div></div>
@@ -1157,6 +1159,23 @@ async function enterStore(){
       buildCats(); renderSections();
     }
   } catch(e){ /* keep demo data */ }
+  // Check store open/closed status
+  try {
+    const cfg = await fetch(API+'/settings',{signal:AbortSignal.timeout(5000)}).then(r=>r.json());
+    const isOpen = cfg.store_open=='1'||cfg.store_open===1;
+    const badge = document.getElementById('store-badge');
+    const dot   = document.getElementById('store-dot');
+    const txt   = document.getElementById('store-badge-txt');
+    if(!isOpen){
+      badge.classList.add('closed');
+      dot.classList.add('closed');
+      txt.textContent = 'LOJA FECHADA';
+    } else {
+      badge.classList.remove('closed');
+      dot.classList.remove('closed');
+      txt.textContent = 'PEDIDOS ONLINE';
+    }
+  } catch(e){}
 }
 
 const CAT_ICONS = {
@@ -1195,11 +1214,19 @@ function buildCats(){
 let catObserver = null;
 function setCat(id){
   document.getElementById('s-in').value='';
+  const feed = document.getElementById('feed');
   if(id==='all'){
-    document.getElementById('feed').scrollTo({top:0,behavior:'smooth'});
+    feed.scrollTo({top:0,behavior:'smooth'});
   } else {
     const sec = document.getElementById('sec-'+id);
-    if(sec) sec.scrollIntoView({behavior:'smooth',block:'start'});
+    if(sec && feed){
+      const strip = feed.querySelector('.cat-strip');
+      const stripH = strip ? strip.offsetHeight : 0;
+      const feedRect = feed.getBoundingClientRect();
+      const secRect  = sec.getBoundingClientRect();
+      const target   = feed.scrollTop + (secRect.top - feedRect.top) - stripH;
+      feed.scrollTo({top: Math.max(0, target), behavior:'smooth'});
+    }
   }
   setActivePill(id);
 }
