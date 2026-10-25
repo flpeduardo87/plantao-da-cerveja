@@ -143,7 +143,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   border-radius:6px;margin-bottom:6px;letter-spacing:.5px;
 }
 .banner-headline{
-  font-size:32px;font-weight:600;color:rgba(0,0,0,.52);
+  font-size:32px;font-weight:600;color:rgba(255,255,255,.92);
   line-height:1.05;letter-spacing:-1px;text-transform:uppercase;
 }
 .banner-deco{
@@ -963,8 +963,10 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 <script>
 const API = 'https://api.plantaodacerveja.com.br';
 
+function esc(s){const d=document.createElement('div');d.textContent=String(s??'');return d.innerHTML;}
+
 function prodImg(id,w,h){
-  return `https://picsum.photos/seed/plantao${id}/${w}/${h}`;
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}'%3E%3Crect width='${w}' height='${h}' fill='%23F3F4F6'/%3E%3Ccircle cx='${Math.round(w/2)}' cy='${Math.round(h/2)}' r='${Math.round(Math.min(w,h)*0.22)}' fill='%23E5E7EB'/%3E%3C/svg%3E`;
 }
 
 let CATS = [{id:'all',em:'🏠',lb:'Todos'}];
@@ -1206,8 +1208,8 @@ function catIconEl(slug,name,size=22){
 }
 function buildCats(){
   document.getElementById('cats').innerHTML = CATS.map(c=>`
-    <button class="cat-pill${c.id===activeCat?' on':''}" data-cat="${c.id}" onclick="setCat('${c.id}')">
-      ${catIconEl(c.id,c.lb)}<span class="lb">${c.lb}</span>
+    <button class="cat-pill${c.id===activeCat?' on':''}" data-cat="${esc(c.id)}" onclick="setCat('${esc(c.id)}')">
+      ${catIconEl(c.id,c.lb)}<span class="lb">${esc(c.lb)}</span>
     </button>`).join('');
   lucide.createIcons();
 }
@@ -1273,11 +1275,11 @@ function cardHTML(p){
   const imgSrc = p.image_url || prodImg(p.id,148,112);
   return `<div class="pcard">
     <div class="pcard-img">
-      <img src="${imgSrc}" alt="${p.name}" loading="lazy">
-      ${p.disc?`<span class="disc-badge">-${p.disc}%</span>`:''}
+      <img src="${imgSrc}" alt="${esc(p.name)}" loading="lazy">
+      ${p.disc?`<span class="disc-badge">-${Number(p.disc)}%</span>`:''}
     </div>
     <div class="pcard-body">
-      <div class="pname">${p.name}</div>
+      <div class="pname">${esc(p.name)}</div>
       ${p.old?`<div class="pold">R$ ${fmt(p.old)}</div>`:''}
       <div class="prow">
         <span class="pnew">R$ ${fmt(p.price)}</span>
@@ -1366,13 +1368,13 @@ function renderDrawerCart(){
     <div class="cart-items-card">
       ${cart.map(i=>`
         <div class="ci-row">
-          <div class="ci-thumb"><img src="${i.image_url||prodImg(i.id,56,56)}" alt="${i.name}"></div>
+          <div class="ci-thumb"><img src="${i.image_url||prodImg(i.id,56,56)}" alt="${esc(i.name)}"></div>
           <div class="ci-info">
-            <div class="ci-name">${i.name}</div>
+            <div class="ci-name">${esc(i.name)}</div>
             <div class="ci-price">R$ ${fmt(i.price)}</div>
-            <div class="ci-qty">Qtd: ${i.qty}</div>
+            <div class="ci-qty">Qtd: ${Number(i.qty)}</div>
           </div>
-          <button class="ci-del" onclick="removeDrawerItem(${i.id})"><i data-lucide="trash-2" width="16" height="16"></i></button>
+          <button class="ci-del" onclick="removeDrawerItem(${Number(i.id)})"><i data-lucide="trash-2" width="16" height="16"></i></button>
         </div>`).join('')}
     </div>
     <div class="summary-card">
@@ -1412,13 +1414,13 @@ function renderCartPage(){
     <div class="cart-items-card">
       ${cart.map(i=>`
         <div class="ci-row">
-          <div class="ci-thumb"><img src="${i.image_url||prodImg(i.id,56,56)}" alt="${i.name}"></div>
+          <div class="ci-thumb"><img src="${i.image_url||prodImg(i.id,56,56)}" alt="${esc(i.name)}"></div>
           <div class="ci-info">
-            <div class="ci-name">${i.name}</div>
+            <div class="ci-name">${esc(i.name)}</div>
             <div class="ci-price">R$ ${fmt(i.price)}</div>
-            <div class="ci-qty">Quantidade: ${i.qty}</div>
+            <div class="ci-qty">Quantidade: ${Number(i.qty)}</div>
           </div>
-          <button class="ci-del" onclick="removeFromCart(${i.id})"><i data-lucide="trash-2" width="18" height="18"></i></button>
+          <button class="ci-del" onclick="removeFromCart(${Number(i.id)})"><i data-lucide="trash-2" width="18" height="18"></i></button>
         </div>`).join('')}
     </div>
     <div class="summary-card">
@@ -1592,8 +1594,8 @@ function renderCoStep(){
         <div class="success-title">Pedido Confirmado!</div>
         <div class="success-sub">Seu pedido foi registrado com sucesso.<br>Em breve entraremos em contato pelo WhatsApp.</div>
         <div class="success-info">
-          <p>Nome: <strong>${coData.nome||'—'}</strong></p>
-          <p>Entrega: <strong>${coData.rua||'—'}, ${coData.num||''}</strong></p>
+          <p>Nome: <strong>${esc(coData.nome||'—')}</strong></p>
+          <p>Entrega: <strong>${esc(coData.rua||'—')}, ${esc(coData.num||'')}</strong></p>
           <p>Pagamento: <strong>${{pix:'PIX',maquininha:'Maquininha',credito:'Cartão de Crédito',dinheiro:'Dinheiro'}[payMethod]||'—'}</strong></p>
           <p>Previsão: <strong>${chosenWhen==='imediata'?'15–20 minutos':'Conforme agendado'}</strong></p>
         </div>

@@ -1,3 +1,4 @@
+<?php require 'auth_check.php'; ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>

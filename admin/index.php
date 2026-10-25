@@ -80,6 +80,7 @@ async function login() {
     if (!res.ok) throw new Error(data.error || 'Erro');
     localStorage.setItem('plantao_token', data.token);
     localStorage.setItem('plantao_user',  JSON.stringify(data.user));
+    await fetch('set_session.php', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:data.token})});
     window.location.href = 'dashboard.php';
   } catch (e) {
     err.textContent = e.message;

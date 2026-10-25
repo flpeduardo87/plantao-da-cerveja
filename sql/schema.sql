@@ -138,8 +138,8 @@ CREATE TABLE IF NOT EXISTS admin_users (
   created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Default admin: email=admin@plantaodacerveja.com.br senha=Plantao@2025
--- (change immediately after first login)
+-- Default admin: email=admin@plantaodacerveja.com.br
+-- IMPORTANTE: altere a senha imediatamente após o primeiro acesso
 INSERT INTO admin_users (name, email, password_hash) VALUES
   ('Administrador', 'admin@plantaodacerveja.com.br',
    '$2y$12$NXqhfW7p5yfO2nPEwWjVZuxZ4bza/6lQCGPGhZkU1TL1Au.ILVnxW');

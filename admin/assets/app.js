@@ -16,7 +16,7 @@ function logout() {
   }).finally(() => {
     localStorage.removeItem('plantao_token');
     localStorage.removeItem('plantao_user');
-    window.location.href = 'index.php';
+    window.location.href = 'logout.php';
   });
 }
 
