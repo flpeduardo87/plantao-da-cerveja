@@ -5,10 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Dashboard · Plantão Admin</title>
 <link rel="icon" href="assets/favicon.png">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap">
 <link rel="stylesheet" href="assets/style.css">
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
-<style>.spin{animation:spin-ic 1s linear infinite}@keyframes spin-ic{to{transform:rotate(360deg)}}</style>
 </head>
 <body>
 <div id="toast"></div>
@@ -16,24 +14,29 @@
 
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <img src="assets/logo.jpg" alt="">
+      <img src="assets/logo.jpg" alt="Plantão">
       <div><span>Plantão da Cerveja</span><small>Painel Admin</small></div>
     </div>
     <nav>
-      <div class="nav-section">Menu</div>
-      <a class="nav-link active" href="dashboard.php"><i data-lucide="layout-dashboard" width="18" height="18"></i> Dashboard</a>
-      <a class="nav-link" href="orders.php"><i data-lucide="package" width="18" height="18"></i> Pedidos <span class="badge" id="new-count" style="display:none">0</span></a>
-      <a class="nav-link" href="products.php"><i data-lucide="beer" width="18" height="18"></i> Produtos</a>
-      <a class="nav-link" href="settings.php"><i data-lucide="settings" width="18" height="18"></i> Configurações</a>
+      <div class="nav-section">Principal</div>
+      <a class="nav-link active" href="dashboard.php"><i data-lucide="layout-dashboard" width="16" height="16"></i> Dashboard</a>
+      <a class="nav-link" href="orders.php"><i data-lucide="package" width="16" height="16"></i> Pedidos <span class="badge" id="new-count" style="display:none">0</span></a>
+      <div class="nav-section">Catálogo</div>
+      <a class="nav-link" href="products.php"><i data-lucide="box" width="16" height="16"></i> Produtos</a>
+      <a class="nav-link" href="categories.php"><i data-lucide="tag" width="16" height="16"></i> Categorias</a>
+      <div class="nav-section">Análises</div>
+      <a class="nav-link" href="reports.php"><i data-lucide="bar-chart-2" width="16" height="16"></i> Relatórios</a>
+      <div class="nav-section">Sistema</div>
+      <a class="nav-link" href="settings.php"><i data-lucide="settings" width="16" height="16"></i> Configurações</a>
     </nav>
     <div class="sidebar-footer">
-      <button class="btn-logout" data-logout><i data-lucide="log-out" width="16" height="16"></i> Sair</button>
+      <button class="btn-logout" data-logout><i data-lucide="log-out" width="14" height="14"></i> Sair</button>
     </div>
   </aside>
 
   <div class="main">
     <div class="topbar">
-      <button class="hamburger" id="hamburger">☰</button>
+      <button class="hamburger" id="hamburger"><i data-lucide="menu" width="20" height="20"></i></button>
       <h1>Dashboard</h1>
       <div class="topbar-right">
         <button class="store-status closed" id="store-status-btn" data-open="0">
@@ -43,26 +46,36 @@
     </div>
 
     <div class="page">
-      <div class="stats-grid" id="stats-grid">
+      <div class="stats-grid">
         <div class="stat-tile amber">
+          <div class="st-icon"><i data-lucide="shopping-bag" width="18" height="18"></i></div>
           <div class="label">Pedidos hoje</div>
           <div class="value" id="stat-today">—</div>
           <div class="sub">Total do dia</div>
         </div>
         <div class="stat-tile green">
+          <div class="st-icon"><i data-lucide="banknote" width="18" height="18"></i></div>
           <div class="label">Receita hoje</div>
           <div class="value" id="stat-revenue">—</div>
           <div class="sub">Pedidos entregues</div>
         </div>
         <div class="stat-tile blue">
+          <div class="st-icon"><i data-lucide="clock" width="18" height="18"></i></div>
           <div class="label">Em andamento</div>
           <div class="value" id="stat-active">—</div>
           <div class="sub">Aceitos + preparando + a caminho</div>
         </div>
         <div class="stat-tile red">
-          <div class="label">Novos (aguardando)</div>
+          <div class="st-icon"><i data-lucide="bell" width="18" height="18"></i></div>
+          <div class="label">Aguardando</div>
           <div class="value" id="stat-new">—</div>
-          <div class="sub">Aguardando confirmação</div>
+          <div class="sub">Novos pedidos</div>
+        </div>
+        <div class="stat-tile purple">
+          <div class="st-icon"><i data-lucide="receipt" width="18" height="18"></i></div>
+          <div class="label">Ticket médio</div>
+          <div class="value" id="stat-ticket">—</div>
+          <div class="sub">Pedidos entregues hoje</div>
         </div>
       </div>
 
@@ -79,7 +92,7 @@
               </tr>
             </thead>
             <tbody id="recent-tbody">
-              <tr><td colspan="7" class="empty"><div class="icon"><i data-lucide="loader-2" width="36" height="36" class="spin"></i></div><p>Carregando…</p></td></tr>
+              <tr><td colspan="7"><div class="empty"><i data-lucide="loader-2" width="28" height="28" class="spin"></i><p>Carregando…</p></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -108,57 +121,63 @@ function beep() {
 
 async function loadStats() {
   try {
-    const [all, today] = await Promise.all([
-      api('/orders?limit=10'),
-      api('/orders?limit=200')
+    const [recent, all] = await Promise.all([
+      api('/orders?limit=8'),
+      api('/orders?limit=500')
     ]);
 
-    const orders = today.data || [];
+    const orders = all.data || [];
     const now = new Date();
     const todayOrders = orders.filter(o => {
       const d = new Date(o.created_at);
-      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+      return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && d.getDate()===now.getDate();
     });
 
-    const revenue = todayOrders.filter(o => o.status === 'delivered').reduce((s, o) => s + parseFloat(o.total || 0), 0);
+    const delivered = todayOrders.filter(o => o.status === 'delivered');
+    const revenue = delivered.reduce((s, o) => s + parseFloat(o.total || 0), 0);
     const active = orders.filter(o => ['accepted','preparing','delivering'].includes(o.status)).length;
     const newOrders = orders.filter(o => o.status === 'new').length;
+    const ticket = delivered.length ? revenue / delivered.length : 0;
 
     document.getElementById('stat-today').textContent   = todayOrders.length;
     document.getElementById('stat-revenue').textContent = fmtMoney(revenue);
     document.getElementById('stat-active').textContent  = active;
     document.getElementById('stat-new').textContent     = newOrders;
+    document.getElementById('stat-ticket').textContent  = delivered.length ? fmtMoney(ticket) : '—';
 
     const badge = document.getElementById('new-count');
     if (newOrders > 0) { badge.textContent = newOrders; badge.style.display = ''; }
-    else { badge.style.display = 'none'; }
+    else badge.style.display = 'none';
 
-    if (newOrders > lastNewCount && lastNewCount >= 0) { beep(); toast(`🔔 ${newOrders - lastNewCount} novo(s) pedido(s)!`); }
+    if (newOrders > lastNewCount && lastNewCount >= 0) {
+      beep();
+      toast(`${newOrders - lastNewCount} novo(s) pedido(s) aguardando`);
+    }
     lastNewCount = newOrders;
 
-    const rows = (all.data || []).slice(0, 8);
+    const rows = (recent.data || []).slice(0, 8);
     const tbody = document.getElementById('recent-tbody');
     if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="icon"><i data-lucide="inbox" width="36" height="36"></i></div><p>Nenhum pedido ainda</p></div></td></tr>';
-      return;
+      tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><i data-lucide="inbox" width="28" height="28"></i><p>Nenhum pedido ainda</p></div></td></tr>';
+      lucide.createIcons(); return;
     }
     tbody.innerHTML = rows.map(o => `
       <tr>
         <td><strong>#${o.order_number}</strong></td>
         <td>${o.customer_name}</td>
         <td><strong>${fmtMoney(o.total)}</strong></td>
-        <td>${fmtPayment(o.payment_method)}</td>
+        <td style="color:var(--fg-2)">${fmtPayment(o.payment_method)}</td>
         <td>${fmtStatus(o.status)}</td>
-        <td style="white-space:nowrap;font-size:13px;color:var(--fg-2)">${fmtDate(o.created_at)}</td>
-        <td><a href="orders.php?id=${o.id}" class="btn btn-ghost btn-sm">Ver</a></td>
+        <td style="white-space:nowrap;font-size:12px;color:var(--fg-2)">${fmtDate(o.created_at)}</td>
+        <td><a href="orders.php?id=${o.id}" class="btn btn-ghost btn-sm">Detalhes</a></td>
       </tr>
     `).join('');
+    lucide.createIcons();
   } catch (e) { console.error(e); }
 }
 
 loadStats();
 setInterval(loadStats, 15000);
 </script>
-<script>document.addEventListener("DOMContentLoaded",()=>lucide.createIcons());</script>
 </body>
 </html>

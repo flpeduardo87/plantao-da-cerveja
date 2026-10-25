@@ -5,51 +5,83 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Configurações · Plantão Admin</title>
 <link rel="icon" href="assets/favicon.png">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap">
 <link rel="stylesheet" href="assets/style.css">
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
-<style>.spin{animation:spin-ic 1s linear infinite}@keyframes spin-ic{to{transform:rotate(360deg)}}</style>
 </head>
 <body>
 <div id="toast"></div>
 
 <div class="layout">
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><img src="assets/logo.jpg" alt=""><div><span>Plantão da Cerveja</span><small>Painel Admin</small></div></div>
+    <div class="sidebar-logo">
+      <img src="assets/logo.jpg" alt="Plantão">
+      <div><span>Plantão da Cerveja</span><small>Painel Admin</small></div>
+    </div>
     <nav>
-      <div class="nav-section">Menu</div>
-      <a class="nav-link" href="dashboard.php"><i data-lucide="layout-dashboard" width="18" height="18"></i> Dashboard</a>
-      <a class="nav-link" href="orders.php"><i data-lucide="package" width="18" height="18"></i> Pedidos</a>
-      <a class="nav-link" href="products.php"><i data-lucide="beer" width="18" height="18"></i> Produtos</a>
-      <a class="nav-link active" href="settings.php"><i data-lucide="settings" width="18" height="18"></i> Configurações</a>
+      <div class="nav-section">Principal</div>
+      <a class="nav-link" href="dashboard.php"><i data-lucide="layout-dashboard" width="16" height="16"></i> Dashboard</a>
+      <a class="nav-link" href="orders.php"><i data-lucide="package" width="16" height="16"></i> Pedidos <span class="badge" id="new-count" style="display:none">0</span></a>
+      <div class="nav-section">Catálogo</div>
+      <a class="nav-link" href="products.php"><i data-lucide="box" width="16" height="16"></i> Produtos</a>
+      <a class="nav-link" href="categories.php"><i data-lucide="tag" width="16" height="16"></i> Categorias</a>
+      <div class="nav-section">Análises</div>
+      <a class="nav-link" href="reports.php"><i data-lucide="bar-chart-2" width="16" height="16"></i> Relatórios</a>
+      <div class="nav-section">Sistema</div>
+      <a class="nav-link active" href="settings.php"><i data-lucide="settings" width="16" height="16"></i> Configurações</a>
     </nav>
-    <div class="sidebar-footer"><button class="btn-logout" data-logout>🚪 Sair</button></div>
+    <div class="sidebar-footer">
+      <button class="btn-logout" data-logout><i data-lucide="log-out" width="14" height="14"></i> Sair</button>
+    </div>
   </aside>
 
   <div class="main">
     <div class="topbar">
-      <button class="hamburger" id="hamburger">☰</button>
+      <button class="hamburger" id="hamburger"><i data-lucide="menu" width="20" height="20"></i></button>
       <h1>Configurações</h1>
       <div class="topbar-right">
         <button class="store-status closed" id="store-status-btn" data-open="0"><span class="dot"></span>Carregando…</button>
       </div>
     </div>
 
-    <div class="page" style="max-width:720px;display:flex;flex-direction:column;gap:24px">
+    <div class="page" style="max-width:760px;display:flex;flex-direction:column;gap:20px">
 
+      <!-- Informações da loja -->
       <div class="card">
-        <div class="card-header"><h2>🏪 Informações da loja</h2></div>
+        <div class="card-header">
+          <div class="ch-icon amber"><i data-lucide="store" width="14" height="14"></i></div>
+          <h2>Informações da loja</h2>
+        </div>
         <div class="card-body">
           <form id="form-store" onsubmit="saveStore(event)">
-            <div class="form-grid" style="margin-bottom:16px">
-              <div class="field form-full"><label>Nome da loja</label><input type="text" id="s-store-name" placeholder="Plantão da Cerveja"></div>
-              <div class="field"><label>Pedido mínimo (R$)</label><input type="number" id="s-min-order" min="0" step="0.01"></div>
-              <div class="field"><label>Taxa de entrega (R$)</label><input type="number" id="s-delivery-fee" min="0" step="0.01"></div>
-              <div class="field"><label>Tempo mínimo de entrega (min)</label><input type="number" id="s-time-min" min="0" placeholder="15"></div>
-              <div class="field"><label>Tempo máximo de entrega (min)</label><input type="number" id="s-time-max" min="0" placeholder="40"></div>
-              <div class="field form-full" style="flex-direction:row;align-items:center;gap:10px">
-                <label class="toggle"><input type="checkbox" id="s-open"><span class="toggle-slider"></span></label>
-                <div><div style="font-size:13px;font-weight:700">Loja aberta</div><div style="font-size:12px;color:var(--fg-3)">Clientes conseguem fazer pedidos quando ativo</div></div>
+            <div class="form-grid" style="margin-bottom:14px">
+              <div class="field form-full">
+                <label>Nome da loja</label>
+                <input type="text" id="s-store-name" placeholder="Plantão da Cerveja 24h">
+              </div>
+              <div class="field">
+                <label>Pedido mínimo (R$)</label>
+                <input type="number" id="s-min-order" min="0" step="0.01" placeholder="20,00">
+              </div>
+              <div class="field">
+                <label>Taxa de entrega (R$)</label>
+                <input type="number" id="s-delivery-fee" min="0" step="0.01" placeholder="0,00">
+              </div>
+              <div class="field">
+                <label>Tempo mínimo de entrega (min)</label>
+                <input type="number" id="s-time-min" min="0" placeholder="15">
+              </div>
+              <div class="field">
+                <label>Tempo máximo de entrega (min)</label>
+                <input type="number" id="s-time-max" min="0" placeholder="40">
+              </div>
+              <div class="field form-full">
+                <div class="toggle-wrap">
+                  <label class="toggle"><input type="checkbox" id="s-open"><span class="toggle-slider"></span></label>
+                  <div>
+                    <div style="font-size:13px;font-weight:600">Loja aberta</div>
+                    <div style="font-size:11.5px;color:var(--fg-3)">Clientes conseguem fazer pedidos quando ativo</div>
+                  </div>
+                </div>
               </div>
             </div>
             <button type="submit" class="btn btn-primary">Salvar configurações</button>
@@ -57,40 +89,62 @@
         </div>
       </div>
 
+      <!-- WhatsApp -->
       <div class="card">
-        <div class="card-header"><h2>📲 WhatsApp (Fonnte)</h2></div>
+        <div class="card-header">
+          <div class="ch-icon green"><i data-lucide="message-circle" width="14" height="14"></i></div>
+          <h2>WhatsApp — Notificações (Fonnte)</h2>
+        </div>
         <div class="card-body">
-          <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#166534">
-            <strong>Como configurar:</strong><br>
-            1. Acesse <strong>fonnte.com</strong> → crie uma conta gratuita<br>
-            2. Conecte o WhatsApp do estabelecimento (escaneie o QR code)<br>
-            3. Copie o token da API e cole abaixo<br>
-            4. Informe o número do WhatsApp que receberá as notificações de pedido
+          <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:9px;padding:12px 14px;margin-bottom:14px;font-size:12.5px;color:#166534;line-height:1.6">
+            <strong>Como configurar:</strong> Acesse <strong>fonnte.com</strong>, conecte o WhatsApp do estabelecimento e cole o token abaixo. Você receberá uma notificação a cada novo pedido.
           </div>
           <form id="form-whatsapp" onsubmit="saveSecrets(event)">
-            <div class="form-grid" style="margin-bottom:16px">
-              <div class="field form-full"><label>Token Fonnte (API key)</label><input type="text" id="s-fonnte-token" placeholder="Cole aqui o token da Fonnte" autocomplete="off"><span class="field-hint">Encontrado em fonnte.com → Dispositivos → seu número → Token</span></div>
-              <div class="field form-full"><label>WhatsApp que receberá notificações</label><input type="tel" id="s-store-whatsapp" placeholder="5511999999999 (com código do país, sem +)"><span class="field-hint">Ex: 5541999998888 para (41) 99999-8888</span></div>
+            <div class="form-grid" style="margin-bottom:14px">
+              <div class="field form-full">
+                <label>Token Fonnte (API key)</label>
+                <input type="text" id="s-fonnte-token" placeholder="Cole aqui o token da Fonnte" autocomplete="off">
+                <span class="field-hint">Encontrado em fonnte.com › Dispositivos › seu número › Token</span>
+              </div>
+              <div class="field form-full">
+                <label>WhatsApp que receberá notificações</label>
+                <input type="tel" id="s-store-whatsapp" placeholder="5541999998888">
+                <span class="field-hint">Número com código do país, sem espaços. Ex: 5541999998888</span>
+              </div>
             </div>
             <button type="submit" class="btn btn-primary">Salvar WhatsApp</button>
           </form>
         </div>
       </div>
 
+      <!-- Pagamento Stone -->
       <div class="card">
-        <div class="card-header"><h2>💳 Pagamento Stone</h2></div>
+        <div class="card-header">
+          <div class="ch-icon blue"><i data-lucide="credit-card" width="14" height="14"></i></div>
+          <h2>Pagamento — Stone</h2>
+        </div>
         <div class="card-body">
-          <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#1D4ED8">
-            <strong>Stone:</strong> Configure as credenciais da API Stone para aceitar pagamentos via PIX e cartão diretamente no app.<br>
-            Acesse <strong>stone.com.br</strong> → Área do lojista → Integrações para obter as credenciais.
+          <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:9px;padding:12px 14px;margin-bottom:14px;font-size:12.5px;color:#1D4ED8;line-height:1.6">
+            Configure as credenciais Stone para aceitar PIX e cartão no app. Acesse <strong>stone.com.br</strong> › Área do lojista › Integrações.
           </div>
           <form id="form-stone" onsubmit="saveStone(event)">
-            <div class="form-grid" style="margin-bottom:16px">
-              <div class="field form-full"><label>Stone Client ID</label><input type="text" id="s-stone-client-id" placeholder="stone_client_id" autocomplete="off"></div>
-              <div class="field form-full"><label>Stone Client Secret</label><input type="password" id="s-stone-client-secret" placeholder="••••••••••••••••" autocomplete="off"></div>
-              <div class="field form-full" style="flex-direction:row;align-items:center;gap:10px">
-                <label class="toggle"><input type="checkbox" id="s-stone-sandbox"><span class="toggle-slider"></span></label>
-                <div><div style="font-size:13px;font-weight:700">Modo sandbox (testes)</div><div style="font-size:12px;color:var(--fg-3)">Desative quando for ao ar em produção</div></div>
+            <div class="form-grid" style="margin-bottom:14px">
+              <div class="field form-full">
+                <label>Stone Client ID</label>
+                <input type="text" id="s-stone-client-id" placeholder="stone_client_id" autocomplete="off">
+              </div>
+              <div class="field form-full">
+                <label>Stone Client Secret</label>
+                <input type="password" id="s-stone-client-secret" placeholder="••••••••••••••••" autocomplete="off">
+              </div>
+              <div class="field form-full">
+                <div class="toggle-wrap">
+                  <label class="toggle"><input type="checkbox" id="s-stone-sandbox"><span class="toggle-slider"></span></label>
+                  <div>
+                    <div style="font-size:13px;font-weight:600">Modo sandbox (testes)</div>
+                    <div style="font-size:11.5px;color:var(--fg-3)">Desative ao colocar em produção</div>
+                  </div>
+                </div>
               </div>
             </div>
             <button type="submit" class="btn btn-primary">Salvar Stone</button>
@@ -98,14 +152,27 @@
         </div>
       </div>
 
+      <!-- Alterar senha -->
       <div class="card">
-        <div class="card-header"><h2>🔒 Alterar senha</h2></div>
+        <div class="card-header">
+          <div class="ch-icon gray"><i data-lucide="lock" width="14" height="14"></i></div>
+          <h2>Segurança — Alterar senha</h2>
+        </div>
         <div class="card-body">
           <form id="form-password" onsubmit="changePassword(event)">
-            <div class="form-grid" style="margin-bottom:16px">
-              <div class="field form-full"><label>Senha atual</label><input type="password" id="s-pass-current" required autocomplete="current-password"></div>
-              <div class="field"><label>Nova senha</label><input type="password" id="s-pass-new" required minlength="8" autocomplete="new-password"></div>
-              <div class="field"><label>Confirmar nova senha</label><input type="password" id="s-pass-confirm" required autocomplete="new-password"></div>
+            <div class="form-grid" style="margin-bottom:14px">
+              <div class="field form-full">
+                <label>Senha atual</label>
+                <input type="password" id="s-pass-current" required autocomplete="current-password">
+              </div>
+              <div class="field">
+                <label>Nova senha</label>
+                <input type="password" id="s-pass-new" required minlength="8" autocomplete="new-password">
+              </div>
+              <div class="field">
+                <label>Confirmar nova senha</label>
+                <input type="password" id="s-pass-confirm" required autocomplete="new-password">
+              </div>
             </div>
             <button type="submit" class="btn btn-primary">Alterar senha</button>
           </form>
@@ -128,9 +195,9 @@ async function loadSettings() {
     document.getElementById('s-time-max').value = data.delivery_time_max || '';
     document.getElementById('s-open').checked = data.store_open === '1' || data.store_open === 1;
     document.getElementById('s-stone-sandbox').checked = data.stone_sandbox === '1' || data.stone_sandbox === 1;
-    if (data.fonnte_token) document.getElementById('s-fonnte-token').placeholder = '(salvo)';
+    if (data.fonnte_token) document.getElementById('s-fonnte-token').placeholder = '(configurado)';
     if (data.store_whatsapp) document.getElementById('s-store-whatsapp').value = data.store_whatsapp;
-    if (data.stone_client_id) document.getElementById('s-stone-client-id').placeholder = '(salvo)';
+    if (data.stone_client_id) document.getElementById('s-stone-client-id').placeholder = '(configurado)';
   } catch (e) { toast(e.message, 'error'); }
 }
 
@@ -146,7 +213,7 @@ async function saveStore(e) {
       delivery_time_max: document.getElementById('s-time-max').value,
       store_open: document.getElementById('s-open').checked ? '1' : '0',
     }) });
-    toast('Configurações salvas!');
+    toast('Configurações salvas');
   } catch (e) { toast(e.message, 'error'); }
   finally { btn.disabled = false; btn.textContent = 'Salvar configurações'; }
 }
@@ -159,9 +226,8 @@ async function saveSecrets(e) {
   if (token) body.fonnte_token = token;
   try {
     await api('/settings/secrets', { method: 'PUT', body: JSON.stringify(body) });
-    toast('WhatsApp salvo!');
-    document.getElementById('s-fonnte-token').value = '';
-    document.getElementById('s-fonnte-token').placeholder = '(salvo)';
+    toast('WhatsApp salvo');
+    if (token) { document.getElementById('s-fonnte-token').value = ''; document.getElementById('s-fonnte-token').placeholder = '(configurado)'; }
   } catch (e) { toast(e.message, 'error'); }
   finally { btn.disabled = false; btn.textContent = 'Salvar WhatsApp'; }
 }
@@ -176,8 +242,8 @@ async function saveStone(e) {
   if (csec) body.stone_client_secret = csec;
   try {
     await api('/settings/secrets', { method: 'PUT', body: JSON.stringify(body) });
-    toast('Credenciais Stone salvas!');
-    if (cid) { document.getElementById('s-stone-client-id').value = ''; document.getElementById('s-stone-client-id').placeholder = '(salvo)'; }
+    toast('Credenciais Stone salvas');
+    if (cid) { document.getElementById('s-stone-client-id').value = ''; document.getElementById('s-stone-client-id').placeholder = '(configurado)'; }
     if (csec) document.getElementById('s-stone-client-secret').value = '';
   } catch (e) { toast(e.message, 'error'); }
   finally { btn.disabled = false; btn.textContent = 'Salvar Stone'; }
@@ -194,7 +260,7 @@ async function changePassword(e) {
       current_password: document.getElementById('s-pass-current').value,
       new_password: npass,
     }) });
-    toast('Senha alterada com sucesso!');
+    toast('Senha alterada com sucesso');
     document.getElementById('form-password').reset();
   } catch (e) { toast(e.message, 'error'); }
   finally { btn.disabled = false; btn.textContent = 'Alterar senha'; }
@@ -202,6 +268,5 @@ async function changePassword(e) {
 
 loadSettings();
 </script>
-<script>document.addEventListener("DOMContentLoaded",()=>lucide.createIcons());</script>
 </body>
 </html>

@@ -47,9 +47,8 @@ function initSidebar() {
   if (!sidebar || !hamburger) return;
   hamburger.addEventListener('click', () => sidebar.classList.toggle('open'));
   document.addEventListener('click', e => {
-    if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !hamburger.contains(e.target)) {
+    if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !hamburger.contains(e.target))
       sidebar.classList.remove('open');
-    }
   });
 }
 
@@ -68,7 +67,7 @@ async function initStoreStatus() {
     try {
       await api('/settings', { method: 'PUT', body: JSON.stringify({ store_open: open ? '0' : '1' }) });
       setStoreStatus(!open, btn);
-      toast(!open ? 'Loja aberta!' : 'Loja fechada', !open ? 'success' : 'error');
+      toast(!open ? 'Loja aberta' : 'Loja fechada', !open ? 'success' : 'error');
     } catch (e) { toast(e.message, 'error'); }
   });
 }
@@ -81,13 +80,18 @@ function setStoreStatus(open, btn) {
 
 /* ── Format helpers ── */
 function fmtMoney(v) {
-  return 'R$ ' + Number(v).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return 'R$ ' + Number(v || 0).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
 function fmtDate(s) {
   if (!s) return '—';
   const d = new Date(s);
   return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function fmtDateShort(s) {
+  if (!s) return '—';
+  return new Date(s).toLocaleDateString('pt-BR');
 }
 
 function fmtStatus(s) {
@@ -104,8 +108,14 @@ function fmtStatus(s) {
 }
 
 function fmtPayment(p) {
-  const map = { pix: 'PIX', credit_card: 'Cartão Crédito', debit_card: 'Cartão Débito', cash: 'Dinheiro', machine: 'Maquininha' };
-  return map[p] || p;
+  const map = {
+    pix: 'PIX',
+    credit_card: 'Cartão crédito',
+    debit_card: 'Cartão débito',
+    cash: 'Dinheiro',
+    machine: 'Maquininha'
+  };
+  return map[p] || p || '—';
 }
 
 /* ── Modal helpers ── */
@@ -118,4 +128,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initSidebar();
   initStoreStatus();
   document.querySelectorAll('[data-logout]').forEach(el => el.addEventListener('click', logout));
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 });
