@@ -4,8 +4,22 @@ const API = 'https://api.plantaodacerveja.com.br';
 function getToken() { return localStorage.getItem('plantao_token'); }
 function getUser()  { try { return JSON.parse(localStorage.getItem('plantao_user') || '{}'); } catch { return {}; } }
 
+function isTokenExpired() {
+  const token = getToken();
+  if (!token) return true;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    return payload.exp && payload.exp < Math.floor(Date.now() / 1000);
+  } catch { return false; }
+}
+
 function authGuard() {
-  if (!getToken()) { window.location.href = 'index.php'; return false; }
+  if (!getToken() || isTokenExpired()) {
+    localStorage.removeItem('plantao_token');
+    localStorage.removeItem('plantao_user');
+    window.location.href = 'index.php';
+    return false;
+  }
   return true;
 }
 

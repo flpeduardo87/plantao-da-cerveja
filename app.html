@@ -387,6 +387,13 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .ci-name{font-size:13px;font-weight:500;line-height:1.3;}
 .ci-price{font-size:14px;font-weight:600;margin-top:3px;font-variant-numeric:tabular-nums;}
 .ci-qty{font-size:12px;color:var(--fg-3);margin-top:1px;}
+.ci-qty-ctrl{display:flex;align-items:center;gap:6px;margin-top:4px;}
+.qty-btn{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg);color:var(--fg);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s;}
+.qty-btn:hover{background:var(--bg-2);}
+.qty-num{font-size:13px;font-weight:600;min-width:18px;text-align:center;}
+.when-dt{margin-top:10px;padding:12px 14px;background:var(--bg-2);border-radius:var(--r-sm);}
+.when-dt label{font-size:11.5px;font-weight:700;color:var(--fg-2);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;}
+.when-dt input[type=datetime-local]{width:100%;padding:9px 12px;border:2px solid var(--border);border-radius:8px;font:14px 'Inter',sans-serif;color:var(--fg);background:var(--bg);}
 .ci-del{
   background:none;border:none;cursor:pointer;
   color:var(--fg-3);padding:6px;
@@ -928,6 +935,10 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
       <span class="when-opt-icon"><i data-lucide="calendar" width="24" height="24"></i></span>
       <div class="when-opt-txt"><strong>Agendar Entrega</strong><span>Escolha data e horário</span></div>
     </div>
+    <div class="when-dt hidden" id="when-schedule-box">
+      <label>Data e horário da entrega *</label>
+      <input type="datetime-local" id="when-datetime">
+    </div>
     <button class="btn-primary when-continue" id="when-continue-btn" disabled onclick="openCheckout()">Continuar</button>
   </div>
 </div>
@@ -1066,9 +1077,14 @@ async function loadData(){
 let cart = [];
 let activeCat = 'all';
 let chosenWhen = null;
+let chosenScheduledAt = null;
 let coStep = 1;
 let coData = {};
 let payMethod = null;
+
+function saveCart(){ try{ localStorage.setItem('plantao_cart', JSON.stringify(cart)); }catch{} }
+function loadCart(){ try{ const s=localStorage.getItem('plantao_cart'); if(s) cart=JSON.parse(s); }catch{} }
+loadCart();
 
 function fmt(n){ return n.toLocaleString('pt-BR',{minimumFractionDigits:2}); }
 function show(id){ document.getElementById(id).classList.remove('hidden'); }
@@ -1115,13 +1131,34 @@ document.getElementById('cep-in').addEventListener('input',function(){
 });
 function useGeo(){
   const b = document.getElementById('geo-btn');
+  if(!navigator.geolocation){ toast('GPS não disponível neste dispositivo.','error'); return; }
   b.innerHTML='<i data-lucide="loader-2" width="16" height="16" class="spin"></i> Localizando...'; b.disabled=true; lucide.createIcons();
-  setTimeout(()=>showConfirmed('Rua das Flores, 123 — Centro, Sua Cidade/UF'), 1000);
+  navigator.geolocation.getCurrentPosition(
+    ()=>{
+      b.style.display='none';
+      const inp = document.getElementById('cep-in');
+      if(inp){ inp.placeholder='Digite seu CEP para confirmar'; inp.focus(); }
+      const sub = document.querySelector('.loc-card p');
+      if(sub) sub.textContent='GPS ativo! Informe seu CEP para confirmarmos seu endereço:';
+    },
+    ()=>{ b.innerHTML='<i data-lucide="map-pin" width="16" height="16"></i> Usar minha localização'; b.disabled=false; lucide.createIcons(); toast('GPS não pôde ser obtido. Digite seu CEP.','error'); }
+  );
 }
-function confirmCep(){
-  const v = document.getElementById('cep-in').value.replace(/\D/g,'');
-  if(v.length<8){ document.getElementById('cep-in').classList.add('err'); return; }
-  showConfirmed(`CEP ${v.slice(0,5)}-${v.slice(5)} — Endereço confirmado`);
+async function confirmCep(){
+  const inp = document.getElementById('cep-in');
+  const v = inp.value.replace(/\D/g,'');
+  if(v.length<8){ inp.classList.add('err'); return; }
+  inp.classList.remove('err'); inp.disabled=true;
+  try {
+    const r = await fetch(`https://viacep.com.br/ws/${v}/json/`,{signal:AbortSignal.timeout(5000)});
+    const d = await r.json();
+    if(d.erro){ inp.disabled=false; toast('CEP não encontrado. Verifique e tente novamente.','error'); return; }
+    window._viaCepData = d;
+    const parts = [d.logradouro, d.bairro, d.localidade+(d.uf?'/'+d.uf:'')].filter(Boolean);
+    showConfirmed(parts.join(' — '));
+  } catch {
+    showConfirmed(`CEP ${v.slice(0,5)}-${v.slice(5)} confirmado`);
+  } finally { inp.disabled=false; }
 }
 function showConfirmed(addr){
   document.getElementById('loc-form').style.display='none';
@@ -1300,6 +1337,7 @@ function addToCart(id, e){
   const ex = cart.find(x=>x.id===id);
   if(ex) ex.qty++;
   else cart.push({...p,qty:1});
+  saveCart();
   updateBadge();
   refreshFeed();
   toast(`${p.name.substring(0,26)}… adicionado!`);
@@ -1372,7 +1410,11 @@ function renderDrawerCart(){
           <div class="ci-info">
             <div class="ci-name">${esc(i.name)}</div>
             <div class="ci-price">R$ ${fmt(i.price)}</div>
-            <div class="ci-qty">Qtd: ${Number(i.qty)}</div>
+            <div class="ci-qty-ctrl">
+              <button class="qty-btn" onclick="changeQty(${Number(i.id)},-1)">−</button>
+              <span class="qty-num">${Number(i.qty)}</span>
+              <button class="qty-btn" onclick="changeQty(${Number(i.id)},1)">+</button>
+            </div>
           </div>
           <button class="ci-del" onclick="removeDrawerItem(${Number(i.id)})"><i data-lucide="trash-2" width="16" height="16"></i></button>
         </div>`).join('')}
@@ -1388,9 +1430,18 @@ function renderDrawerCart(){
     <button class="btn-outline" onclick="closeCartDrawer()">Continuar comprando</button>`;
   lucide.createIcons();
 }
+function changeQty(id, delta){
+  const item = cart.find(x=>x.id===id);
+  if(!item) return;
+  item.qty += delta;
+  if(item.qty <= 0) cart = cart.filter(x=>x.id!==id);
+  saveCart(); updateBadge(); refreshFeed();
+  renderDrawerCart();
+  if(!document.getElementById('s-cart').classList.contains('hidden')) renderCartPage();
+}
 function removeDrawerItem(id){
   cart = cart.filter(i=>i.id!==id);
-  updateBadge();
+  saveCart(); updateBadge();
   renderDrawerCart();
   refreshFeed();
 }
@@ -1418,7 +1469,11 @@ function renderCartPage(){
           <div class="ci-info">
             <div class="ci-name">${esc(i.name)}</div>
             <div class="ci-price">R$ ${fmt(i.price)}</div>
-            <div class="ci-qty">Quantidade: ${Number(i.qty)}</div>
+            <div class="ci-qty-ctrl">
+              <button class="qty-btn" onclick="changeQty(${Number(i.id)},-1)">−</button>
+              <span class="qty-num">${Number(i.qty)}</span>
+              <button class="qty-btn" onclick="changeQty(${Number(i.id)},1)">+</button>
+            </div>
           </div>
           <button class="ci-del" onclick="removeFromCart(${Number(i.id)})"><i data-lucide="trash-2" width="18" height="18"></i></button>
         </div>`).join('')}
@@ -1436,16 +1491,20 @@ function renderCartPage(){
 }
 function removeFromCart(id){
   cart = cart.filter(i=>i.id!==id);
-  updateBadge();
+  saveCart(); updateBadge();
   renderCartPage();
   refreshFeed();
 }
 
 function openWhen(){
+  const MIN_ORDER = 20;
+  const total = cartTotal();
+  if(total < MIN_ORDER){ toast(`Pedido mínimo R$ ${fmt(MIN_ORDER)}. Adicione mais R$ ${fmt(MIN_ORDER - total)} para continuar.`); return; }
   chosenWhen = null;
   document.getElementById('when-imediata').classList.remove('selected');
   document.getElementById('when-agendar').classList.remove('selected');
   document.getElementById('when-continue-btn').disabled = true;
+  hide('when-schedule-box');
   show('when-overlay');
 }
 function closeWhen(){ hide('when-overlay'); }
@@ -1453,9 +1512,28 @@ function selectWhen(v){
   chosenWhen = v;
   document.getElementById('when-imediata').classList.toggle('selected', v==='imediata');
   document.getElementById('when-agendar').classList.toggle('selected', v==='agendar');
-  document.getElementById('when-continue-btn').disabled = false;
+  if(v==='agendar'){
+    show('when-schedule-box');
+    const dt = document.getElementById('when-datetime');
+    const now = new Date(Date.now() + 30*60000);
+    const pad = n=>String(n).padStart(2,'0');
+    const minStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    dt.min = minStr;
+    if(!dt.value || dt.value < minStr) dt.value = minStr;
+    document.getElementById('when-continue-btn').disabled = false;
+  } else {
+    hide('when-schedule-box');
+    document.getElementById('when-continue-btn').disabled = false;
+  }
 }
 function openCheckout(){
+  if(chosenWhen === 'agendar'){
+    const dtVal = document.getElementById('when-datetime')?.value;
+    if(!dtVal){ toast('Escolha data e horário para a entrega agendada.'); return; }
+    chosenScheduledAt = dtVal;
+  } else {
+    chosenScheduledAt = null;
+  }
   hide('when-overlay');
   coStep = 1; coData = {}; payMethod = null;
   show('checkout-overlay');
@@ -1599,16 +1677,41 @@ function renderCoStep(){
           <p>Pagamento: <strong>${{pix:'PIX',maquininha:'Maquininha',credito:'Cartão de Crédito',dinheiro:'Dinheiro'}[payMethod]||'—'}</strong></p>
           <p>Previsão: <strong>${chosenWhen==='imediata'?'15–20 minutos':'Conforme agendado'}</strong></p>
         </div>
-        <button class="btn-primary" onclick="closeCheckout();cart=[];updateBadge();goHome();refreshFeed()">Voltar ao início</button>
+        <button class="btn-primary" onclick="closeCheckout();cart=[];saveCart();updateBadge();goHome();refreshFeed()">Voltar ao início</button>
       </div>`;
   }
   el.innerHTML = summaryHtml + stepperHtml + content;
   const cepEl = document.getElementById('co-cep');
-  if(cepEl) cepEl.addEventListener('input',function(){
-    let v=this.value.replace(/\D/g,'');
-    if(v.length>5)v=v.slice(0,5)+'-'+v.slice(5,8);
-    this.value=v;
-  });
+  if(cepEl) {
+    cepEl.addEventListener('input',function(){
+      let v=this.value.replace(/\D/g,'');
+      if(v.length>5)v=v.slice(0,5)+'-'+v.slice(5,8);
+      this.value=v;
+    });
+    cepEl.addEventListener('input', async function(){
+      const digits = this.value.replace(/\D/g,'');
+      if(digits.length !== 8) return;
+      try {
+        const r = await fetch(`https://viacep.com.br/ws/${digits}/json/`,{signal:AbortSignal.timeout(5000)});
+        const d = await r.json();
+        if(!d.erro){
+          const rua = document.getElementById('co-rua');
+          const bairro = document.getElementById('co-bairro');
+          if(rua && !rua.value) rua.value = d.logradouro || '';
+          if(bairro && !bairro.value) bairro.value = d.bairro || '';
+        }
+      } catch {}
+    });
+    if(window._viaCepData && !cepEl.value){
+      const d = window._viaCepData;
+      setTimeout(()=>{
+        const rua = document.getElementById('co-rua');
+        const bairro = document.getElementById('co-bairro');
+        if(rua && !rua.value) rua.value = d.logradouro || '';
+        if(bairro && !bairro.value) bairro.value = d.bairro || '';
+      }, 50);
+    }
+  }
   const telEl = document.getElementById('co-tel');
   if(telEl) telEl.addEventListener('input',function(){
     let v=this.value.replace(/\D/g,'');
@@ -1669,6 +1772,7 @@ async function finalizarPedido(){
     address_reference: coData.ref||'',
     payment_method: payMap[payMethod]||'pix',
     delivery_type: chosenWhen==='imediata'?'immediate':'scheduled',
+    scheduled_at: chosenScheduledAt || null,
     notes: '',
     items: cart.map(i=>({product_id:i.id,product_name:i.name,quantity:i.qty,unit_price:i.price})),
   };
