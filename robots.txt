@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /api/
+Disallow: /sql/
+
+Sitemap: https://www.plantaodacerveja.com.br/sitemap.xml

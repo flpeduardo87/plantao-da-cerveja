@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Plantão da Cerveja</title>
+<title>Plantão da Cerveja 24h — Delivery de Bebidas</title>
+<meta name="description" content="Delivery de bebidas geladas 24 horas. Cervejas, destilados, energéticos e muito mais. Peça agora e receba rápido!">
+<meta property="og:title" content="Plantão da Cerveja 24h">
+<meta property="og:description" content="Delivery de bebidas geladas 24 horas. Peça agora e receba rápido!">
+<meta property="og:image" content="logo-plantao-da-cerveja.jpg">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#FCDA24">
+<link rel="manifest" href="manifest.json">
 <link rel="icon" href="favicon-icone.webp" type="image/webp">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -806,13 +813,13 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
   <h1 class="gate-h1">Você tem 18 anos ou mais?</h1>
   <p class="gate-sub">Conteúdo destinado a maiores de idade</p>
   <div class="gate-btns">
-    <button class="btn-yes" onclick="passAge()">Sim, tenho 18+</button>
+    <button class="btn-yes" onclick="passAge()" autofocus>Sim, tenho 18+</button>
     <button class="btn-no" onclick="denyAge()">Não</button>
   </div>
 </div>
 
 <!-- ═══ LOCATION OVERLAY ═══ -->
-<div id="loc-overlay" class="hidden">
+<div id="loc-overlay" class="hidden" role="dialog" aria-modal="true" aria-label="Informar endereço de entrega">
   <div class="loc-card">
     <div id="loc-form">
       <div class="loc-logo"><img src="logo-plantao-da-cerveja.jpg" alt="Plantão da Cerveja"></div>
@@ -829,7 +836,7 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
       <div class="check-ring"><i data-lucide="check" width="26" height="26"></i></div>
       <div class="conf-title">Entregamos na sua região!</div>
       <div class="conf-addr" id="conf-addr">—</div>
-      <div class="motoboys"><i data-lucide="bike" width="14" height="14"></i> 3 motoboys disponíveis agora</div>
+      <div class="motoboys"><i data-lucide="bike" width="14" height="14"></i> Entregamos na sua região!</div>
       <button class="btn-primary" style="margin-top:8px" onclick="enterStore()">Ver produtos →</button>
     </div>
   </div>
@@ -908,11 +915,11 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 </div>
 
 <!-- ═══ CART DRAWER (desktop) ═══ -->
-<div id="cart-drawer-overlay" onclick="closeCartDrawer(event)">
+<div id="cart-drawer-overlay" onclick="closeCartDrawer(event)" role="dialog" aria-modal="true" aria-label="Sacola de compras">
   <div id="cart-drawer">
     <div class="cd-header">
       <span class="cd-title"><i data-lucide="shopping-bag" width="22" height="22"></i> Sacola</span>
-      <button class="cd-close" onclick="closeCartDrawer()"><i data-lucide="x" width="22" height="22"></i></button>
+      <button class="cd-close" onclick="closeCartDrawer()" aria-label="Fechar sacola"><i data-lucide="x" width="22" height="22"></i></button>
     </div>
     <div class="cd-body" id="cd-body"></div>
     <div class="cd-footer hidden" id="cd-footer"></div>
@@ -920,11 +927,11 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 </div>
 
 <!-- ═══ WHEN MODAL ═══ -->
-<div id="when-overlay" class="hidden">
+<div id="when-overlay" class="hidden" role="dialog" aria-modal="true" aria-label="Escolher horário de entrega">
   <div class="when-card">
     <div class="when-hd">
       <div><div class="when-title"><i data-lucide="clock" width="17" height="17"></i> Quando deseja receber?</div></div>
-      <button class="modal-x" onclick="closeWhen()"><i data-lucide="x" width="18" height="18"></i></button>
+      <button class="modal-x" onclick="closeWhen()" aria-label="Fechar"><i data-lucide="x" width="18" height="18"></i></button>
     </div>
     <div class="when-sub">Escolha a melhor opção para você</div>
     <div class="when-opt" id="when-imediata" onclick="selectWhen('imediata')">
@@ -944,12 +951,12 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 </div>
 
 <!-- ═══ CHECKOUT MODAL ═══ -->
-<div id="checkout-overlay" class="hidden">
+<div id="checkout-overlay" class="hidden" role="dialog" aria-modal="true" aria-label="Finalizar pedido">
   <div class="checkout-sheet">
     <div class="co-knob"></div>
     <div class="co-hd">
       <span class="co-title">Finalizar Pedido</span>
-      <button class="co-close" onclick="closeCheckout()"><i data-lucide="x" width="14" height="14"></i></button>
+      <button class="co-close" onclick="closeCheckout()" aria-label="Fechar checkout"><i data-lucide="x" width="14" height="14"></i></button>
     </div>
     <div class="co-body" id="co-body"></div>
   </div>
@@ -969,7 +976,7 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
   </button>
 </nav>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script>
 const API = 'https://api.plantaodacerveja.com.br';
@@ -1615,7 +1622,7 @@ function renderCoStep(){
         <input class="form-input" id="co-email" inputmode="email" placeholder="opcional" value="${coData.email||''}">
       </div>
       <div class="step-btns">
-        <button class="btn-back" onclick="coStep=1;renderCoStep()"><i data-lucide="arrow-left" width="18" height="18"></i></button>
+        <button class="btn-back" onclick="coStep=1;renderCoStep()" aria-label="Voltar"><i data-lucide="arrow-left" width="18" height="18"></i></button>
         <button class="btn-primary btn-next" onclick="nextStep(2)">Próximo →</button>
       </div>`;
   } else if(coStep===3){
@@ -1662,7 +1669,7 @@ function renderCoStep(){
         <div class="pay-info"><strong>Dinheiro</strong><span>Troco para quanto?</span></div>
       </label>
       <div class="step-btns" style="margin-top:4px">
-        <button class="btn-back" onclick="coStep=2;renderCoStep()"><i data-lucide="arrow-left" width="18" height="18"></i></button>
+        <button class="btn-back" onclick="coStep=2;renderCoStep()" aria-label="Voltar"><i data-lucide="arrow-left" width="18" height="18"></i></button>
         <button class="btn-primary btn-next" id="pay-btn" ${payMethod?'':'disabled'} onclick="finalizarPedido()">Confirmar Pedido <i data-lucide="check" width="16" height="16"></i></button>
       </div>`;
   } else if(coStep===4){
@@ -1672,12 +1679,13 @@ function renderCoStep(){
         <div class="success-title">Pedido Confirmado!</div>
         <div class="success-sub">Seu pedido foi registrado com sucesso.<br>Em breve entraremos em contato pelo WhatsApp.</div>
         <div class="success-info">
+          ${(()=>{try{const o=JSON.parse(localStorage.getItem('plantao_last_order')||'{}');return o.order_number?`<p>Nº do pedido: <strong>#${esc(o.order_number)}</strong></p>`:''}catch{return ''}})()}
           <p>Nome: <strong>${esc(coData.nome||'—')}</strong></p>
           <p>Entrega: <strong>${esc(coData.rua||'—')}, ${esc(coData.num||'')}</strong></p>
           <p>Pagamento: <strong>${{pix:'PIX',maquininha:'Maquininha',credito:'Cartão de Crédito',dinheiro:'Dinheiro'}[payMethod]||'—'}</strong></p>
           <p>Previsão: <strong>${chosenWhen==='imediata'?'15–20 minutos':'Conforme agendado'}</strong></p>
         </div>
-        <button class="btn-primary" onclick="closeCheckout();cart=[];saveCart();updateBadge();goHome();refreshFeed()">Voltar ao início</button>
+        <button class="btn-primary" onclick="closeCheckout();goHome();refreshFeed()">Voltar ao início</button>
       </div>`;
   }
   el.innerHTML = summaryHtml + stepperHtml + content;
@@ -1742,7 +1750,9 @@ function nextStep(from){
   } else if(from===2){
     const nome=document.getElementById('co-nome').value.trim();
     const tel=document.getElementById('co-tel').value.trim();
-    if(!nome||tel.replace(/\D/g,'').length<10){ toast('Nome e WhatsApp são obrigatórios.'); return; }
+    const telDigits = tel.replace(/\D/g,'');
+    if(!nome){ toast('Nome é obrigatório.'); return; }
+    if(telDigits.length<10||telDigits.length>11){ toast('WhatsApp inválido. Use DDD + número (10 ou 11 dígitos).'); return; }
     coData.nome=nome; coData.tel=tel; coData.email=document.getElementById('co-email').value;
     coStep=3;
   }
@@ -1784,6 +1794,8 @@ async function finalizarPedido(){
     });
     const j = await r.json();
     if(!r.ok||!j.success) throw new Error(j.message||'Erro ao registrar pedido.');
+    try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, ts: Date.now()})); }catch{}
+    cart=[]; saveCart(); updateBadge();
     coStep=4;
     renderCoStep();
     document.getElementById('co-body').scrollTop=0;
@@ -1796,6 +1808,10 @@ async function finalizarPedido(){
 }
 
 lucide.createIcons();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(()=>{});
+}
 
 window.addEventListener('resize',()=>{
   const dh = document.getElementById('desktop-header');
