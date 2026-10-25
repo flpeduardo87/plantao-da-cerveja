@@ -1212,6 +1212,11 @@ function buildCats(){
   lucide.createIcons();
 }
 let catObserver = null;
+function offsetFromFeed(el, feed){
+  let top = 0, node = el;
+  while(node && node !== feed){ top += node.offsetTop; node = node.offsetParent; }
+  return top;
+}
 function setCat(id){
   document.getElementById('s-in').value='';
   const feed = document.getElementById('feed');
@@ -1219,14 +1224,7 @@ function setCat(id){
     feed.scrollTo({top:0,behavior:'smooth'});
   } else {
     const sec = document.getElementById('sec-'+id);
-    if(sec && feed){
-      const strip = feed.querySelector('.cat-strip');
-      const stripH = strip ? strip.offsetHeight : 0;
-      const feedRect = feed.getBoundingClientRect();
-      const secRect  = sec.getBoundingClientRect();
-      const target   = feed.scrollTop + (secRect.top - feedRect.top) - stripH;
-      feed.scrollTo({top: Math.max(0, target), behavior:'smooth'});
-    }
+    if(sec && feed) feed.scrollTo({top: offsetFromFeed(sec, feed), behavior:'smooth'});
   }
   setActivePill(id);
 }
