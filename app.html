@@ -1159,22 +1159,22 @@ async function enterStore(){
       buildCats(); renderSections();
     }
   } catch(e){ /* keep demo data */ }
-  // Check store open/closed status
+  // Check store open/closed status — only update if endpoint is public and returns store_open
   try {
-    const cfg = await fetch(API+'/settings',{signal:AbortSignal.timeout(5000)}).then(r=>r.json());
-    const isOpen = cfg.store_open=='1'||cfg.store_open===1;
-    const badge = document.getElementById('store-badge');
-    const dot   = document.getElementById('store-dot');
-    const txt   = document.getElementById('store-badge-txt');
-    if(!isOpen){
-      badge.classList.add('closed');
-      dot.classList.add('closed');
-      txt.textContent = 'LOJA FECHADA';
-    } else {
-      badge.classList.remove('closed');
-      dot.classList.remove('closed');
-      txt.textContent = 'PEDIDOS ONLINE';
+    const res = await fetch(API+'/settings',{signal:AbortSignal.timeout(5000)});
+    if(res.ok){
+      const cfg = await res.json();
+      if(cfg && cfg.store_open !== undefined){
+        const isOpen = cfg.store_open=='1'||cfg.store_open===1;
+        const badge = document.getElementById('store-badge');
+        const dot   = document.getElementById('store-dot');
+        const txt   = document.getElementById('store-badge-txt');
+        badge.classList.toggle('closed',!isOpen);
+        dot.classList.toggle('closed',!isOpen);
+        txt.textContent = isOpen ? 'PEDIDOS ONLINE' : 'LOJA FECHADA';
+      }
     }
+    // non-OK (401 etc) → keep default "PEDIDOS ONLINE"
   } catch(e){}
 }
 
@@ -1212,11 +1212,6 @@ function buildCats(){
   lucide.createIcons();
 }
 let catObserver = null;
-function offsetFromFeed(el, feed){
-  let top = 0, node = el;
-  while(node && node !== feed){ top += node.offsetTop; node = node.offsetParent; }
-  return top;
-}
 function setCat(id){
   document.getElementById('s-in').value='';
   const feed = document.getElementById('feed');
@@ -1224,16 +1219,23 @@ function setCat(id){
     feed.scrollTo({top:0,behavior:'smooth'});
   } else {
     const sec = document.getElementById('sec-'+id);
-    if(sec && feed) feed.scrollTo({top: offsetFromFeed(sec, feed), behavior:'smooth'});
+    if(sec && feed){
+      // getBoundingClientRect is relative to viewport — works for any scroll state
+      const top = feed.scrollTop + sec.getBoundingClientRect().top - feed.getBoundingClientRect().top;
+      feed.scrollTo({top: Math.max(0, top), behavior:'smooth'});
+    }
   }
   setActivePill(id);
 }
 function setActivePill(id){
   activeCat = id;
   document.querySelectorAll('.cat-pill').forEach(p=>p.classList.toggle('on', p.dataset.cat===id));
-  // scroll pill into view in the strip
+  // Scroll the cat-strip HORIZONTALLY only — never touch vertical feed scroll
   const pill = document.querySelector(`.cat-pill[data-cat="${id}"]`);
-  if(pill) pill.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  if(pill){
+    const strip = pill.closest('.cat-scroll');
+    if(strip) strip.scrollTo({left: pill.offsetLeft - strip.offsetWidth/2 + pill.offsetWidth/2, behavior:'smooth'});
+  }
 }
 function initScrollSpy(){
   if(catObserver) catObserver.disconnect();
