@@ -169,7 +169,7 @@ tbody tr:hover td{background:#F8FAFC}
 .btn-ghost:hover:not(:disabled){background:#F8FAFC}
 .btn-success{background:var(--green-lt);color:#166534;border:1px solid #BBF7D0}
 .btn-success:hover:not(:disabled){background:#BBF7D0}
-.btn-sm{padding:5px 11px;font-size:12px;border-radius:6px}
+.btn-sm{padding:7px 14px;font-size:12.5px;border-radius:8px}
 .btn-icon{
   padding:6px;border-radius:7px;background:transparent;border:1px solid var(--border);
   cursor:pointer;color:var(--fg-2);transition:all .1s;display:inline-flex;align-items:center
@@ -178,7 +178,7 @@ tbody tr:hover td{background:#F8FAFC}
 .btn-icon.borderless{border-color:transparent}
 
 /* ── Filter bar ── */
-.filter-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.filter-bar{display:flex;align-items:center;gap:8px;row-gap:10px;flex-wrap:wrap;margin-bottom:20px}
 .filter-bar .spacer{flex:1}
 
 /* ── Forms ── */
@@ -352,7 +352,7 @@ textarea{resize:vertical;min-height:80px}
   td{padding:9px 11px}
   th{padding:8px 11px}
   .btn{font-size:13px}
-  .btn-sm{font-size:12px}
+  .btn-sm{font-size:12.5px;padding:7px 13px}
   label{font-size:12px}
   .stat-tile .value{font-size:20px}
   .badge{font-size:11px}
