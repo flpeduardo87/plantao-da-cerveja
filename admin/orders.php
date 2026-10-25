@@ -7,6 +7,8 @@
 <link rel="icon" href="assets/favicon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap">
 <link rel="stylesheet" href="assets/style.css">
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<style>.spin{animation:spin-ic 1s linear infinite}@keyframes spin-ic{to{transform:rotate(360deg)}}</style>
 </head>
 <body>
 <div id="toast"></div>
@@ -15,7 +17,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3 id="modal-order-title">Pedido</h3>
-      <button class="btn-icon" onclick="closeModal('modal-order')">✕</button>
+      <button class="btn-icon" onclick="closeModal('modal-order')"><i data-lucide="x" width="16" height="16"></i></button>
     </div>
     <div class="modal-body" id="modal-order-body"></div>
     <div class="modal-footer">
@@ -32,10 +34,10 @@
     </div>
     <nav>
       <div class="nav-section">Menu</div>
-      <a class="nav-link" href="dashboard.php"><span class="icon">📊</span> Dashboard</a>
-      <a class="nav-link active" href="orders.php"><span class="icon">📦</span> Pedidos <span class="badge" id="new-count" style="display:none">0</span></a>
-      <a class="nav-link" href="products.php"><span class="icon">🍺</span> Produtos</a>
-      <a class="nav-link" href="settings.php"><span class="icon">⚙️</span> Configurações</a>
+      <a class="nav-link" href="dashboard.php"><i data-lucide="layout-dashboard" width="18" height="18"></i> Dashboard</a>
+      <a class="nav-link active" href="orders.php"><i data-lucide="package" width="18" height="18"></i> Pedidos <span class="badge" id="new-count" style="display:none">0</span></a>
+      <a class="nav-link" href="products.php"><i data-lucide="beer" width="18" height="18"></i> Produtos</a>
+      <a class="nav-link" href="settings.php"><i data-lucide="settings" width="18" height="18"></i> Configurações</a>
     </nav>
     <div class="sidebar-footer">
       <button class="btn-logout" data-logout>🚪 Sair</button>
@@ -75,7 +77,7 @@
               </tr>
             </thead>
             <tbody id="orders-tbody">
-              <tr><td colspan="8"><div class="empty"><div class="icon">⏳</div><p>Carregando…</p></div></td></tr>
+              <tr><td colspan="8"><div class="empty"><div class="icon"><i data-lucide="loader-2" width="36" height="36" class="spin"></i></div><p>Carregando…</p></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -124,7 +126,7 @@ async function loadOrders() {
 
     const tbody = document.getElementById('orders-tbody');
     if (!orders.length) {
-      tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="icon">📭</div><p>Nenhum pedido</p></div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="icon"><i data-lucide="inbox" width="36" height="36"></i></div><p>Nenhum pedido</p></div></td></tr>';
     } else {
       tbody.innerHTML = orders.map(o => `
         <tr>
@@ -171,7 +173,7 @@ async function changeStatus(id, status) {
 async function viewOrder(id) {
   const body = document.getElementById('modal-order-body');
   document.getElementById('modal-order-title').textContent = 'Carregando…';
-  body.innerHTML = '<div class="empty"><div class="icon">⏳</div></div>';
+  body.innerHTML = '<div class="empty"><div class="icon"><i data-lucide="loader-2" width="36" height="36" class="spin"></i></div></div>';
   openModal('modal-order');
   try {
     const o = await api(`/orders/${id}`);
@@ -220,5 +222,6 @@ startRefresh();
 
 if (directOrderId) setTimeout(() => viewOrder(parseInt(directOrderId)), 600);
 </script>
+<script>document.addEventListener("DOMContentLoaded",()=>lucide.createIcons());</script>
 </body>
 </html>

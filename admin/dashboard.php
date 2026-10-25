@@ -7,6 +7,8 @@
 <link rel="icon" href="assets/favicon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap">
 <link rel="stylesheet" href="assets/style.css">
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<style>.spin{animation:spin-ic 1s linear infinite}@keyframes spin-ic{to{transform:rotate(360deg)}}</style>
 </head>
 <body>
 <div id="toast"></div>
@@ -19,13 +21,13 @@
     </div>
     <nav>
       <div class="nav-section">Menu</div>
-      <a class="nav-link active" href="dashboard.php"><span class="icon">📊</span> Dashboard</a>
-      <a class="nav-link" href="orders.php"><span class="icon">📦</span> Pedidos <span class="badge" id="new-count" style="display:none">0</span></a>
-      <a class="nav-link" href="products.php"><span class="icon">🍺</span> Produtos</a>
-      <a class="nav-link" href="settings.php"><span class="icon">⚙️</span> Configurações</a>
+      <a class="nav-link active" href="dashboard.php"><i data-lucide="layout-dashboard" width="18" height="18"></i> Dashboard</a>
+      <a class="nav-link" href="orders.php"><i data-lucide="package" width="18" height="18"></i> Pedidos <span class="badge" id="new-count" style="display:none">0</span></a>
+      <a class="nav-link" href="products.php"><i data-lucide="beer" width="18" height="18"></i> Produtos</a>
+      <a class="nav-link" href="settings.php"><i data-lucide="settings" width="18" height="18"></i> Configurações</a>
     </nav>
     <div class="sidebar-footer">
-      <button class="btn-logout" data-logout><span>🚪</span> Sair</button>
+      <button class="btn-logout" data-logout><i data-lucide="log-out" width="16" height="16"></i> Sair</button>
     </div>
   </aside>
 
@@ -77,7 +79,7 @@
               </tr>
             </thead>
             <tbody id="recent-tbody">
-              <tr><td colspan="7" class="empty"><div class="icon">⏳</div><p>Carregando…</p></td></tr>
+              <tr><td colspan="7" class="empty"><div class="icon"><i data-lucide="loader-2" width="36" height="36" class="spin"></i></div><p>Carregando…</p></td></tr>
             </tbody>
           </table>
         </div>
@@ -131,13 +133,13 @@ async function loadStats() {
     if (newOrders > 0) { badge.textContent = newOrders; badge.style.display = ''; }
     else { badge.style.display = 'none'; }
 
-    if (newOrders > lastNewCount && lastNewCount >= 0) { beep(); toast(`🍺 ${newOrders - lastNewCount} novo(s) pedido(s)!`); }
+    if (newOrders > lastNewCount && lastNewCount >= 0) { beep(); toast(`🔔 ${newOrders - lastNewCount} novo(s) pedido(s)!`); }
     lastNewCount = newOrders;
 
     const rows = (all.data || []).slice(0, 8);
     const tbody = document.getElementById('recent-tbody');
     if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="icon">📭</div><p>Nenhum pedido ainda</p></div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="icon"><i data-lucide="inbox" width="36" height="36"></i></div><p>Nenhum pedido ainda</p></div></td></tr>';
       return;
     }
     tbody.innerHTML = rows.map(o => `
@@ -157,5 +159,6 @@ async function loadStats() {
 loadStats();
 setInterval(loadStats, 15000);
 </script>
+<script>document.addEventListener("DOMContentLoaded",()=>lucide.createIcons());</script>
 </body>
 </html>

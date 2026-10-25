@@ -7,6 +7,8 @@
 <link rel="icon" href="assets/favicon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap">
 <link rel="stylesheet" href="assets/style.css">
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<style>.spin{animation:spin-ic 1s linear infinite}@keyframes spin-ic{to{transform:rotate(360deg)}}</style>
 </head>
 <body>
 <div id="toast"></div>
@@ -16,10 +18,10 @@
     <div class="sidebar-logo"><img src="assets/logo.jpg" alt=""><div><span>Plantão da Cerveja</span><small>Painel Admin</small></div></div>
     <nav>
       <div class="nav-section">Menu</div>
-      <a class="nav-link" href="dashboard.php"><span class="icon">📊</span> Dashboard</a>
-      <a class="nav-link" href="orders.php"><span class="icon">📦</span> Pedidos</a>
-      <a class="nav-link" href="products.php"><span class="icon">🍺</span> Produtos</a>
-      <a class="nav-link active" href="settings.php"><span class="icon">⚙️</span> Configurações</a>
+      <a class="nav-link" href="dashboard.php"><i data-lucide="layout-dashboard" width="18" height="18"></i> Dashboard</a>
+      <a class="nav-link" href="orders.php"><i data-lucide="package" width="18" height="18"></i> Pedidos</a>
+      <a class="nav-link" href="products.php"><i data-lucide="beer" width="18" height="18"></i> Produtos</a>
+      <a class="nav-link active" href="settings.php"><i data-lucide="settings" width="18" height="18"></i> Configurações</a>
     </nav>
     <div class="sidebar-footer"><button class="btn-logout" data-logout>🚪 Sair</button></div>
   </aside>
@@ -200,5 +202,6 @@ async function changePassword(e) {
 
 loadSettings();
 </script>
+<script>document.addEventListener("DOMContentLoaded",()=>lucide.createIcons());</script>
 </body>
 </html>

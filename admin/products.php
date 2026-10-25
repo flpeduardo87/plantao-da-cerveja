@@ -7,6 +7,8 @@
 <link rel="icon" href="assets/favicon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap">
 <link rel="stylesheet" href="assets/style.css">
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<style>.spin{animation:spin-ic 1s linear infinite}@keyframes spin-ic{to{transform:rotate(360deg)}}</style>
 </head>
 <body>
 <div id="toast"></div>
@@ -15,7 +17,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3 id="modal-product-title">Novo produto</h3>
-      <button class="btn-icon" onclick="closeModal('modal-product')">✕</button>
+      <button class="btn-icon" onclick="closeModal('modal-product')"><i data-lucide="x" width="16" height="16"></i></button>
     </div>
     <div class="modal-body">
       <form id="product-form" onsubmit="saveProduct(event)">
@@ -70,10 +72,10 @@
     <div class="sidebar-logo"><img src="assets/logo.jpg" alt=""><div><span>Plantão da Cerveja</span><small>Painel Admin</small></div></div>
     <nav>
       <div class="nav-section">Menu</div>
-      <a class="nav-link" href="dashboard.php"><span class="icon">📊</span> Dashboard</a>
-      <a class="nav-link" href="orders.php"><span class="icon">📦</span> Pedidos</a>
-      <a class="nav-link active" href="products.php"><span class="icon">🍺</span> Produtos</a>
-      <a class="nav-link" href="settings.php"><span class="icon">⚙️</span> Configurações</a>
+      <a class="nav-link" href="dashboard.php"><i data-lucide="layout-dashboard" width="18" height="18"></i> Dashboard</a>
+      <a class="nav-link" href="orders.php"><i data-lucide="package" width="18" height="18"></i> Pedidos</a>
+      <a class="nav-link active" href="products.php"><i data-lucide="beer" width="18" height="18"></i> Produtos</a>
+      <a class="nav-link" href="settings.php"><i data-lucide="settings" width="18" height="18"></i> Configurações</a>
     </nav>
     <div class="sidebar-footer"><button class="btn-logout" data-logout>🚪 Sair</button></div>
   </aside>
@@ -128,10 +130,10 @@ function setCatFilter(slug, btn) {
 async function loadProducts() {
   const qs = catFilter ? `?category=${catFilter}` : '';
   const list = document.getElementById('products-list');
-  list.innerHTML = '<div class="empty"><div class="icon">⏳</div><p>Carregando…</p></div>';
+  list.innerHTML = '<div class="empty"><div class="icon"><i data-lucide="loader-2" width="36" height="36" class="spin"></i></div><p>Carregando…</p></div>';
   try {
     const products = await api(`/products${qs}`);
-    if (!products.length) { list.innerHTML = '<div class="empty"><div class="icon">📭</div><p>Nenhum produto cadastrado</p></div>'; return; }
+    if (!products.length) { list.innerHTML = '<div class="empty"><div class="icon"><i data-lucide="inbox" width="36" height="36"></i></div><p>Nenhum produto cadastrado</p></div>'; return; }
     const grouped = {};
     products.forEach(p => { const key = p.category_name || 'Sem categoria'; if (!grouped[key]) grouped[key] = []; grouped[key].push(p); });
     list.innerHTML = Object.entries(grouped).map(([cat, prods]) => `
@@ -247,5 +249,6 @@ document.querySelectorAll('[data-cat]').forEach(btn => {
 loadCategories();
 loadProducts();
 </script>
+<script>document.addEventListener("DOMContentLoaded",()=>lucide.createIcons());</script>
 </body>
 </html>
