@@ -1187,41 +1187,59 @@ function catIconEl(slug,name,size=22){
 }
 function buildCats(){
   document.getElementById('cats').innerHTML = CATS.map(c=>`
-    <button class="cat-pill${c.id===activeCat?' on':''}" onclick="setCat('${c.id}',this)">
+    <button class="cat-pill${c.id===activeCat?' on':''}" data-cat="${c.id}" onclick="setCat('${c.id}')">
       ${catIconEl(c.id,c.lb)}<span class="lb">${c.lb}</span>
     </button>`).join('');
   lucide.createIcons();
 }
-function setCat(id, el){
-  activeCat = id;
-  document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('on'));
-  el.classList.add('on');
+let catObserver = null;
+function setCat(id){
   document.getElementById('s-in').value='';
-  renderSections();
-  document.getElementById('feed').scrollTo({top:0,behavior:'smooth'});
+  if(id==='all'){
+    document.getElementById('feed').scrollTo({top:0,behavior:'smooth'});
+  } else {
+    const sec = document.getElementById('sec-'+id);
+    if(sec) sec.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  setActivePill(id);
 }
-function setCatFromMore(id){
+function setActivePill(id){
   activeCat = id;
-  document.getElementById('s-in').value='';
-  buildCats();
-  renderSections();
-  document.getElementById('feed').scrollTo({top:0,behavior:'smooth'});
+  document.querySelectorAll('.cat-pill').forEach(p=>p.classList.toggle('on', p.dataset.cat===id));
+  // scroll pill into view in the strip
+  const pill = document.querySelector(`.cat-pill[data-cat="${id}"]`);
+  if(pill) pill.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+function initScrollSpy(){
+  if(catObserver) catObserver.disconnect();
+  const feed = document.getElementById('feed');
+  catObserver = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const id = e.target.id.replace('sec-','');
+        setActivePill(id);
+      }
+    });
+  },{root:feed,rootMargin:'-30% 0px -60% 0px',threshold:0});
+  document.querySelectorAll('.section[id]').forEach(s=>catObserver.observe(s));
 }
 function renderSections(prods=null){
   const box = document.getElementById('sections');
   if(prods!==null){
+    if(catObserver) catObserver.disconnect();
     box.innerHTML = prods.length
       ? `<div class="section"><div class="sec-hd"><span class="sec-title">Resultados</span></div><div class="prod-row">${prods.map(cardHTML).join('')}</div></div>`
       : `<div style="text-align:center;padding:48px 16px;color:var(--fg-2)"><div style="margin-bottom:12px"><i data-lucide="search" width="48" height="48"></i></div><p style="font-size:14px">Nenhum produto encontrado.</p></div>`;
     lucide.createIcons(); return;
   }
-  const keys = activeCat==='all' ? Object.keys(SEC_LABELS) : [activeCat];
-  box.innerHTML = keys.filter(k=>CATALOG[k]).map(k=>`
-    <div class="section">
-      <div class="sec-hd"><span class="sec-title">${SEC_LABELS[k]}</span>${activeCat==='all'?`<span class="sec-more" onclick="setCatFromMore('${k}')">Ver mais</span>`:''}</div>
+  // Always render ALL sections
+  box.innerHTML = Object.keys(SEC_LABELS).filter(k=>CATALOG[k]).map(k=>`
+    <div class="section" id="sec-${k}">
+      <div class="sec-hd"><span class="sec-title">${SEC_LABELS[k]}</span></div>
       <div class="prod-row">${CATALOG[k].map(cardHTML).join('')}</div>
     </div>`).join('');
   lucide.createIcons();
+  initScrollSpy();
 }
 function cardHTML(p){
   const inCart = cart.some(i=>i.id===p.id);
