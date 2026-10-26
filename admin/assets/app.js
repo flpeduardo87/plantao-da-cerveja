@@ -38,7 +38,7 @@ function logout() {
 async function api(path, opts = {}) {
   const headers = { 'Content-Type': 'application/json', ...opts.headers };
   if (getToken()) headers['Authorization'] = `Bearer ${getToken()}`;
-  const res = await fetch(`${API}${path}`, { ...opts, headers });
+  const res = await fetch(`${API}${path}`, { ...opts, headers, signal: opts.signal ?? AbortSignal.timeout(15000) });
   if (res.status === 401) { localStorage.clear(); window.location.href = 'index.php'; return; }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || `Erro ${res.status}`);
