@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Configurações · Plantão Admin</title>
-<link rel="icon" href="assets/favicon.png">
+<link rel="icon" href="../favicon-icone.webp">
 <link rel="stylesheet" href="assets/style.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +18,7 @@
 <div class="layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <img src="../logo-plantao-da-cerveja.jpg" alt="Plantão">
+      <img src="../favicon-icone.webp" alt="Plantão">
       <div><span>Plantão da Cerveja</span><small>Painel Admin</small></div>
     </div>
     <nav>
@@ -40,7 +40,7 @@
 
   <div class="main">
     <div class="topbar">
-      <button class="hamburger" id="hamburger"><i data-lucide="menu" width="20" height="20"></i></button>
+      <button class="hamburger" id="hamburger"><i data-lucide="menu" width="24" height="24"></i></button>
       <h1>Configurações</h1>
       <div class="topbar-right">
         <button class="store-status closed" id="store-status-btn" data-open="0"><span class="dot"></span>Carregando…</button>

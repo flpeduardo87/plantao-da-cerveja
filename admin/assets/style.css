@@ -30,7 +30,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#F1F5F
   display:flex;align-items:center;gap:10px;padding:18px 16px;
   border-bottom:1px solid rgba(255,255,255,.07)
 }
-.sidebar-logo img{width:34px;height:34px;border-radius:7px;object-fit:cover;flex-shrink:0}
+.sidebar-logo img{width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0}
 .sidebar-logo span{font-size:13px;font-weight:700;color:#F1F5F9;line-height:1.2;display:block}
 .sidebar-logo small{font-size:10px;color:#64748B;display:block;font-weight:500;margin-top:1px}
 
@@ -79,7 +79,7 @@ nav{flex:1;padding:8px 0;overflow-y:auto}
 .store-status.open .dot{background:var(--green);animation:pulse-dot 2s infinite}
 .store-status.closed .dot{background:var(--red)}
 @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.35}}
-.hamburger{display:none;background:none;border:none;cursor:pointer;padding:5px;border-radius:6px;color:var(--fg-2)}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;color:var(--fg);width:40px;height:40px;align-items:center;justify-content:center}
 .hamburger:hover{background:#F1F5F9}
 
 .page{padding:24px;max-width:1280px;width:100%}
@@ -340,6 +340,8 @@ textarea{resize:vertical;min-height:80px}
   .sidebar.open{transform:none}
   .main{margin-left:0}
   .hamburger{display:flex}
+  .nav-link{font-size:16px;padding:10px 12px}
+  .btn-logout{font-size:16px}
   .stats-grid{grid-template-columns:1fr 1fr}
   .form-grid{grid-template-columns:1fr}
   .form-grid.cols-3{grid-template-columns:1fr}

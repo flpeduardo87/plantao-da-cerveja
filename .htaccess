@@ -30,6 +30,12 @@ AddType font/woff2 .woff2
   Header set Cache-Control "no-store, no-cache, must-revalidate"
 </FilesMatch>
 
+# HTML and PHP pages must never be cached
+<FilesMatch "\.(html|php)$">
+  Header set Cache-Control "no-store, no-cache, must-revalidate"
+  Header set Pragma "no-cache"
+</FilesMatch>
+
 # Block access to sensitive files
 <FilesMatch "(local\.php|\.env|\.git)">
   Require all denied

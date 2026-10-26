@@ -72,20 +72,20 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   transition:opacity .3s,transform .3s;
 }
 #s-age.exit{opacity:0;transform:scale(1.04);pointer-events:none;}
-.gate-icon{line-height:1;filter:drop-shadow(0 4px 12px rgba(0,0,0,.15));display:flex;align-items:center;justify-content:center;}
-.gate-h1{font-size:clamp(22px,6vw,28px);font-weight:600;color:#fff;text-align:center;text-wrap:balance;}
-.gate-sub{font-size:14px;color:rgba(255,255,255,.85);text-align:center;}
-.gate-btns{display:flex;gap:10px;width:100%;max-width:340px;}
+.gate-icon{line-height:1;display:flex;align-items:center;justify-content:center;}
+.gate-h1{font-size:22px;font-weight:600;color:#fff;text-align:center;text-wrap:balance;margin-bottom:8px;}
+.gate-sub{font-size:14px;color:rgba(255,255,255,.75);text-align:center;}
+.gate-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:360px;}
 .btn-yes{
-  flex:1;padding:15px;border-radius:999px;border:none;cursor:pointer;
-  background:#fff;color:#111;font:600 15px 'Inter',sans-serif;
-  box-shadow:var(--sh-md);transition:transform .1s;
+  width:100%;padding:15px;border-radius:999px;border:none;cursor:pointer;
+  background:var(--amber,#FCDA24);color:#111;font:700 15px 'Inter',sans-serif;
+  transition:transform .1s,opacity .1s;
 }
 .btn-yes:active{transform:scale(.97);}
 .btn-no{
-  flex:1;padding:15px;border-radius:999px;cursor:pointer;
-  background:transparent;color:#fff;font:700 15px 'Inter',sans-serif;
-  border:2px solid rgba(255,255,255,.55);
+  width:100%;padding:10px;border-radius:999px;cursor:pointer;
+  background:transparent;color:rgba(255,255,255,.55);font:500 14px 'Inter',sans-serif;
+  border:none;
 }
 
 /* ── LOCATION MODAL ── */
@@ -823,7 +823,9 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 
 <!-- ═══ AGE GATE ═══ -->
 <div id="s-age" class="screen" style="z-index:100">
-  <div class="gate-icon"><img src="favicon-icone.webp" alt="Plantão da Cerveja" style="width:120px;height:120px;border-radius:50%;display:block;"></div>
+  <div class="gate-icon"><img src="favicon-icone.webp" alt="Plantão da Cerveja" style="width:88px;height:88px;border-radius:50%;display:block;"></div>
+  <div class="loc-brand">Plantão da Cerveja</div>
+  <div class="loc-tagline">Bebida gelada onde você estiver!</div>
   <h1 class="gate-h1">Você tem 18 anos ou mais?</h1>
   <p class="gate-sub">Conteúdo destinado a maiores de idade</p>
   <div class="gate-btns">
