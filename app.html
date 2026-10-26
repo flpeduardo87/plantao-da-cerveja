@@ -230,7 +230,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   flex:1;overflow-y:auto;background:var(--bg-2);
   padding-bottom:calc(70px + env(safe-area-inset-bottom,0px));
 }
-.cat-strip{background:var(--bg);padding:12px 0;margin-bottom:8px;position:sticky;top:0;z-index:20;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.cat-strip{background:var(--bg);padding:12px 0;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.06);}
 .cat-scroll{
   display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;
   padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));
@@ -858,6 +858,7 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
       </button>
     </div>
   </div>
+  <div class="cat-strip"><div class="cat-scroll" id="cats"></div></div>
   <div class="feed" id="feed">
     <!-- Hero -->
     <div class="store-hero">
@@ -888,8 +889,6 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
       </div>
       <div class="online-badge" id="store-badge"><span class="online-dot" id="store-dot"></span><span id="store-badge-txt">PEDIDOS ONLINE</span></div>
     </div>
-    <!-- Categories -->
-    <div class="cat-strip"><div class="cat-scroll" id="cats"></div></div>
     <div id="sections"></div>
   </div>
 </div>
