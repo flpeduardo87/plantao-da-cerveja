@@ -263,10 +263,11 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   flex-shrink:0;width:148px;background:var(--bg);
   border-radius:var(--r-sm);border:1.5px solid var(--border);
   overflow:hidden;position:relative;box-shadow:var(--sh-sm);
+  display:flex;flex-direction:column;
 }
 .pcard-img{
   width:100%;height:112px;background:var(--bg-2);
-  position:relative;overflow:hidden;
+  position:relative;overflow:hidden;flex-shrink:0;
 }
 .pcard-img img{width:100%;height:100%;object-fit:cover;display:block;}
 .disc-badge{
@@ -275,10 +276,10 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   font-size:11px;font-weight:600;padding:2px 7px;
   border-radius:999px;
 }
-.pcard-body{padding:8px 8px 10px;}
-.pname{font-size:15px;font-weight:500;color:var(--fg);line-height:1.35;min-height:30px;}
+.pcard-body{padding:8px 8px 10px;display:flex;flex-direction:column;flex:1;}
+.pname{font-size:15px;font-weight:500;color:var(--fg);line-height:1.35;}
 .pold{font-size:12px;color:var(--fg-3);text-decoration:line-through;margin-top:4px;}
-.prow{display:flex;align-items:center;justify-content:space-between;margin-top:4px;}
+.prow{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:6px;}
 .pnew{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;}
 .addbtn{
   width:30px;height:30px;border-radius:50%;border:none;
@@ -1316,10 +1317,11 @@ function renderSections(prods=null){
 function cardHTML(p){
   const inCart = cart.some(i=>i.id===p.id);
   const imgSrc = p.image_url || prodImg(p.id,148,112);
+  const discPct = p.disc ? Number(p.disc) : (p.old && p.price < p.old ? Math.round((1 - p.price/p.old)*100) : 0);
   return `<div class="pcard">
     <div class="pcard-img">
       <img src="${imgSrc}" alt="${esc(p.name)}" loading="lazy">
-      ${p.disc?`<span class="disc-badge">-${Number(p.disc)}%</span>`:''}
+      ${discPct?`<span class="disc-badge">-${discPct}%</span>`:''}
     </div>
     <div class="pcard-body">
       <div class="pname">${esc(p.name)}</div>
