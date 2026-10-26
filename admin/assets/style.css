@@ -49,8 +49,10 @@ nav{flex:1;padding:8px 0;overflow-y:auto}
 .nav-link.active{background:rgba(252,218,36,.12);color:#FCDA24;font-weight:600}
 .nav-link .badge{
   margin-left:auto;background:var(--red);color:#fff;
-  font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;min-width:18px;text-align:center
+  font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;min-width:18px;text-align:center;
+  animation:badge-pulse 1.4s ease-in-out infinite;
 }
+@keyframes badge-pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.18);opacity:.8}}
 
 .sidebar-footer{padding:12px 16px;border-top:1px solid rgba(255,255,255,.07)}
 .btn-logout{

@@ -57,6 +57,7 @@
       <button class="hamburger" id="hamburger"><i data-lucide="menu" width="24" height="24"></i></button>
       <h1>Pedidos</h1>
       <div class="topbar-right">
+        <button id="btn-notify" class="btn btn-sm btn-ghost" onclick="askNotifyPermission()"><i data-lucide="bell-off" width="14" height="14"></i> Ativar alertas</button>
         <button class="store-status closed" id="store-status-btn" data-open="0"><span class="dot"></span>Carregando…</button>
       </div>
     </div>
@@ -103,19 +104,88 @@ let currentPage = 1;
 let lastNewCount = 0;
 let audioCtx;
 let refreshTimer;
+let titleFlashTimer;
+const PAGE_TITLE = 'Pedidos · Plantão Admin';
 
 const urlParams = new URLSearchParams(window.location.search);
 const directOrderId = urlParams.get('id');
 
-function beep() {
+/* ── Chime: C5 → E5 → G5 (acorde maior ascendente) ── */
+function playChime() {
   try {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.frequency.value = 880; gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
-    osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    [[523.25, 0], [659.25, 0.15], [783.99, 0.30]].forEach(([freq, delay]) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      const t = audioCtx.currentTime + delay;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.35, t + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+      osc.start(t); osc.stop(t + 0.6);
+    });
   } catch {}
+}
+
+/* ── Browser Notification ── */
+function askNotifyPermission() {
+  if (!('Notification' in window)) return;
+  Notification.requestPermission().then(p => {
+    if (p === 'granted') toast('Alertas ativados!');
+    updateNotifyBtn();
+  });
+}
+function sendBrowserNotification(count) {
+  if (Notification.permission !== 'granted') return;
+  const n = new Notification('🍺 Novo pedido!', {
+    body: `${count} pedido(s) aguardando confirmação`,
+    icon: '../favicon-icone.webp',
+    tag: 'new-order',
+    renotify: true,
+  });
+  n.onclick = () => { window.focus(); n.close(); };
+}
+function updateNotifyBtn() {
+  const btn = document.getElementById('btn-notify');
+  if (!btn) return;
+  if (!('Notification' in window)) { btn.style.display = 'none'; return; }
+  if (Notification.permission === 'granted') {
+    btn.innerHTML = '<i data-lucide="bell" width="14" height="14"></i> Alertas ativos';
+    btn.className = 'btn btn-sm btn-ghost'; btn.style.color = 'var(--green)';
+    btn.onclick = null; btn.disabled = true;
+  } else {
+    btn.innerHTML = '<i data-lucide="bell-off" width="14" height="14"></i> Ativar alertas';
+    btn.className = 'btn btn-sm btn-ghost'; btn.style.color = '';
+    btn.onclick = askNotifyPermission; btn.disabled = false;
+  }
+  lucide.createIcons();
+}
+
+/* ── Tab title flash ── */
+function flashTitle(count) {
+  clearInterval(titleFlashTimer);
+  let on = true;
+  titleFlashTimer = setInterval(() => {
+    document.title = on ? `🔔 ${count} NOVO(S) PEDIDO(S)` : PAGE_TITLE;
+    on = !on;
+  }, 900);
+}
+function stopFlash() {
+  clearInterval(titleFlashTimer);
+  document.title = PAGE_TITLE;
+}
+
+/* ── Alert hub: called when new orders detected ── */
+function alertNewOrders(count) {
+  playChime();
+  sendBrowserNotification(count);
+  flashTitle(count);
+}
+function clearNewAlerts() {
+  stopFlash();
 }
 
 async function loadOrders() {
@@ -129,8 +199,8 @@ async function loadOrders() {
     const newOrders = orders.filter(o => o.status === 'new').length;
     const badge = document.getElementById('new-count');
     if (newOrders > 0) { badge.textContent = newOrders; badge.style.display = ''; }
-    else badge.style.display = 'none';
-    if (newOrders > lastNewCount && lastNewCount >= 0) beep();
+    else { badge.style.display = 'none'; clearNewAlerts(); }
+    if (newOrders > lastNewCount && lastNewCount >= 0) alertNewOrders(newOrders);
     lastNewCount = newOrders;
 
     const tbody = document.getElementById('orders-tbody');
@@ -261,6 +331,7 @@ document.getElementById('auto-refresh').addEventListener('change', function() {
 
 loadOrders();
 startRefresh();
+updateNotifyBtn();
 if (directOrderId) setTimeout(() => viewOrder(parseInt(directOrderId)), 700);
 </script>
 </body>
