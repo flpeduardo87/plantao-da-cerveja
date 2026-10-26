@@ -5,16 +5,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Categorias · Plantão Admin</title>
-<link rel="icon" href="assets/favicon.png">
+<link rel="icon" href="../favicon-icone.webp">
 <link rel="stylesheet" href="assets/style.css">
-<script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js" integrity="sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb" crossorigin="anonymous"></script>
+<script src="assets/lucide.min.js"></script>
 </head>
 <body>
 <div id="toast"></div>
 
 <!-- Modal: criar/editar categoria -->
 <div class="modal-backdrop" id="modal-cat">
-  <div class="modal" style="max-width:440px">
+  <div class="modal">
     <div class="modal-header">
       <h3 id="modal-cat-title">Nova categoria</h3>
       <button class="btn-icon borderless" onclick="closeModal('modal-cat')"><i data-lucide="x" width="16" height="16"></i></button>
@@ -52,7 +52,7 @@
 
 <!-- Modal: confirmar exclusão -->
 <div class="modal-backdrop" id="modal-delete">
-  <div class="modal" style="max-width:380px">
+  <div class="modal">
     <div class="modal-header"><h3>Excluir categoria?</h3></div>
     <div class="modal-body">
       <p style="font-size:13.5px;color:var(--fg-2)">Os produtos desta categoria não serão excluídos, mas ficarão sem categoria. Esta ação não pode ser desfeita.</p>
@@ -67,7 +67,7 @@
 <div class="layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <img src="assets/logo.jpg" alt="Plantão">
+      <img src="../favicon-icone.webp" alt="Plantão" style="border-radius:50%">
       <div><span>Plantão da Cerveja</span><small>Painel Admin</small></div>
     </div>
     <nav>
@@ -90,7 +90,7 @@
 
   <div class="main">
     <div class="topbar">
-      <button class="hamburger" id="hamburger"><i data-lucide="menu" width="20" height="20"></i></button>
+      <button class="hamburger" id="hamburger"><i data-lucide="menu" width="24" height="24"></i></button>
       <h1>Categorias</h1>
       <div class="topbar-right">
         <button class="store-status closed" id="store-status-btn" data-open="0"><span class="dot"></span>Carregando…</button>
