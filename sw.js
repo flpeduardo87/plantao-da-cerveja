@@ -1,4 +1,4 @@
-const CACHE = 'plantao-v2';
+const CACHE = 'plantao-v3';
 const PRECACHE = [
   '/app.html',
   '/manifest.json',
