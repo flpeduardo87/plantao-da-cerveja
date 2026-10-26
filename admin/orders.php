@@ -132,9 +132,11 @@ function playChime() {
 
 /* ── Browser Notification ── */
 function askNotifyPermission() {
-  if (!('Notification' in window)) return;
+  // Unlock + test audio immediately (requires user gesture)
+  playChime();
+  if (!('Notification' in window)) { toast('Som ativado! (notificações não suportadas neste browser)'); return; }
   Notification.requestPermission().then(p => {
-    if (p === 'granted') toast('Alertas ativados!');
+    toast(p === 'granted' ? '🔔 Alertas e som ativados!' : '🔔 Som ativado! (notificações bloqueadas)');
     updateNotifyBtn();
   });
 }
