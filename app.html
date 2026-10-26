@@ -232,11 +232,21 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   flex:1;overflow-y:scroll;background:var(--bg-2);
   padding-bottom:calc(70px + env(safe-area-inset-bottom,0px));
 }
-.cat-strip{background:var(--bg);padding:12px 0;position:sticky;top:0;z-index:20;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.cat-strip{
+  --cat-bg:var(--bg);
+  background:var(--bg);padding:12px 0;position:sticky;top:0;z-index:20;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.cat-strip::after{
+  content:'';position:absolute;right:0;top:0;bottom:0;width:52px;
+  background:linear-gradient(to right,transparent,var(--cat-bg));
+  pointer-events:none;z-index:1;
+}
 .cat-scroll{
-  display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;
+  display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;cursor:grab;
   padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));
 }
+.cat-scroll.dragging{cursor:grabbing;user-select:none;}
 .cat-scroll::-webkit-scrollbar{display:none;}
 .cat-pill{
   display:flex;flex-direction:column;align-items:center;gap:3px;
@@ -715,7 +725,8 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
   .mob-logo{display:none!important;}
 
   /* Category strip — amber bar, text-only pills */
-  .cat-strip{background:var(--amber);padding:0;margin-bottom:12px;}
+  .cat-strip{--cat-bg:var(--amber);background:var(--amber);padding:0;margin-bottom:12px;}
+  .cat-strip::after{background:linear-gradient(to right,transparent,var(--amber));}
   .cat-scroll{padding:0 40px;gap:0;}
   .cat-pill{
     flex-direction:row;gap:0;padding:14px 18px;
@@ -1817,6 +1828,24 @@ async function finalizarPedido(){
 }
 
 lucide.createIcons();
+
+// Drag-to-scroll on category bar
+(function(){
+  const el = document.getElementById('cats');
+  if(!el) return;
+  let down=false, startX=0, scrollLeft=0;
+  el.addEventListener('mousedown', e=>{
+    down=true; el.classList.add('dragging');
+    startX=e.pageX-el.offsetLeft; scrollLeft=el.scrollLeft;
+  });
+  el.addEventListener('mouseleave', ()=>{ down=false; el.classList.remove('dragging'); });
+  el.addEventListener('mouseup', ()=>{ down=false; el.classList.remove('dragging'); });
+  el.addEventListener('mousemove', e=>{
+    if(!down) return;
+    e.preventDefault();
+    el.scrollLeft = scrollLeft-(e.pageX-el.offsetLeft-startX);
+  });
+})();
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(()=>{});
