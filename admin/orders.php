@@ -32,7 +32,7 @@
 <div class="layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <img src="assets/logo.jpg" alt="Plantão">
+      <img src="../logo-plantao-da-cerveja.jpg" alt="Plantão">
       <div><span>Plantão da Cerveja</span><small>Painel Admin</small></div>
     </div>
     <nav>

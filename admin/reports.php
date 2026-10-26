@@ -18,7 +18,7 @@
 <div class="layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <img src="assets/logo.jpg" alt="Plantão">
+      <img src="../logo-plantao-da-cerveja.jpg" alt="Plantão">
       <div><span>Plantão da Cerveja</span><small>Painel Admin</small></div>
     </div>
     <nav>
@@ -243,7 +243,6 @@ function renderReport(orders) {
   orders.forEach(o => { const h = new Date(o.created_at).getHours(); hourCounts[h]++; });
   const maxH = Math.max(...hourCounts, 1);
   const peakWrap = document.getElementById('peak-chart');
-  const barColor = (n) => n === Math.max(...hourCounts) ? '#FCDA24' : '#E2E8F0';
   peakWrap.innerHTML = hourCounts.map((n,h) => `
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end">
       <div title="${h}h: ${n} pedido(s)" style="width:100%;border-radius:3px 3px 0 0;min-height:2px;height:${Math.round(n/maxH*64)}px;background:${n===Math.max(...hourCounts)?'#FCDA24':'#CBD5E1'};transition:height .4s"></div>

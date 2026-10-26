@@ -39,7 +39,7 @@ input:focus{border-color:var(--amber);background:#fff}
 <div class="login-wrap">
   <div class="login-card">
     <div class="login-logo">
-      <img src="assets/logo.jpg" alt="Plantão da Cerveja">
+      <img src="../logo-plantao-da-cerveja.jpg" alt="Plantão da Cerveja">
       <div>
         <h1>Plantão da Cerveja</h1>
         <p>Painel Administrativo</p>
