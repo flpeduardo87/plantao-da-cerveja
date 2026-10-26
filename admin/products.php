@@ -187,7 +187,7 @@ async function loadProducts() {
       <div style="margin-bottom:20px">
         <h3 style="font-size:11px;font-weight:700;color:var(--fg-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">${cat}</h3>
         <div class="card"><div class="tbl-wrap"><table>
-          <thead><tr><th style="width:52px">Foto</th><th>Nome</th><th>Preço</th><th>Estoque</th><th>Status</th><th></th></tr></thead>
+          <thead><tr><th style="width:52px">Foto</th><th>Nome</th><th style="width:110px">Preço</th><th style="width:90px">Estoque</th><th style="width:90px">Status</th><th style="width:130px"></th></tr></thead>
           <tbody>${prods.map(p => `
             <tr>
               <td>${p.image_url
