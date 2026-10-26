@@ -1,5 +1,5 @@
 <?php
-session_name('plantao_admin');
+ini_set('session.cookie_path', '/');
 session_start();
 session_destroy();
 header('Location: index.php');

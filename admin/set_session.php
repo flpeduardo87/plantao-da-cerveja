@@ -1,5 +1,6 @@
 <?php
-session_name('plantao_admin');
+ini_set('session.cookie_path', '/');
+ini_set('session.cookie_httponly', '1');
 session_start();
 header('Content-Type: application/json');
 
@@ -8,7 +9,7 @@ $token = trim($input['token'] ?? '');
 $parts = explode('.', $token);
 
 if (count($parts) === 3 && strlen($token) > 60) {
-    $_SESSION['logged'] = true;
+    $_SESSION['plantao_logged'] = true;
     echo '{"ok":true}';
 } else {
     http_response_code(400);
