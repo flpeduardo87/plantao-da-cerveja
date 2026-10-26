@@ -5,9 +5,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Configurações · Plantão Admin</title>
-<link rel="icon" href="assets/favicon.png">
+<link rel="icon" href="../favicon-icone.webp">
 <link rel="stylesheet" href="assets/style.css">
-<script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js" integrity="sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb" crossorigin="anonymous"></script>
+<script src="assets/lucide.min.js"></script>
 </head>
 <body>
 <div id="toast"></div>
@@ -15,7 +15,7 @@
 <div class="layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <img src="assets/logo.jpg" alt="Plantão">
+      <img src="../favicon-icone.webp" alt="Plantão" style="border-radius:50%">
       <div><span>Plantão da Cerveja</span><small>Painel Admin</small></div>
     </div>
     <nav>
@@ -38,7 +38,7 @@
 
   <div class="main">
     <div class="topbar">
-      <button class="hamburger" id="hamburger"><i data-lucide="menu" width="20" height="20"></i></button>
+      <button class="hamburger" id="hamburger"><i data-lucide="menu" width="24" height="24"></i></button>
       <h1>Configurações</h1>
       <div class="topbar-right">
         <button class="store-status closed" id="store-status-btn" data-open="0"><span class="dot"></span>Carregando…</button>
@@ -80,7 +80,7 @@
                 <div class="toggle-wrap">
                   <label class="toggle"><input type="checkbox" id="s-open"><span class="toggle-slider"></span></label>
                   <div>
-                    <div style="font-size:13px;font-weight:600">Loja aberta</div>
+                    <div style="font-size:13px;font-weight:600">Loja aberta agora</div>
                     <div style="font-size:11.5px;color:var(--fg-3)">Clientes conseguem fazer pedidos quando ativo</div>
                   </div>
                 </div>
@@ -88,6 +88,23 @@
             </div>
             <button type="submit" class="btn btn-primary">Salvar configurações</button>
           </form>
+        </div>
+      </div>
+
+      <!-- Horário de funcionamento -->
+      <div class="card">
+        <div class="card-header">
+          <div class="ch-icon amber"><i data-lucide="clock" width="14" height="14"></i></div>
+          <h2>Horário de funcionamento</h2>
+        </div>
+        <div class="card-body">
+          <div style="font-size:12px;color:var(--fg-3);margin-bottom:16px">
+            Configure os dias e horários em que a loja aceita pedidos automaticamente.
+          </div>
+          <div id="hours-grid" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+            <!-- preenchido via JS -->
+          </div>
+          <button type="button" class="btn btn-primary" onclick="saveHours()">Salvar horários</button>
         </div>
       </div>
 
@@ -185,22 +202,87 @@
   </div>
 </div>
 
+<style>
+.hours-row{
+  display:grid;grid-template-columns:80px 1fr;align-items:center;gap:12px;
+  padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:#FAFAFA;
+  transition:background .15s
+}
+.hours-row.active{background:#fff}
+.hours-row-left{display:flex;align-items:center;gap:8px}
+.hours-day-label{font-size:13px;font-weight:600;color:var(--fg);min-width:36px}
+.hours-times{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hours-times input[type=time]{width:110px;padding:6px 10px;font-size:13px}
+.hours-times .sep{font-size:12px;color:var(--fg-3);font-weight:500}
+.hours-row.inactive .hours-times input{opacity:.35;pointer-events:none}
+@media(max-width:540px){
+  .hours-row{grid-template-columns:1fr;gap:8px}
+  .hours-times input[type=time]{width:100px}
+}
+</style>
+
 <script src="assets/app.js"></script>
 <script>
+const DAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const DAYS_DEFAULT = {
+  0:{open:false,start:'00:00',end:'23:59'},
+  1:{open:true, start:'09:00',end:'23:00'},
+  2:{open:true, start:'09:00',end:'23:00'},
+  3:{open:true, start:'09:00',end:'23:00'},
+  4:{open:true, start:'09:00',end:'23:00'},
+  5:{open:true, start:'09:00',end:'23:00'},
+  6:{open:true, start:'09:00',end:'23:00'},
+};
+
+function buildHoursGrid(hours) {
+  const grid = document.getElementById('hours-grid');
+  grid.innerHTML = '';
+  DAYS.forEach((day, i) => {
+    const d = (hours && hours[i]) ? hours[i] : DAYS_DEFAULT[i];
+    const row = document.createElement('div');
+    row.className = 'hours-row' + (d.open ? ' active' : ' inactive');
+    row.id = `hrow-${i}`;
+    row.innerHTML = `
+      <div class="hours-row-left">
+        <label class="toggle" title="${d.open ? 'Aberto' : 'Fechado'}">
+          <input type="checkbox" id="h-open-${i}" ${d.open ? 'checked' : ''} onchange="toggleDay(${i})">
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="hours-day-label">${day}</span>
+      </div>
+      <div class="hours-times">
+        <input type="time" id="h-start-${i}" value="${d.start || '09:00'}">
+        <span class="sep">até</span>
+        <input type="time" id="h-end-${i}" value="${d.end || '23:00'}">
+      </div>`;
+    grid.appendChild(row);
+  });
+}
+
+function toggleDay(i) {
+  const open = document.getElementById(`h-open-${i}`).checked;
+  const row = document.getElementById(`hrow-${i}`);
+  row.className = 'hours-row ' + (open ? 'active' : 'inactive');
+}
+
 async function loadSettings() {
   try {
     const data = await api('/settings');
-    document.getElementById('s-store-name').value = data.store_name || '';
-    document.getElementById('s-min-order').value = data.min_order || '';
+    document.getElementById('s-store-name').value   = data.store_name || '';
+    document.getElementById('s-min-order').value    = data.min_order || '';
     document.getElementById('s-delivery-fee').value = data.delivery_fee || '';
-    document.getElementById('s-time-min').value = data.delivery_time_min || '';
-    document.getElementById('s-time-max').value = data.delivery_time_max || '';
-    document.getElementById('s-open').checked = data.store_open === '1' || data.store_open === 1;
+    document.getElementById('s-time-min').value     = data.delivery_time_min || '';
+    document.getElementById('s-time-max').value     = data.delivery_time_max || '';
+    document.getElementById('s-open').checked       = data.store_open === '1' || data.store_open === 1;
     document.getElementById('s-stone-sandbox').checked = data.stone_sandbox === '1' || data.stone_sandbox === 1;
-    if (data.fonnte_token) document.getElementById('s-fonnte-token').placeholder = '(configurado)';
-    if (data.store_whatsapp) document.getElementById('s-store-whatsapp').value = data.store_whatsapp;
+    if (data.fonnte_token)    document.getElementById('s-fonnte-token').placeholder    = '(configurado)';
+    if (data.store_whatsapp)  document.getElementById('s-store-whatsapp').value        = data.store_whatsapp;
     if (data.stone_client_id) document.getElementById('s-stone-client-id').placeholder = '(configurado)';
-  } catch (e) { toast(e.message, 'error'); }
+    buildHoursGrid(data.store_hours ? (typeof data.store_hours === 'string' ? JSON.parse(data.store_hours) : data.store_hours) : null);
+  } catch (e) {
+    buildHoursGrid(null);
+    toast(e.message, 'error');
+  }
 }
 
 async function saveStore(e) {
@@ -208,16 +290,34 @@ async function saveStore(e) {
   const btn = e.submitter; btn.disabled = true; btn.textContent = 'Salvando…';
   try {
     await api('/settings', { method: 'PUT', body: JSON.stringify({
-      store_name: document.getElementById('s-store-name').value,
-      min_order: document.getElementById('s-min-order').value,
-      delivery_fee: document.getElementById('s-delivery-fee').value,
+      store_name:        document.getElementById('s-store-name').value,
+      min_order:         document.getElementById('s-min-order').value,
+      delivery_fee:      document.getElementById('s-delivery-fee').value,
       delivery_time_min: document.getElementById('s-time-min').value,
       delivery_time_max: document.getElementById('s-time-max').value,
-      store_open: document.getElementById('s-open').checked ? '1' : '0',
+      store_open:        document.getElementById('s-open').checked ? '1' : '0',
     }) });
     toast('Configurações salvas');
   } catch (e) { toast(e.message, 'error'); }
   finally { btn.disabled = false; btn.textContent = 'Salvar configurações'; }
+}
+
+async function saveHours() {
+  const btn = document.querySelector('[onclick="saveHours()"]');
+  btn.disabled = true; btn.textContent = 'Salvando…';
+  const hours = {};
+  DAYS.forEach((_, i) => {
+    hours[i] = {
+      open:  document.getElementById(`h-open-${i}`).checked,
+      start: document.getElementById(`h-start-${i}`).value,
+      end:   document.getElementById(`h-end-${i}`).value,
+    };
+  });
+  try {
+    await api('/settings', { method: 'PUT', body: JSON.stringify({ store_hours: JSON.stringify(hours) }) });
+    toast('Horários salvos');
+  } catch (e) { toast(e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Salvar horários'; }
 }
 
 async function saveSecrets(e) {
@@ -238,14 +338,14 @@ async function saveStone(e) {
   e.preventDefault();
   const btn = e.submitter; btn.disabled = true; btn.textContent = 'Salvando…';
   const body = { stone_sandbox: document.getElementById('s-stone-sandbox').checked ? '1' : '0' };
-  const cid = document.getElementById('s-stone-client-id').value;
+  const cid  = document.getElementById('s-stone-client-id').value;
   const csec = document.getElementById('s-stone-client-secret').value;
-  if (cid) body.stone_client_id = cid;
+  if (cid)  body.stone_client_id     = cid;
   if (csec) body.stone_client_secret = csec;
   try {
     await api('/settings/secrets', { method: 'PUT', body: JSON.stringify(body) });
     toast('Credenciais Stone salvas');
-    if (cid) { document.getElementById('s-stone-client-id').value = ''; document.getElementById('s-stone-client-id').placeholder = '(configurado)'; }
+    if (cid)  { document.getElementById('s-stone-client-id').value = ''; document.getElementById('s-stone-client-id').placeholder = '(configurado)'; }
     if (csec) document.getElementById('s-stone-client-secret').value = '';
   } catch (e) { toast(e.message, 'error'); }
   finally { btn.disabled = false; btn.textContent = 'Salvar Stone'; }
