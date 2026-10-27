@@ -1105,10 +1105,15 @@ let coData = {};
 let payMethod = null;
 
 function saveCart(){ try{ localStorage.setItem('plantao_cart', JSON.stringify(cart)); }catch{} }
-function loadCart(){ try{ const s=localStorage.getItem('plantao_cart'); if(s) cart=JSON.parse(s); }catch{} }
+function loadCart(){
+  try{
+    const s=localStorage.getItem('plantao_cart');
+    if(s) cart=JSON.parse(s).map(i=>({...i,price:parseFloat(i.price)||0,qty:parseInt(i.qty)||1})).filter(i=>i&&i.name&&(parseFloat(i.price)||0)>0);
+  }catch{}
+}
 loadCart();
 
-function fmt(n){ return n.toLocaleString('pt-BR',{minimumFractionDigits:2}); }
+function fmt(n){ const v=parseFloat(n); return isNaN(v)?'0,00':v.toLocaleString('pt-BR',{minimumFractionDigits:2}); }
 function show(id){ document.getElementById(id).classList.remove('hidden'); }
 function hide(id){ document.getElementById(id).classList.add('hidden'); }
 function showScreen(id){
@@ -1657,7 +1662,7 @@ function renderCoStep(){
         <div style="margin-top:6px">Cliente: <strong>${coData.nome||'—'}</strong></div>
         <table class="review-table" style="margin-top:10px">
           <tr><th>Item</th><th>Qtd</th><th>Total</th></tr>
-          ${cart.map(i=>`<tr><td>${i.name}</td><td>${i.qty}</td><td>R$ ${fmt(i.price*i.qty)}</td></tr>`).join('')}
+          ${cart.map(i=>`<tr><td>${esc(i.name)}</td><td>${i.qty}</td><td>R$ ${fmt(i.price*i.qty)}</td></tr>`).join('')}
         </table>
         <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:6px;border-top:1px solid var(--border);font-size:12px">
           <span style="color:var(--fg-2)">Subtotal</span><span>R$ ${fmt(total)}</span>
