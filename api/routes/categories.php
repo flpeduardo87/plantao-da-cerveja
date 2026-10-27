@@ -15,8 +15,18 @@ match ($method) {
             $row = $s->fetch();
             $row ? json_ok($row) : json_err('Not found', 404);
         } else {
-            $rows = $pdo->query('SELECT * FROM categories WHERE active = 1 ORDER BY sort_order, id')->fetchAll();
-            json_ok($rows);
+            $includeCount = !empty($_GET['include_count']);
+            if ($includeCount) {
+                $sql = 'SELECT c.*, COUNT(p.id) AS product_count
+                        FROM categories c
+                        LEFT JOIN products p ON p.category_id = c.id AND p.active = 1
+                        WHERE c.active = 1
+                        GROUP BY c.id
+                        ORDER BY c.sort_order, c.id';
+            } else {
+                $sql = 'SELECT * FROM categories WHERE active = 1 ORDER BY sort_order, id';
+            }
+            json_ok($pdo->query($sql)->fetchAll());
         }
     })(),
 

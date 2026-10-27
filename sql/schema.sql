@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS products (
   old_price    DECIMAL(10,2),
   discount_pct TINYINT        NOT NULL DEFAULT 0,
   image_url    VARCHAR(500),
+  stock        INT            NULL COMMENT 'NULL = ilimitado',
   active       TINYINT(1)     NOT NULL DEFAULT 1,
   featured     TINYINT(1)     NOT NULL DEFAULT 0,
   sort_order   INT            NOT NULL DEFAULT 0,

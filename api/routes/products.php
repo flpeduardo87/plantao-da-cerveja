@@ -60,7 +60,7 @@ match ($method) {
     'PUT', 'PATCH' => (function () use ($pdo, $id, $method) {
         if (!$id) json_err('ID required');
         $d = body();
-        $allowed = ['category_id','name','description','price','old_price','discount_pct','image_url','active','featured','sort_order'];
+        $allowed = ['category_id','name','description','price','old_price','discount_pct','image_url','active','featured','sort_order','stock'];
         $fields = [];
         $vals   = [];
         foreach ($allowed as $f) {

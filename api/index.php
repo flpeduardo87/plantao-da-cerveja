@@ -52,6 +52,7 @@ function body(): array {
 
 // ── Dispatch ─────────────────────────────────────────────────────────────────
 match ($route) {
+    'auth'       => require __DIR__ . '/routes/auth.php',
     'categories' => require __DIR__ . '/routes/categories.php',
     'products'   => require __DIR__ . '/routes/products.php',
     'orders'     => require __DIR__ . '/routes/orders.php',

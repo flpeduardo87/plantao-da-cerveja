@@ -183,7 +183,7 @@ match ($method) {
     })(),
 
     // ── Update status ─────────────────────────────────────────────────────────
-    'PATCH' => (function () use ($pdo, $id) {
+    'PUT', 'PATCH' => (function () use ($pdo, $id) {
         if (!$id) json_err('ID required');
         $d = body();
         $allowed = ['status','payment_status','notes','whatsapp_sent'];
