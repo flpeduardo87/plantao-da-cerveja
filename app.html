@@ -1292,8 +1292,9 @@ function setCat(id){
   } else {
     const sec = document.getElementById('sec-'+id);
     if(sec && feed){
-      // getBoundingClientRect is relative to viewport — works for any scroll state
-      const top = feed.scrollTop + sec.getBoundingClientRect().top - feed.getBoundingClientRect().top;
+      const strip = document.querySelector('.cat-strip');
+      const offset = strip ? strip.offsetHeight : 0;
+      const top = feed.scrollTop + sec.getBoundingClientRect().top - feed.getBoundingClientRect().top - offset;
       feed.scrollTo({top: Math.max(0, top), behavior:'smooth'});
     }
   }
