@@ -122,7 +122,7 @@
   </div>
 </div>
 
-<script src="assets/app.js"></script>
+<script src="assets/app.js?v=2"></script>
 <script>
 let lastNewCount = 0;
 let audioCtx;
