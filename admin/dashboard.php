@@ -14,6 +14,21 @@
 </head>
 <body>
 <div id="toast"></div>
+
+<!-- Modal: detalhes do pedido -->
+<div class="modal-backdrop" id="modal-order">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-order-title">Pedido</h3>
+      <button class="btn-icon borderless" onclick="closeModal('modal-order')"><i data-lucide="x" width="16" height="16"></i></button>
+    </div>
+    <div class="modal-body" id="modal-order-body"></div>
+    <div class="modal-footer" id="modal-order-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-order')">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <div class="layout">
 
   <aside class="sidebar" id="sidebar">
@@ -44,6 +59,7 @@
       <button class="hamburger" id="hamburger"><i data-lucide="menu" width="24" height="24"></i></button>
       <h1>Dashboard</h1>
       <div class="topbar-right">
+        <button id="btn-notify" class="btn btn-sm btn-ghost" onclick="askNotifyPermission()"><i data-lucide="bell-off" width="14" height="14"></i> Ativar alertas</button>
         <button class="store-status closed" id="store-status-btn" data-open="0">
           <span class="dot"></span>Carregando…
         </button>
@@ -111,6 +127,7 @@
 let lastNewCount = 0;
 let audioCtx;
 
+/* Simple chime for dashboard (app.js askNotifyPermission calls this as fallback) */
 function beep() {
   try {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -156,6 +173,7 @@ async function loadStats() {
 
     if (newOrders > lastNewCount && lastNewCount >= 0) {
       beep();
+      sendBrowserNotification(newOrders);
       toast(`${newOrders - lastNewCount} novo(s) pedido(s) aguardando`);
     }
     lastNewCount = newOrders;
@@ -174,7 +192,7 @@ async function loadStats() {
         <td style="color:var(--fg-2)">${fmtPayment(o.payment_method)}</td>
         <td>${fmtStatus(o.status)}</td>
         <td style="white-space:nowrap;font-size:12px;color:var(--fg-2)">${fmtDate(o.created_at)}</td>
-        <td><a href="pedidos?id=${o.id}" class="btn btn-ghost btn-sm">Detalhes</a></td>
+        <td><button class="btn btn-ghost btn-sm" onclick="viewOrder(${o.id})">Detalhes</button></td>
       </tr>
     `).join('');
     lucide.createIcons();
@@ -183,6 +201,7 @@ async function loadStats() {
 
 loadStats();
 setInterval(loadStats, 15000);
+updateNotifyBtn();
 </script>
 </body>
 </html>
