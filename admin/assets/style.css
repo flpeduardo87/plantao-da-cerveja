@@ -1,7 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#F1F5F9;color:#0F172A;font-size:14px}
+html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#F1F5F9;color:#0F172A;font-size:15px}
 :root{
   --amber:#FCDA24;--amber-dk:#C8B000;--amber-lt:#FEF9C3;--amber-bg:#FEFCE8;
   --green:#16A34A;--green-lt:#DCFCE7;
@@ -224,7 +222,7 @@ textarea{resize:vertical;min-height:80px}
   background:#fff;border-radius:14px;width:100%;max-width:640px;
   max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.15)
 }
-.modal-sm{max-width:400px}
+.modal-sm{max-width:520px}
 .modal-header{
   padding:18px 22px 14px;display:flex;align-items:center;gap:10px;
   border-bottom:1px solid var(--border)

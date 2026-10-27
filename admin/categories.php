@@ -101,7 +101,7 @@
       </div>
     </div>
 
-    <div class="page" style="max-width:860px">
+    <div class="page">
       <div class="card">
         <div class="tbl-wrap">
           <table>

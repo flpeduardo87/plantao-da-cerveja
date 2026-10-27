@@ -48,7 +48,7 @@
       </div>
     </div>
 
-    <div class="page" style="max-width:760px;display:flex;flex-direction:column;gap:20px">
+    <div class="page" style="display:flex;flex-direction:column;gap:20px">
 
       <!-- Informações da loja -->
       <div class="card">
