@@ -1,4 +1,4 @@
-const CACHE = 'plantao-v4';
+const CACHE = 'plantao-v5';
 const PRECACHE = [
   '/manifest.json',
   '/favicon-icone.webp',
