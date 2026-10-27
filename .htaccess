@@ -1,42 +1,62 @@
 Options -Indexes
 DirectoryIndex index.html index.php
-
-# Force HTTPS
 RewriteEngine On
+
+# ── Force HTTPS ────────────────────────────────────────────────────────────────
 RewriteCond %{HTTPS} off
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Security headers
-Header always set X-Frame-Options "SAMEORIGIN"
-Header always set X-Content-Type-Options "nosniff"
-Header always set Referrer-Policy "strict-origin-when-cross-origin"
-Header always set Permissions-Policy "geolocation=(self), camera=(), microphone=()"
-Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://api.plantaodacerveja.com.br; connect-src 'self' https://api.plantaodacerveja.com.br https://viacep.com.br; frame-ancestors 'none';"
+# ── Clean URLs: hide .html extension ──────────────────────────────────────────
+# /app → app.html
+RewriteRule ^app$ app.html [L]
 
-# Allow font files
+# /foo → foo.html (when foo.html exists and foo/ does not)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^([^/]+)$ $1.html [L]
+
+# ── Security headers ──────────────────────────────────────────────────────────
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(self), camera=(), microphone=()"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://api.plantaodacerveja.com.br https://plantaodacerveja.com.br; connect-src 'self' https://api.plantaodacerveja.com.br https://viacep.com.br; frame-ancestors 'none';"
+</IfModule>
+
+# ── Font files: allow cross-origin + correct MIME ─────────────────────────────
 <FilesMatch "\.(otf|ttf|woff|woff2|eot)$">
-  Header set Access-Control-Allow-Origin "*"
-  Require all granted
+    Header set Access-Control-Allow-Origin "*"
+    Require all granted
 </FilesMatch>
-
-# MIME types for fonts
-AddType font/otf .otf
-AddType font/ttf .ttf
-AddType font/woff .woff
+AddType font/otf   .otf
+AddType font/ttf   .ttf
+AddType font/woff  .woff
 AddType font/woff2 .woff2
 
-# Service Worker must never be cached by HTTP cache
+# ── Service Worker: never cache ────────────────────────────────────────────────
 <FilesMatch "^sw\.js$">
-  Header set Cache-Control "no-store, no-cache, must-revalidate"
+    Header set Cache-Control "no-store, no-cache, must-revalidate"
 </FilesMatch>
 
-# HTML and PHP pages must never be cached
+# ── HTML/PHP: never cache ──────────────────────────────────────────────────────
 <FilesMatch "\.(html|php)$">
-  Header set Cache-Control "no-store, no-cache, must-revalidate"
-  Header set Pragma "no-cache"
+    Header set Cache-Control "no-store, no-cache, must-revalidate"
+    Header set Pragma "no-cache"
 </FilesMatch>
 
-# Block access to sensitive files
+# ── Static assets: long cache ──────────────────────────────────────────────────
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/webp              "access plus 1 year"
+    ExpiresByType image/png               "access plus 1 year"
+    ExpiresByType image/jpeg              "access plus 1 year"
+    ExpiresByType text/css                "access plus 1 month"
+    ExpiresByType application/javascript  "access plus 1 month"
+</IfModule>
+
+# ── Block sensitive files ──────────────────────────────────────────────────────
 <FilesMatch "(local\.php|\.env|\.git)">
-  Require all denied
+    Require all denied
 </FilesMatch>

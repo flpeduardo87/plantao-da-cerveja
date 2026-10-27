@@ -1,10 +1,20 @@
 Options -Indexes
 DirectoryIndex index.php
+RewriteEngine On
 
-<IfModule mod_autoindex.c>
-  Options -Indexes
+# ── Clean URLs: hide .php extension ───────────────────────────────────────────
+# /admin/orders → orders.php  (only when the .php file exists)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^([^/]+)$ $1.php [L]
+
+# ── Security ───────────────────────────────────────────────────────────────────
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
 </IfModule>
 
 <FilesMatch "\.php$">
-  Allow from all
+    Allow from all
 </FilesMatch>
