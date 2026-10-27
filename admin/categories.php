@@ -55,7 +55,7 @@
 
 <!-- Modal: confirmar exclusão -->
 <div class="modal-backdrop" id="modal-delete">
-  <div class="modal">
+  <div class="modal modal-sm">
     <div class="modal-header"><h3>Excluir categoria?</h3></div>
     <div class="modal-body">
       <p style="font-size:13.5px;color:var(--fg-2)">Os produtos desta categoria não serão excluídos, mas ficarão sem categoria. Esta ação não pode ser desfeita.</p>

@@ -221,9 +221,10 @@ textarea{resize:vertical;min-height:80px}
 }
 .modal-backdrop.open{display:flex}
 .modal{
-  background:#fff;border-radius:14px;width:100%;max-width:560px;
+  background:#fff;border-radius:14px;width:100%;max-width:640px;
   max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.15)
 }
+.modal-sm{max-width:400px}
 .modal-header{
   padding:18px 22px 14px;display:flex;align-items:center;gap:10px;
   border-bottom:1px solid var(--border)
