@@ -80,7 +80,7 @@
 
 <!-- Modal: confirmar exclusão -->
 <div class="modal-backdrop" id="modal-delete">
-  <div class="modal" style="max-width:380px">
+  <div class="modal">
     <div class="modal-header"><h3>Excluir produto?</h3></div>
     <div class="modal-body"><p style="font-size:13.5px;color:var(--fg-2)">Esta ação não pode ser desfeita. O produto será removido permanentemente.</p></div>
     <div class="modal-footer">

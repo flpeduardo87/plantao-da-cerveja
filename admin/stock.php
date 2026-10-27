@@ -52,7 +52,7 @@
 
 <!-- Modal: entrada de estoque -->
 <div class="modal-backdrop" id="modal-entry">
-  <div class="modal" style="max-width:400px">
+  <div class="modal">
     <div class="modal-header">
       <h3>Entrada de estoque</h3>
       <button class="btn-icon borderless" onclick="closeModal('modal-entry')"><i data-lucide="x" width="16" height="16"></i></button>
@@ -83,7 +83,7 @@
 
 <!-- Modal: zerar estoque -->
 <div class="modal-backdrop" id="modal-zero">
-  <div class="modal" style="max-width:380px">
+  <div class="modal">
     <div class="modal-header"><h3>Zerar estoque?</h3></div>
     <div class="modal-body">
       <p style="font-size:13.5px;color:var(--fg-2)">O estoque de <strong id="zero-product-name"></strong> será zerado. O produto ficará como "esgotado".</p>
