@@ -83,7 +83,7 @@
 
 <!-- Modal: confirmar exclusão -->
 <div class="modal-backdrop" id="modal-delete">
-  <div class="modal" style="max-width:380px">
+  <div class="modal">
     <div class="modal-header"><h3>Excluir produto?</h3></div>
     <div class="modal-body"><p style="font-size:13.5px;color:var(--fg-2)">Esta ação não pode ser desfeita. O produto será removido permanentemente.</p></div>
     <div class="modal-footer">
@@ -96,7 +96,7 @@
 <div class="layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <img src="../favicon-icone.webp" alt="Plantão">
+<img src="../favicon-icone.webp" alt="Plantão" style="border-radius:50%">
       <div><span>Plantão da Cerveja</span><small>Painel Admin</small></div>
     </div>
     <nav>
@@ -106,6 +106,7 @@
       <div class="nav-section">Catálogo</div>
       <a class="nav-link active" href="products.php"><i data-lucide="box" width="16" height="16"></i> Produtos</a>
       <a class="nav-link" href="categories.php"><i data-lucide="tag" width="16" height="16"></i> Categorias</a>
+      <a class="nav-link" href="stock.php"><i data-lucide="warehouse" width="16" height="16"></i> Estoque</a>
       <div class="nav-section">Análises</div>
       <a class="nav-link" href="reports.php"><i data-lucide="bar-chart-2" width="16" height="16"></i> Relatórios</a>
       <div class="nav-section">Sistema</div>
