@@ -2,8 +2,16 @@ Options -Indexes
 DirectoryIndex index.php
 RewriteEngine On
 
-# ── Clean URLs: hide .php extension ───────────────────────────────────────────
-# /admin/orders → orders.php  (only when the .php file exists)
+# ── Clean URLs (PT-BR slugs → PHP files) ──────────────────────────────────────
+RewriteRule ^painel$        dashboard.php   [L]
+RewriteRule ^pedidos$       orders.php      [L]
+RewriteRule ^produtos$      products.php    [L]
+RewriteRule ^categorias$    categories.php  [L]
+RewriteRule ^estoque$       stock.php       [L]
+RewriteRule ^relatorios$    reports.php     [L]
+RewriteRule ^configuracoes$ settings.php    [L]
+
+# ── Fallback: hide .php for any other file ─────────────────────────────────────
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}.php -f

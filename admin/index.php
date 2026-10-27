@@ -81,7 +81,7 @@ async function login() {
     localStorage.setItem('plantao_token', data.token);
     localStorage.setItem('plantao_user',  JSON.stringify(data.user));
     document.cookie = 'plantao_auth=1; path=/admin/; SameSite=Strict; max-age=86400';
-    window.location.href = 'dashboard.php';
+    window.location.href = 'painel';
   } catch (e) {
     err.textContent = e.message;
     err.style.display = 'block';

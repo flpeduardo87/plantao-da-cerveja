@@ -101,16 +101,16 @@
     </div>
     <nav>
       <div class="nav-section">Principal</div>
-      <a class="nav-link" href="dashboard.php"><i data-lucide="layout-dashboard" width="16" height="16"></i> Dashboard</a>
-      <a class="nav-link" href="orders.php"><i data-lucide="package" width="16" height="16"></i> Pedidos <span class="badge" id="new-count" style="display:none">0</span></a>
+      <a class="nav-link" href="painel"><i data-lucide="layout-dashboard" width="16" height="16"></i> Dashboard</a>
+      <a class="nav-link" href="pedidos"><i data-lucide="package" width="16" height="16"></i> Pedidos <span class="badge" id="new-count" style="display:none">0</span></a>
       <div class="nav-section">Catálogo</div>
-      <a class="nav-link active" href="products.php"><i data-lucide="box" width="16" height="16"></i> Produtos</a>
-      <a class="nav-link" href="categories.php"><i data-lucide="tag" width="16" height="16"></i> Categorias</a>
-      <a class="nav-link" href="stock.php"><i data-lucide="warehouse" width="16" height="16"></i> Estoque</a>
+      <a class="nav-link active" href="produtos"><i data-lucide="box" width="16" height="16"></i> Produtos</a>
+      <a class="nav-link" href="categorias"><i data-lucide="tag" width="16" height="16"></i> Categorias</a>
+      <a class="nav-link" href="estoque"><i data-lucide="warehouse" width="16" height="16"></i> Estoque</a>
       <div class="nav-section">Análises</div>
-      <a class="nav-link" href="reports.php"><i data-lucide="bar-chart-2" width="16" height="16"></i> Relatórios</a>
+      <a class="nav-link" href="relatorios"><i data-lucide="bar-chart-2" width="16" height="16"></i> Relatórios</a>
       <div class="nav-section">Sistema</div>
-      <a class="nav-link" href="settings.php"><i data-lucide="settings" width="16" height="16"></i> Configurações</a>
+      <a class="nav-link" href="configuracoes"><i data-lucide="settings" width="16" height="16"></i> Configurações</a>
     </nav>
     <div class="sidebar-footer">
       <button class="btn-logout" data-logout><i data-lucide="log-out" width="14" height="14"></i> Sair</button>
