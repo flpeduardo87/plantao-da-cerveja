@@ -5,15 +5,9 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-# Route everything to index.php
+# Route everything to index.php (CORS is handled dynamically in index.php)
 RewriteRule ^(.*)$ index.php [QSA,L]
 
-# CORS headers
-Header always set Access-Control-Allow-Origin "https://plantaodacerveja.com.br"
-Header always set Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
-Header always set Access-Control-Allow-Credentials "true"
-
-# Handle preflight
+# Handle preflight OPTIONS before rewrite conditions above apply
 RewriteCond %{REQUEST_METHOD} OPTIONS
 RewriteRule ^(.*)$ index.php [QSA,L]
