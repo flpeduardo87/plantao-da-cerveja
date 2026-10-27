@@ -7,6 +7,9 @@
 <title>Dashboard · Plantão Admin</title>
 <link rel="icon" href="../favicon-icone.webp">
 <link rel="stylesheet" href="assets/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <script src="assets/lucide.min.js"></script>
 </head>
 <body>
@@ -15,7 +18,7 @@
 
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <img src="../favicon-icone.webp" alt="Plantão" style="border-radius:50%">
+<img src="../favicon-icone.webp" alt="Plantão" style="border-radius:50%">
       <div><span>Plantão da Cerveja</span><small>Painel Admin</small></div>
     </div>
     <nav>

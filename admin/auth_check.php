@@ -1,7 +1,6 @@
 <?php
-session_name('plantao_admin');
-session_start();
-if (empty($_SESSION['logged'])) {
-    header('Location: index.php');
-    exit;
-}
+// JS cookie set on login (no PHP session dependency)
+if (($_COOKIE['plantao_auth'] ?? '') === '1') return;
+
+header('Location: index.php');
+exit;

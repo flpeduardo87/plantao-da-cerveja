@@ -7,6 +7,9 @@
 <title>Categorias · Plantão Admin</title>
 <link rel="icon" href="../favicon-icone.webp">
 <link rel="stylesheet" href="assets/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <script src="assets/lucide.min.js"></script>
 </head>
 <body>
@@ -67,7 +70,7 @@
 <div class="layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <img src="../favicon-icone.webp" alt="Plantão" style="border-radius:50%">
+<img src="../favicon-icone.webp" alt="Plantão" style="border-radius:50%">
       <div><span>Plantão da Cerveja</span><small>Painel Admin</small></div>
     </div>
     <nav>
@@ -121,6 +124,7 @@
 <script src="assets/app.js"></script>
 <script>
 let deleteId = null;
+let catsCache = [];
 
 function autoSlug() {
   const nameEl = document.getElementById('c-name');
@@ -141,6 +145,7 @@ async function loadCats() {
   try {
     const res = await api('/categories?include_count=1');
     const cats = Array.isArray(res) ? res : (res.data || []);
+    catsCache = cats;
     if (!cats.length) {
       tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><i data-lucide="inbox" width="28" height="28"></i><p>Nenhuma categoria cadastrada</p></div></td></tr>';
       lucide.createIcons(); return;
@@ -172,17 +177,21 @@ function openNew() {
 }
 
 async function editCat(id) {
-  openModal('modal-cat');
-  document.getElementById('modal-cat-title').textContent = 'Editar categoria';
+  let c = catsCache.find(x => x.id == id);
+  if (!c) {
+    try {
+      const res = await api(`/categories/${id}`);
+      c = res.data || res;
+    } catch (e) { toast(e.message, 'error'); return; }
+  }
+  document.getElementById('c-id').value = c.id;
+  document.getElementById('c-name').value = c.name;
+  document.getElementById('c-slug').value = c.slug;
+  document.getElementById('c-sort').value = c.sort_order ?? 0;
+  document.getElementById('c-active').checked = c.active == 1;
   document.getElementById('c-slug').dataset.manual = '1';
-  try {
-    const c = await api(`/categories/${id}`);
-    document.getElementById('c-id').value = c.id;
-    document.getElementById('c-name').value = c.name;
-    document.getElementById('c-slug').value = c.slug;
-    document.getElementById('c-sort').value = c.sort_order ?? 0;
-    document.getElementById('c-active').checked = c.active == 1;
-  } catch (e) { toast(e.message, 'error'); closeModal('modal-cat'); }
+  document.getElementById('modal-cat-title').textContent = 'Editar categoria';
+  openModal('modal-cat');
 }
 
 async function saveCat(e) {

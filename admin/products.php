@@ -7,6 +7,9 @@
 <title>Produtos · Plantão Admin</title>
 <link rel="icon" href="../favicon-icone.webp">
 <link rel="stylesheet" href="assets/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <script src="assets/lucide.min.js"></script>
 </head>
 <body>
@@ -93,7 +96,7 @@
 <div class="layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <img src="../favicon-icone.webp" alt="Plantão" style="border-radius:50%">
+<img src="../favicon-icone.webp" alt="Plantão" style="border-radius:50%">
       <div><span>Plantão da Cerveja</span><small>Painel Admin</small></div>
     </div>
     <nav>
@@ -167,8 +170,7 @@ function setCatFilter(slug, btn) {
 async function loadProducts() {
   const qs = catFilter ? `?category=${catFilter}` : '';
   const list = document.getElementById('products-list');
-  list.innerHTML = '<div class="empty"><i data-lucide="loader-2" width="28" height="28" class="spin"></i><p>Carregando…</p></div>';
-  lucide.createIcons();
+  list.innerHTML = '<p style="padding:24px;color:var(--fg-3)">Carregando…</p>';
   try {
     const res = await api(`/products${qs}`);
     const products = Array.isArray(res) ? res : (res.data || []);
@@ -186,7 +188,7 @@ async function loadProducts() {
       <div style="margin-bottom:20px">
         <h3 style="font-size:11px;font-weight:700;color:var(--fg-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">${cat}</h3>
         <div class="card"><div class="tbl-wrap"><table>
-          <thead><tr><th style="width:52px">Foto</th><th>Nome</th><th>Preço</th><th>Estoque</th><th>Status</th><th></th></tr></thead>
+          <thead><tr><th style="width:52px">Foto</th><th>Nome</th><th style="width:110px">Preço</th><th style="width:90px">Estoque</th><th style="width:90px">Status</th><th style="width:130px"></th></tr></thead>
           <tbody>${prods.map(p => `
             <tr>
               <td>${p.image_url

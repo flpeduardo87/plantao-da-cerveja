@@ -25,6 +25,17 @@ AddType font/ttf .ttf
 AddType font/woff .woff
 AddType font/woff2 .woff2
 
+# Service Worker must never be cached by HTTP cache
+<FilesMatch "^sw\.js$">
+  Header set Cache-Control "no-store, no-cache, must-revalidate"
+</FilesMatch>
+
+# HTML and PHP pages must never be cached
+<FilesMatch "\.(html|php)$">
+  Header set Cache-Control "no-store, no-cache, must-revalidate"
+  Header set Pragma "no-cache"
+</FilesMatch>
+
 # Block access to sensitive files
 <FilesMatch "(local\.php|\.env|\.git)">
   Require all denied
