@@ -246,7 +246,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .notes{margin-top:9px;font-size:12px;color:#555;background:#fff8f0;border:1px solid #ffe4cc;border-radius:8px;padding:8px 12px;text-align:left}
 @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style></head><body>
-<div class="hd"><div class="logo">🍺 PLANTÃO DA CERVEJA</div><div class="sub">24 horas · Delivery</div></div>
+<div class="hd"><div class="logo">🍺 PLANTÃO DA CERVEJA</div><div class="sub">Delivery de Bebidas</div></div>
 <div class="order-badge"><div class="ob-label">Pedido</div><div class="ob-num">#${o.order_number}</div><div class="ob-time">${fmtDate(o.created_at)}</div></div>
 <div class="sec"><div class="sec-title">Cliente</div>
   <div class="info-row"><strong>${o.customer_name}</strong></div>

@@ -61,7 +61,7 @@
             <div class="form-grid" style="margin-bottom:14px">
               <div class="field form-full">
                 <label>Nome da loja</label>
-                <input type="text" id="s-store-name" placeholder="Plantão da Cerveja 24h">
+                <input type="text" id="s-store-name" placeholder="Plantão da Cerveja">
               </div>
               <div class="field">
                 <label>Pedido mínimo (R$)</label>
