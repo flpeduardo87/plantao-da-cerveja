@@ -9,6 +9,33 @@ $pdo = db();
 match ($method) {
     // ── List / Single ────────────────────────────────────────────────────────
     'GET' => (function () use ($pdo, $id) {
+        // Public tracking by order_number + phone (no auth required)
+        if (!empty($_GET['order_number']) && !empty($_GET['phone'])) {
+            $phone = preg_replace('/\D/', '', $_GET['phone']);
+            $s = $pdo->prepare(
+                'SELECT o.order_number, o.status, o.created_at, o.total, o.payment_method, o.delivery_type,
+                        o.address_street, o.address_number,
+                        GROUP_CONCAT(
+                            JSON_OBJECT(
+                                "product_name", oi.product_name,
+                                "quantity", oi.quantity,
+                                "unit_price", oi.unit_price,
+                                "total", oi.total
+                            )
+                        ) AS items_json
+                 FROM orders o
+                 LEFT JOIN order_items oi ON oi.order_id = o.id
+                 WHERE o.order_number = ? AND o.customer_phone = ?
+                 GROUP BY o.id'
+            );
+            $s->execute([trim($_GET['order_number']), $phone]);
+            $row = $s->fetch();
+            if (!$row) json_err('Pedido não encontrado', 404);
+            $row['items'] = $row['items_json'] ? json_decode('[' . $row['items_json'] . ']', true) : [];
+            unset($row['items_json']);
+            json_ok($row);
+        }
+
         if ($id) {
             $s = $pdo->prepare(
                 'SELECT o.*, GROUP_CONCAT(

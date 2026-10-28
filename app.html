@@ -594,6 +594,51 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 .success-icon{margin-bottom:12px;display:flex;justify-content:center;}
 .success-title{font-size:22px;font-weight:600;margin-bottom:8px;}
 .success-sub{font-size:14px;color:var(--fg-2);line-height:1.5;}
+
+/* ── ORDER TRACKING ── */
+.track-screen{padding:4px 0 8px;}
+.track-header{text-align:center;margin-bottom:20px;}
+.track-icon{
+  width:72px;height:72px;border-radius:50%;background:var(--amber);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 12px;
+}
+.track-title{font-size:20px;font-weight:700;margin-bottom:4px;}
+.track-order-num{font-size:13px;color:var(--fg-3);font-weight:500;}
+.track-status-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:600;padding:5px 14px;
+  border-radius:999px;margin-top:8px;
+  background:var(--amber-lt);color:#7A6300;
+}
+.track-status-badge.delivered{background:var(--green-lt);color:var(--green-dk);}
+.track-status-badge.cancelled{background:var(--red-lt);color:var(--red);}
+.tl{display:flex;flex-direction:column;gap:0;margin-bottom:20px;}
+.tl-step{display:flex;gap:12px;align-items:flex-start;}
+.tl-left{display:flex;flex-direction:column;align-items:center;width:28px;flex-shrink:0;}
+.tl-dot{
+  width:28px;height:28px;border-radius:50%;border:2px solid var(--border);
+  background:var(--bg);display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .3s;
+}
+.tl-dot.done{background:var(--amber);border-color:var(--amber);}
+.tl-dot.active{background:var(--fg);border-color:var(--fg);animation:tlPulse 1.2s infinite;}
+.tl-line{width:2px;flex:1;min-height:24px;background:var(--border);margin:2px 0;}
+.tl-line.done{background:var(--amber);}
+.tl-info{padding:4px 0 20px;}
+.tl-label{font-size:14px;font-weight:600;color:var(--fg-3);}
+.tl-label.done,.tl-label.active{color:var(--fg);}
+.tl-sub{font-size:12px;color:var(--fg-3);margin-top:2px;}
+.track-eta{
+  background:var(--bg-2);border-radius:var(--r-sm);
+  padding:12px 14px;font-size:13px;color:var(--fg-2);
+  display:flex;align-items:center;gap:8px;margin-bottom:4px;
+}
+.track-poll-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--green);
+  animation:tlPulse 1.5s infinite;
+}
+@keyframes tlPulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.85);}}
 .success-info{
   background:var(--bg-2);border-radius:var(--r-sm);
   padding:14px;margin:16px 0;text-align:left;
@@ -1591,7 +1636,7 @@ function openCheckout(){
   show('checkout-overlay');
   renderCoStep();
 }
-function closeCheckout(){ hide('checkout-overlay'); }
+function closeCheckout(){ stopOrderTracking(); hide('checkout-overlay'); }
 
 function renderCoStep(){
   const el = document.getElementById('co-body');
@@ -1718,19 +1763,43 @@ function renderCoStep(){
         <button class="btn-primary btn-next" id="pay-btn" ${payMethod?'':'disabled'} onclick="finalizarPedido()">Confirmar Pedido <i data-lucide="check" width="16" height="16"></i></button>
       </div>`;
   } else if(coStep===4){
+    const lastOrder=(()=>{try{return JSON.parse(localStorage.getItem('plantao_last_order')||'{}')}catch{return {}}})();
     content=`
-      <div class="success-view">
-        <div class="success-icon"><i data-lucide="sparkles" width="64" height="64"></i></div>
-        <div class="success-title">Pedido Confirmado!</div>
-        <div class="success-sub">Seu pedido foi registrado com sucesso.<br>Em breve entraremos em contato pelo WhatsApp.</div>
-        <div class="success-info">
-          ${(()=>{try{const o=JSON.parse(localStorage.getItem('plantao_last_order')||'{}');return o.order_number?`<p>Nº do pedido: <strong>#${esc(o.order_number)}</strong></p>`:''}catch{return ''}})()}
+      <div class="track-screen" id="track-screen">
+        <div class="track-header">
+          <div class="track-icon"><i data-lucide="bike" width="32" height="32" style="color:#111"></i></div>
+          <div class="track-title">Pedido Confirmado!</div>
+          <div class="track-order-num">${lastOrder.order_number?`#${esc(lastOrder.order_number)}`:'&nbsp;'}</div>
+          <div class="track-status-badge" id="track-badge"><i data-lucide="clock" width="12" height="12"></i> Aguardando confirmação</div>
+        </div>
+        <div class="tl" id="track-tl">
+          <div class="tl-step" id="tl-0">
+            <div class="tl-left"><div class="tl-dot active" id="tl-dot-0"><i data-lucide="check" width="14" height="14" style="color:#fff"></i></div><div class="tl-line" id="tl-line-0"></div></div>
+            <div class="tl-info"><div class="tl-label active" id="tl-lbl-0">Pedido recebido</div><div class="tl-sub">Aguardando confirmação da loja</div></div>
+          </div>
+          <div class="tl-step" id="tl-1">
+            <div class="tl-left"><div class="tl-dot" id="tl-dot-1"><i data-lucide="package" width="14" height="14"></i></div><div class="tl-line" id="tl-line-1"></div></div>
+            <div class="tl-info"><div class="tl-label" id="tl-lbl-1">Em preparo</div><div class="tl-sub">A loja está separando seu pedido</div></div>
+          </div>
+          <div class="tl-step" id="tl-2">
+            <div class="tl-left"><div class="tl-dot" id="tl-dot-2"><i data-lucide="bike" width="14" height="14"></i></div><div class="tl-line" id="tl-line-2"></div></div>
+            <div class="tl-info"><div class="tl-label" id="tl-lbl-2">A caminho</div><div class="tl-sub">Entregador saiu para sua localização</div></div>
+          </div>
+          <div class="tl-step" id="tl-3">
+            <div class="tl-left"><div class="tl-dot" id="tl-dot-3"><i data-lucide="home" width="14" height="14"></i></div></div>
+            <div class="tl-info"><div class="tl-label" id="tl-lbl-3">Entregue</div><div class="tl-sub">Pedido entregue com sucesso!</div></div>
+          </div>
+        </div>
+        <div class="track-eta">
+          <div class="track-poll-dot"></div>
+          <span id="track-eta-txt">Previsão: ${chosenWhen==='imediata'?'15–20 minutos':'Conforme agendado'} · Atualizando ao vivo…</span>
+        </div>
+        <div class="success-info" style="margin-bottom:12px">
           <p>Nome: <strong>${esc(coData.nome||'—')}</strong></p>
           <p>Entrega: <strong>${esc(coData.rua||'—')}, ${esc(coData.num||'')}</strong></p>
           <p>Pagamento: <strong>${{pix:'PIX',maquininha:'Maquininha',credito:'Cartão de Crédito',dinheiro:'Dinheiro'}[payMethod]||'—'}</strong></p>
-          <p>Previsão: <strong>${chosenWhen==='imediata'?'15–20 minutos':'Conforme agendado'}</strong></p>
         </div>
-        <button class="btn-primary" onclick="closeCheckout();goHome();refreshFeed()">Voltar ao início</button>
+        <button class="btn-primary" onclick="closeCheckout();goHome();refreshFeed()">Continuar comprando</button>
       </div>`;
   }
   el.innerHTML = summaryHtml + stepperHtml + content;
@@ -1844,11 +1913,92 @@ async function finalizarPedido(){
     coStep=4;
     renderCoStep();
     document.getElementById('co-body').scrollTop=0;
+    startOrderTracking();
   } catch(e) {
     toast(e.message);
     btn.disabled=false;
     btn.innerHTML='Confirmar Pedido <i data-lucide="check" width="16" height="16"></i>';
     lucide.createIcons();
+  }
+}
+
+// ── ORDER TRACKING ──────────────────────────────────────────────────────────
+let _trackTimer = null;
+const STATUS_STEPS = {
+  'new':        0,
+  'confirmed':  1,
+  'preparing':  1,
+  'ready':      2,
+  'on_the_way': 2,
+  'delivered':  3,
+  'cancelled':  -1,
+};
+const STATUS_LABELS = {
+  'new':        'Aguardando confirmação',
+  'confirmed':  'Confirmado pela loja',
+  'preparing':  'Em preparo',
+  'ready':      'Pronto para entrega',
+  'on_the_way': 'A caminho!',
+  'delivered':  'Entregue 🎉',
+  'cancelled':  'Cancelado',
+};
+
+function startOrderTracking(){
+  lucide.createIcons();
+  stopOrderTracking();
+  pollOrderStatus();
+  _trackTimer = setInterval(pollOrderStatus, 30000);
+}
+
+function stopOrderTracking(){
+  if(_trackTimer){ clearInterval(_trackTimer); _trackTimer=null; }
+}
+
+async function pollOrderStatus(){
+  try {
+    const last = JSON.parse(localStorage.getItem('plantao_last_order')||'{}');
+    if(!last.order_number || !coData.tel) return;
+    const phone = coData.tel.replace(/\D/g,'');
+    const r = await fetch(`${API}/orders?order_number=${encodeURIComponent(last.order_number)}&phone=${encodeURIComponent(phone)}`);
+    if(!r.ok) return;
+    const j = await r.json();
+    if(!j.success || !j.order) return;
+    updateTrackUI(j.order.status || 'new');
+  } catch {}
+}
+
+function updateTrackUI(status){
+  const step = STATUS_STEPS[status] ?? 0;
+  const badge = document.getElementById('track-badge');
+  const etaTxt = document.getElementById('track-eta-txt');
+  if(!badge) return;
+
+  badge.textContent = STATUS_LABELS[status] || status;
+  badge.className = 'track-status-badge';
+  if(status === 'delivered') badge.classList.add('delivered');
+  if(status === 'cancelled') badge.classList.add('cancelled');
+
+  if(status === 'delivered'){
+    if(etaTxt) etaTxt.textContent = 'Pedido entregue com sucesso! Obrigado 🍺';
+    stopOrderTracking();
+  } else if(status === 'on_the_way'){
+    if(etaTxt) etaTxt.textContent = 'Entregador a caminho · Atualizando ao vivo…';
+  } else if(status === 'cancelled'){
+    if(etaTxt) etaTxt.textContent = 'Pedido cancelado. Dúvidas? Entre em contato.';
+    stopOrderTracking();
+  }
+
+  for(let i=0;i<=3;i++){
+    const dot  = document.getElementById(`tl-dot-${i}`);
+    const lbl  = document.getElementById(`tl-lbl-${i}`);
+    const line = document.getElementById(`tl-line-${i}`);
+    if(!dot) continue;
+    dot.classList.remove('done','active');
+    lbl?.classList.remove('done','active');
+    line?.classList.remove('done');
+    if(step < 0) continue;
+    if(i < step){ dot.classList.add('done'); lbl?.classList.add('done'); line?.classList.add('done'); }
+    else if(i === step){ dot.classList.add(status==='delivered'?'done':'active'); lbl?.classList.add('active'); if(line) line.classList.add(step>0?'done':''); }
   }
 }
 
