@@ -129,12 +129,12 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .btn-skip{background:none;border:none;color:rgba(255,255,255,.5);font:400 13px 'Inter',sans-serif;cursor:pointer;margin-top:6px;padding:6px 12px;}
 #loc-confirmed{display:none;flex-direction:column;align-items:center;gap:10px;}
 .check-ring{
-  width:58px;height:58px;border-radius:50%;background:var(--green-lt);
-  display:flex;align-items:center;justify-content:center;color:var(--green-dk);
+  width:58px;height:58px;border-radius:50%;background:var(--amber);
+  display:flex;align-items:center;justify-content:center;color:#000;
 }
-.conf-title{font-size:17px;font-weight:600;}
-.conf-addr{font-size:13px;color:var(--fg-2);line-height:1.4;}
-.motoboys{font-size:13px;font-weight:500;color:var(--orange);}
+.conf-title{font-size:17px;font-weight:700;color:#fff;}
+.conf-addr{font-size:13px;color:rgba(255,255,255,.7);line-height:1.4;}
+.motoboys{font-size:13px;font-weight:500;color:var(--amber);}
 
 /* ── STORE HERO ── */
 .store-hero{position:relative;background:var(--bg);}
@@ -860,7 +860,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
       <div class="check-ring"><i data-lucide="check" width="26" height="26"></i></div>
       <div class="conf-title">Entregamos na sua região!</div>
       <div class="conf-addr" id="conf-addr">—</div>
-      <div class="motoboys"><i data-lucide="bike" width="14" height="14"></i> Entregamos na sua região!</div>
+      <div class="motoboys"><i data-lucide="bike" width="14" height="14"></i> Entrega rápida na sua região</div>
       <button class="btn-primary" style="margin-top:8px" onclick="enterStore()">Ver produtos →</button>
     </div>
   </div>
