@@ -484,7 +484,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 
 /* ── CHECKOUT MODAL ── */
 #checkout-overlay{
-  position:fixed;inset:0;z-index:91;background:rgba(0,0,0,.5);
+  position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);
   display:flex;align-items:flex-end;
   animation:fadeIn .2s ease;
 }
@@ -1673,7 +1673,7 @@ function openCheckout(){
   show('checkout-overlay');
   renderCoStep();
 }
-function closeCheckout(){ stopOrderTracking(); hide('checkout-overlay'); }
+function closeCheckout(){ stopOrderTracking(); hide('checkout-overlay'); updateTrackingBanner(); }
 
 function renderCoStep(){
   const el = document.getElementById('co-body');
@@ -2011,8 +2011,13 @@ function startOrderTracking(){
   lucide.createIcons();
   stopOrderTracking();
   updateTrackingBanner();
+  // Restore last known status instantly, then poll for fresh data
+  try{
+    const last = JSON.parse(localStorage.getItem('plantao_last_order')||'{}');
+    if(last.last_status) updateTrackUI(last.last_status);
+  }catch{}
   pollOrderStatus();
-  _trackTimer = setInterval(pollOrderStatus, 30000);
+  _trackTimer = setInterval(pollOrderStatus, 15000);
 }
 
 function stopOrderTracking(){
@@ -2029,7 +2034,10 @@ async function pollOrderStatus(){
     if(!r.ok) return;
     const j = await r.json();
     if(!j.success || !j.order) return;
-    updateTrackUI(j.order.status || 'new');
+    const status = j.order.status || 'new';
+    // Save last known status so modal can restore it when reopened
+    try{ const o=JSON.parse(localStorage.getItem('plantao_last_order')||'{}'); o.last_status=status; localStorage.setItem('plantao_last_order',JSON.stringify(o)); }catch{}
+    updateTrackUI(status);
   } catch {}
 }
 
