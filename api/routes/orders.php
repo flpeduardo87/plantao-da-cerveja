@@ -33,7 +33,7 @@ match ($method) {
             if (!$row) json_err('Pedido não encontrado', 404);
             $row['items'] = $row['items_json'] ? json_decode('[' . $row['items_json'] . ']', true) : [];
             unset($row['items_json']);
-            json_ok($row);
+            json_ok(['success' => true, 'order' => $row]);
         }
 
         if ($id) {
