@@ -67,6 +67,8 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .screen.slide-left{transform:translateX(-100%);}
 
 /* ── AGE GATE ── */
+.age-ok #s-age{display:none!important;}
+.age-ok.loc-ok #loc-overlay{display:none!important;}
 #s-age{
   background:#000000;align-items:center;justify-content:center;gap:20px;
   padding:max(32px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px))
@@ -802,6 +804,10 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
 </head>
 <body>
+<script>
+try{if(localStorage.getItem('age_ok')==='1')document.documentElement.classList.add('age-ok');
+if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('loc-ok');}catch{}
+</script>
 
 <!-- ═══ DESKTOP HEADER ═══ -->
 <header id="desktop-header">
@@ -1197,6 +1203,7 @@ function showConfirmed(addr){
   document.getElementById('conf-addr').textContent = addr;
 }
 async function enterStore(){
+  try { localStorage.setItem('loc_ok','1'); } catch {}
   hide('loc-overlay');
   document.getElementById('bnav').style.display='flex';
   if(window.innerWidth>=900) document.getElementById('desktop-header').classList.add('dh-shown');
@@ -1840,11 +1847,16 @@ async function finalizarPedido(){
 
 lucide.createIcons();
 
-// Skip age gate if already verified in a previous visit
+// Restore session: skip age gate and/or location overlay if already confirmed
 try {
-  if (localStorage.getItem('age_ok') === '1') {
-    const g = document.getElementById('s-age');
-    if (g) { g.classList.add('hidden'); show('loc-overlay'); }
+  const ageOk = localStorage.getItem('age_ok') === '1';
+  const locOk = localStorage.getItem('loc_ok') === '1';
+  if (ageOk && locOk) {
+    document.getElementById('s-age')?.classList.add('hidden');
+    enterStore();
+  } else if (ageOk) {
+    document.getElementById('s-age')?.classList.add('hidden');
+    show('loc-overlay');
   }
 } catch {}
 
