@@ -272,6 +272,8 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 }
 .sec-title{font-size:18px;font-weight:600;}
 .sec-more{font-size:12px;font-weight:500;color:var(--orange);cursor:pointer;}
+.offers-section{background:var(--amber-bg);}
+.offers-title{display:flex;align-items:center;gap:6px;color:var(--amber-dk);}
 .prod-row{
   display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;
   padding:2px max(16px,env(safe-area-inset-right,0px)) 14px max(16px,env(safe-area-inset-left,0px));
@@ -1164,10 +1166,12 @@ async function loadData(){
         old:p.old_price?parseFloat(p.old_price):null,
         disc:parseInt(p.discount_pct)||0,
         image_url:p.image_url||null,
+        featured:p.featured==1||p.featured===true,
       });
     });
     Object.keys(CATALOG).forEach(k=>{ if(!CATALOG[k].length) delete CATALOG[k]; });
     allProds = Object.values(CATALOG).flat();
+    buildOffersSection();
     if(!allProds.length) loadDemoData();
   } catch(e) {
     loadDemoData();
@@ -1298,10 +1302,11 @@ async function enterStore(){
       cats.forEach(c=>{catById[c.id]=c;CATALOG[c.slug]=[];SEC_LABELS[c.slug]=c.name;});
       prods.forEach(p=>{
         const cat=catById[p.category_id];
-        if(cat&&CATALOG[cat.slug]) CATALOG[cat.slug].push({id:p.id,name:p.name,price:parseFloat(p.price),old:p.old_price?parseFloat(p.old_price):null,disc:parseInt(p.discount_pct)||0,image_url:p.image_url||null});
+        if(cat&&CATALOG[cat.slug]) CATALOG[cat.slug].push({id:p.id,name:p.name,price:parseFloat(p.price),old:p.old_price?parseFloat(p.old_price):null,disc:parseInt(p.discount_pct)||0,image_url:p.image_url||null,featured:p.featured==1||p.featured===true});
       });
       Object.keys(CATALOG).forEach(k=>{if(!CATALOG[k].length)delete CATALOG[k];});
       allProds=Object.values(CATALOG).flat();
+      buildOffersSection();
       buildCats(); renderSections();
     }
   } catch(e){ /* keep demo data */ }
@@ -1326,6 +1331,7 @@ async function enterStore(){
 
 const CAT_ICONS = {
   'all':'layout-grid','todos':'layout-grid',
+  'ofertas':'tag',
   'cerveja':'beer','cervejas':'beer',
   'vinho':'wine','vinhos':'wine',
   'destilados':'bottle-wine','dose':'bottle-wine','whisky':'bottle-wine','whiskies':'bottle-wine','destilado':'bottle-wine',
@@ -1403,6 +1409,14 @@ function initScrollSpy(){
   },{root:feed,rootMargin:'-30% 0px -60% 0px',threshold:0});
   document.querySelectorAll('.section[id]').forEach(s=>catObserver.observe(s));
 }
+function buildOffersSection(){
+  const offers = allProds.filter(p=>p.featured);
+  const hasOffers = offers.length > 0;
+  // Manage "Ofertas" tab in CATS
+  CATS = CATS.filter(c=>c.id!=='ofertas');
+  if(hasOffers) CATS.splice(1,0,{id:'ofertas',lb:'Ofertas'});
+  buildCats();
+}
 function renderSections(prods=null){
   const box = document.getElementById('sections');
   if(prods!==null){
@@ -1412,8 +1426,13 @@ function renderSections(prods=null){
       : `<div style="text-align:center;padding:48px 16px;color:var(--fg-2)"><div style="margin-bottom:12px"><i data-lucide="search" width="48" height="48"></i></div><p style="font-size:14px">Nenhum produto encontrado.</p></div>`;
     lucide.createIcons(); return;
   }
-  // Always render ALL sections
-  box.innerHTML = Object.keys(SEC_LABELS).filter(k=>CATALOG[k]).map(k=>`
+  const offers = allProds.filter(p=>p.featured);
+  const offersSec = offers.length ? `
+    <div class="section offers-section" id="sec-ofertas">
+      <div class="sec-hd"><span class="sec-title offers-title"><i data-lucide="tag" width="16" height="16"></i> Ofertas</span></div>
+      <div class="prod-row">${offers.map(cardHTML).join('')}</div>
+    </div>` : '';
+  box.innerHTML = offersSec + Object.keys(SEC_LABELS).filter(k=>CATALOG[k]).map(k=>`
     <div class="section" id="sec-${k}">
       <div class="sec-hd"><span class="sec-title">${SEC_LABELS[k]}</span></div>
       <div class="prod-row">${CATALOG[k].map(cardHTML).join('')}</div>

@@ -69,7 +69,7 @@
           </div>
           <div class="field" style="flex-direction:row;align-items:center;gap:10px">
             <label class="toggle"><input type="checkbox" id="p-featured"><span class="toggle-slider"></span></label>
-            <span style="font-size:13px;font-weight:500">Destaque</span>
+            <span style="font-size:13px;font-weight:500">Oferta</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end">
@@ -198,7 +198,7 @@ async function loadProducts() {
               <td>
                 <div style="font-weight:600">${p.name}</div>
                 ${p.description ? `<div style="font-size:11.5px;color:var(--fg-2)">${p.description.slice(0,60)}${p.description.length>60?'…':''}</div>` : ''}
-                ${p.featured ? '<span class="badge" style="background:var(--amber-lt);color:#92400E;font-size:10px;margin-top:4px">Destaque</span>' : ''}
+                ${p.featured ? '<span class="badge" style="background:var(--amber-lt);color:#92400E;font-size:10px;margin-top:4px">🏷 Oferta</span>' : ''}
               </td>
               <td>
                 <strong>${fmtMoney(p.price)}</strong>
