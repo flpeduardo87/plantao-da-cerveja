@@ -903,6 +903,27 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 .login-logo img{width:80px;height:80px;border-radius:50%;}
 .login-title{text-align:center;font-size:20px;font-weight:700;margin-bottom:4px;}
 .login-sub{text-align:center;font-size:14px;color:var(--fg-2);margin-bottom:28px;}
+.phone-field{
+  display:flex;align-items:center;gap:0;
+  border:2px solid var(--border);border-radius:14px;
+  background:var(--bg-2);overflow:hidden;
+  transition:border-color .18s;
+}
+.phone-field:focus-within{border-color:var(--amber);}
+.phone-flag{
+  display:flex;align-items:center;gap:6px;
+  padding:0 14px 0 16px;border-right:1px solid var(--border);
+  font-size:15px;color:var(--fg-2);white-space:nowrap;flex-shrink:0;
+  height:54px;
+}
+.phone-flag span{font-size:14px;font-weight:600;color:var(--fg);}
+.phone-field input{
+  flex:1;border:none;outline:none;background:transparent;
+  padding:0 16px;height:54px;
+  font-size:17px;font-weight:500;color:var(--fg);letter-spacing:.04em;
+  font-family:'Inter',sans-serif;
+}
+.phone-field input::placeholder{color:var(--fg-3);font-weight:400;letter-spacing:0;}
 .otp-boxes{display:flex;gap:10px;justify-content:center;margin:20px 0;}
 .otp-box{
   width:52px;height:58px;border:2px solid var(--border);border-radius:10px;
@@ -936,12 +957,12 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
     </div>
     <div class="dh-right">
       <button class="dh-loc" onclick="show('loc-overlay')"><i data-lucide="map-pin" width="14" height="14"></i> Informe seu endereço</button>
+      <button class="dh-cart-btn" onclick="goToAccount()" style="background:var(--bg-2);color:var(--fg)">
+        <i data-lucide="user" width="16" height="16"></i> Conta
+      </button>
       <button class="dh-cart-btn" onclick="goToCart()">
         <i data-lucide="shopping-bag" width="16" height="16"></i> Sacola
         <span class="dh-cart-cnt hidden" id="dh-cart-cnt">0</span>
-      </button>
-      <button class="dh-cart-btn" onclick="goToAccount()" style="background:var(--bg-2);color:var(--fg)">
-        <i data-lucide="user" width="16" height="16"></i> Conta
       </button>
     </div>
   </div>
@@ -1119,9 +1140,12 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
     <div class="login-title">Minha Conta</div>
     <div class="login-sub">Entre com seu número de WhatsApp</div>
     <div id="acct-phone-step">
-      <label class="field-label">Telefone (WhatsApp)</label>
-      <input class="field-input" id="acct-tel" type="tel" placeholder="(00) 00000-0000" maxlength="15" oninput="maskTel(this)">
-      <button class="btn-primary" style="margin-top:16px" onclick="acctSendOtp()">Enviar código →</button>
+      <label class="field-label" style="font-size:13px;font-weight:600;color:var(--fg-2);margin-bottom:10px;display:block;text-transform:uppercase;letter-spacing:.06em">Número do WhatsApp</label>
+      <div class="phone-field">
+        <div class="phone-flag">🇧🇷 <span>+55</span></div>
+        <input id="acct-tel" type="tel" placeholder="(00) 00000-0000" maxlength="15" inputmode="numeric" oninput="maskTel(this)">
+      </div>
+      <button class="btn-primary" style="margin-top:20px" onclick="acctSendOtp()">Enviar código →</button>
       <div id="acct-err" style="color:var(--red);font-size:13px;margin-top:10px;text-align:center;display:none"></div>
     </div>
     <div id="acct-otp-step" style="display:none">
