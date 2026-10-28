@@ -237,7 +237,7 @@ match ($method) {
             }
         } catch (\Throwable $e2) { /* best-effort */ }
 
-        json_ok(['id' => $orderId, 'order_number' => $orderNumber, 'total' => $total], 201);
+        json_ok(['success' => true, 'id' => $orderId, 'order_number' => $orderNumber, 'total' => $total], 201);
     })(),
 
     // ── Update status ─────────────────────────────────────────────────────────
