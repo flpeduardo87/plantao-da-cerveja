@@ -61,5 +61,6 @@ match ($route) {
     'settings'   => require __DIR__ . '/routes/settings.php',
     'upload'     => require __DIR__ . '/routes/upload.php',
     'push'       => require __DIR__ . '/routes/push.php',
+    'customer'   => require __DIR__ . '/routes/customer.php',
     default      => json_err('Route not found', 404),
 };
