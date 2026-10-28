@@ -145,16 +145,17 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 /* ── STORE HERO ── */
 .store-hero{position:relative;background:var(--bg);}
 .store-banner{
-  height:calc(190px + env(safe-area-inset-top,0px));
   padding-top:env(safe-area-inset-top,0px);
   position:relative;overflow:hidden;
-  background:#191A12 url('banner-ofertas.webp') center/cover no-repeat;
+  background:#191A12;
+  line-height:0;
 }
 .store-banner::before{
   content:'';position:absolute;inset:0;
   background:none;
 }
-.banner-inner{position:absolute;bottom:28px;left:max(16px,env(safe-area-inset-left,0px));z-index:2;display:none;}
+.banner-img{width:100%;height:auto;display:block;}
+.banner-inner{display:none;}
 .banner-offer-badge{
   display:inline-flex;align-items:center;gap:4px;
   background:rgba(0,0,0,.28);color:#fff;
@@ -745,11 +746,8 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
   .bottom-nav{display:none!important;}
   #s-home,#s-cart{padding-top:64px;}
 
-  /* Banner: image */
-  .store-banner{
-    height:240px;
-    background:#191A12 url('banner-ofertas.webp') center/cover no-repeat;
-  }
+  /* Banner: image fills naturally */
+  .store-banner{background:#191A12;}
   .store-banner::before{background:none;}
 
   /* Store info: centered, rounded top card like reference */
@@ -950,6 +948,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
     <!-- Hero -->
     <div class="store-hero">
       <div class="store-banner">
+        <img src="banner-ofertas.webp" alt="Ofertas Imperdíveis" class="banner-img">
         <div class="banner-inner">
           <div class="banner-offer-badge"><i data-lucide="tag" width="11" height="11"></i> SUPER OFERTAS</div>
           <div class="banner-headline">OFERTAS<br>IMPERDÍVEIS</div>
