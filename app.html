@@ -746,7 +746,7 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 
   /* Top bar replaces bottom nav */
   .bottom-nav{display:none!important;}
-  #s-home,#s-cart{padding-top:64px;}
+  #s-home,#s-cart,#s-account{padding-top:64px;}
 
   /* Banner: image fills naturally */
   .store-banner{background:#191A12;}
@@ -939,6 +939,9 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
       <button class="dh-cart-btn" onclick="goToCart()">
         <i data-lucide="shopping-bag" width="16" height="16"></i> Sacola
         <span class="dh-cart-cnt hidden" id="dh-cart-cnt">0</span>
+      </button>
+      <button class="dh-cart-btn" onclick="goToAccount()" style="background:var(--bg-2);color:var(--fg)">
+        <i data-lucide="user" width="16" height="16"></i> Conta
       </button>
     </div>
   </div>
@@ -1599,6 +1602,7 @@ function goBack(to){
   if(to==='s-home'){
     document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
     document.getElementById('nb-home').classList.add('on');
+    showScreen('s-home');
   }
 }
 function goToCart(){
@@ -2181,6 +2185,8 @@ try { acctToken = localStorage.getItem('acct_token'); acctPhone = localStorage.g
 
 function goToAccount(){
   setNavActive('nb-acct');
+  hideScreen('s-cart');
+  hideScreen('s-home');
   showScreen('s-account');
   if(acctToken) acctShowDashboard();
   else acctShowLogin();
