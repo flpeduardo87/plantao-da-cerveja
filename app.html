@@ -855,6 +855,23 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 [data-lucide]{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;flex-shrink:0;}
 @keyframes spin-ic{to{transform:rotate(360deg);}}
 .spin{animation:spin-ic 1s linear infinite;}
+/* ── TRACKING BANNER ── */
+#track-banner{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+  display:none;align-items:center;gap:10px;
+  background:#111;color:#fff;
+  padding:12px 18px;border-radius:999px;
+  box-shadow:0 4px 20px rgba(0,0,0,.35);
+  font-size:13px;font-weight:600;
+  cursor:pointer;z-index:200;
+  border:1.5px solid rgba(255,255,255,.12);
+  white-space:nowrap;
+  animation:bannerIn .3s ease;
+}
+#track-banner:hover{background:#222;}
+#track-banner .tb-dot{width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0;animation:tlPulse 1.5s infinite;}
+@keyframes bannerIn{from{opacity:0;transform:translateX(-50%) translateY(12px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+@media(max-width:600px){#track-banner{bottom:72px;font-size:12px;padding:10px 16px;}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
 </head>
@@ -991,6 +1008,13 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
     </div>
   </div>
   <div class="cart-body" id="cart-body"></div>
+</div>
+
+<!-- ═══ TRACKING BANNER ═══ -->
+<div id="track-banner" onclick="openTrackingFromBanner()" role="button" tabindex="0" aria-label="Acompanhar pedido">
+  <span class="tb-dot"></span>
+  <span>Acompanhar pedido</span>
+  <i data-lucide="chevron-right" width="14" height="14" style="opacity:.6"></i>
 </div>
 
 <!-- ═══ CART DRAWER (desktop) ═══ -->
@@ -1912,7 +1936,7 @@ async function finalizarPedido(){
     });
     const j = await r.json();
     if(!r.ok||!j.success) throw new Error(j.message||'Erro ao registrar pedido.');
-    try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, ts: Date.now()})); }catch{}
+    try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, phone: coData.tel, ts: Date.now()})); }catch{}
     cart=[]; saveCart(); updateBadge();
     coStep=4;
     renderCoStep();
@@ -1930,26 +1954,54 @@ async function finalizarPedido(){
 let _trackTimer = null;
 const STATUS_STEPS = {
   'new':        0,
+  'accepted':   1,
   'confirmed':  1,
   'preparing':  1,
   'ready':      2,
+  'delivering': 2,
   'on_the_way': 2,
   'delivered':  3,
   'cancelled':  -1,
 };
 const STATUS_LABELS = {
   'new':        'Aguardando confirmação',
+  'accepted':   'Confirmado pela loja',
   'confirmed':  'Confirmado pela loja',
   'preparing':  'Em preparo',
   'ready':      'Pronto para entrega',
-  'on_the_way': 'A caminho!',
+  'delivering': 'A caminho! 🛵',
+  'on_the_way': 'A caminho! 🛵',
   'delivered':  'Entregue 🎉',
   'cancelled':  'Cancelado',
 };
 
+function updateTrackingBanner(){
+  try {
+    const b = document.getElementById('track-banner');
+    if(!b) return;
+    const last = JSON.parse(localStorage.getItem('plantao_last_order')||'{}');
+    const recent = last.order_number && !last.done && (Date.now()-last.ts) < 4*60*60*1000;
+    b.style.display = recent ? 'flex' : 'none';
+  } catch {}
+}
+
+function openTrackingFromBanner(){
+  try {
+    const last = JSON.parse(localStorage.getItem('plantao_last_order')||'{}');
+    if(!last.order_number) return;
+    if(last.phone) coData.tel = last.phone;
+    coStep=4;
+    show('checkout-overlay');
+    renderCoStep();
+    startOrderTracking();
+    document.getElementById('track-banner').style.display='none';
+  } catch {}
+}
+
 function startOrderTracking(){
   lucide.createIcons();
   stopOrderTracking();
+  updateTrackingBanner();
   pollOrderStatus();
   _trackTimer = setInterval(pollOrderStatus, 30000);
 }
@@ -1961,8 +2013,9 @@ function stopOrderTracking(){
 async function pollOrderStatus(){
   try {
     const last = JSON.parse(localStorage.getItem('plantao_last_order')||'{}');
-    if(!last.order_number || !coData.tel) return;
-    const phone = coData.tel.replace(/\D/g,'');
+    const tel = coData.tel || last.phone || '';
+    if(!last.order_number || !tel) return;
+    const phone = tel.replace(/\D/g,'');
     const r = await fetch(`${API}/orders?order_number=${encodeURIComponent(last.order_number)}&phone=${encodeURIComponent(phone)}`);
     if(!r.ok) return;
     const j = await r.json();
@@ -1985,7 +2038,9 @@ function updateTrackUI(status){
   if(status === 'delivered'){
     if(etaTxt) etaTxt.textContent = 'Pedido entregue com sucesso! Obrigado 🍺';
     stopOrderTracking();
-  } else if(status === 'on_the_way'){
+    try{const o=JSON.parse(localStorage.getItem('plantao_last_order')||'{}');o.done=true;localStorage.setItem('plantao_last_order',JSON.stringify(o));}catch{}
+    updateTrackingBanner();
+  } else if(status === 'delivering' || status === 'on_the_way'){
     if(etaTxt) etaTxt.textContent = 'Entregador a caminho · Atualizando ao vivo…';
   } else if(status === 'cancelled'){
     if(etaTxt) etaTxt.textContent = 'Pedido cancelado. Dúvidas? Entre em contato.';

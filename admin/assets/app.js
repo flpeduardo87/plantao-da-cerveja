@@ -97,12 +97,13 @@ function fmtMoney(v) {
 }
 function fmtDate(s) {
   if (!s) return '—';
-  const d = new Date(s);
-  return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const d = new Date(s.replace(' ', 'T') + 'Z');
+  return d.toLocaleDateString('pt-BR', {timeZone: 'America/Sao_Paulo'}) + ' ' +
+         d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
 }
 function fmtDateShort(s) {
   if (!s) return '—';
-  return new Date(s).toLocaleDateString('pt-BR');
+  return new Date(s.replace(' ', 'T') + 'Z').toLocaleDateString('pt-BR', {timeZone: 'America/Sao_Paulo'});
 }
 function fmtStatus(s) {
   const map = {
