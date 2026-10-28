@@ -148,13 +148,13 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   height:calc(190px + env(safe-area-inset-top,0px));
   padding-top:env(safe-area-inset-top,0px);
   position:relative;overflow:hidden;
-  background:#191A12;
+  background:#191A12 url('banner-ofertas.webp') center/cover no-repeat;
 }
 .store-banner::before{
   content:'';position:absolute;inset:0;
   background:none;
 }
-.banner-inner{position:absolute;bottom:28px;left:max(16px,env(safe-area-inset-left,0px));z-index:2;}
+.banner-inner{position:absolute;bottom:28px;left:max(16px,env(safe-area-inset-left,0px));z-index:2;display:none;}
 .banner-offer-badge{
   display:inline-flex;align-items:center;gap:4px;
   background:rgba(0,0,0,.28);color:#fff;
@@ -165,12 +165,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   font-size:32px;font-weight:600;color:rgba(255,255,255,.92);
   line-height:1.05;letter-spacing:-1px;text-transform:uppercase;
 }
-.banner-deco{
-  position:absolute;right:-30px;top:50%;transform:translateY(-50%);
-  width:220px;height:220px;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,255,255,.13) 0%,transparent 70%);
-  pointer-events:none;
-}
+.banner-deco{display:none;}
 .store-avatar-wrap{
   display:flex;justify-content:center;
   margin-top:-72px;position:relative;z-index:5;
@@ -750,16 +745,12 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
   .bottom-nav{display:none!important;}
   #s-home,#s-cart{padding-top:64px;}
 
-  /* Banner: solid black */
+  /* Banner: image */
   .store-banner{
-    height:200px;
-    background:#191A12;
-    background-image:none;
+    height:240px;
+    background:#191A12 url('banner-ofertas.webp') center/cover no-repeat;
   }
   .store-banner::before{background:none;}
-  .banner-headline{font-size:52px;color:rgba(255,255,255,.9);letter-spacing:-2px;}
-  .banner-offer-badge{font-size:14px;}
-  .banner-inner{bottom:40px;left:48px;}
 
   /* Store info: centered, rounded top card like reference */
   .store-avatar-wrap{justify-content:center;padding-left:0;margin-top:-96px;}
