@@ -10,7 +10,7 @@ match ($method) {
         match ($sub) {
             'login' => (function () use ($pdo) {
                 $d = body();
-                if (empty($d['email']) || empty($d['password'])) json_err('email and password required');
+                if (empty($d['email']) || empty($d['password'])) json_err('E-mail e senha são obrigatórios');
 
                 $s = $pdo->prepare('SELECT id, name, email, password_hash FROM admin_users WHERE email = ? AND active = 1');
                 $s->execute([strtolower(trim($d['email']))]);
@@ -38,7 +38,7 @@ match ($method) {
             'change-password' => (function () use ($pdo) {
                 $d = body();
                 if (empty($d['email']) || empty($d['current_password']) || empty($d['new_password'])) {
-                    json_err('email, current_password and new_password required');
+                    json_err('E-mail, senha atual e nova senha são obrigatórios');
                 }
                 if (strlen($d['new_password']) < 8) json_err('A senha deve ter pelo menos 8 caracteres');
 

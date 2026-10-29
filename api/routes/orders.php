@@ -240,6 +240,14 @@ match ($method) {
         json_ok(['success' => true, 'id' => $orderId, 'order_number' => $orderNumber, 'total' => $total], 201);
     })(),
 
+    // ── Delete order ─────────────────────────────────────────────────────────
+    'DELETE' => (function () use ($pdo, $id) {
+        if (!$id) json_err('ID required');
+        $pdo->prepare('DELETE FROM order_items WHERE order_id = ?')->execute([$id]);
+        $pdo->prepare('DELETE FROM orders WHERE id = ?')->execute([$id]);
+        json_ok(['deleted' => true]);
+    })(),
+
     // ── Update status ─────────────────────────────────────────────────────────
     'PUT', 'PATCH' => (function () use ($pdo, $id) {
         if (!$id) json_err('ID required');

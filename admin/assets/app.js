@@ -200,11 +200,23 @@ async function viewOrder(id) {
       <button class="btn btn-ghost" onclick="closeModal('modal-order')">Fechar</button>
       <select class="status-select" style="flex:1;max-width:150px" onchange="changeStatus(${o.id},this.value);this.blur()">${statusOptions(o.status)}</select>
       <button class="btn btn-ghost btn-sm" onclick="printOrder(_viewingOrder)"><i data-lucide="printer" width="14" height="14"></i> Imprimir</button>
-      <button class="btn btn-sm" style="background:#25D366;color:#fff;border:none;gap:5px" onclick="shareOrderWhatsapp(_viewingOrder)"><i data-lucide="message-circle" width="14" height="14"></i> WhatsApp</button>`;
+      <button class="btn btn-sm" style="background:#25D366;color:#fff;border:none;gap:5px" onclick="shareOrderWhatsapp(_viewingOrder)"><i data-lucide="message-circle" width="14" height="14"></i> WhatsApp</button>
+      <button class="btn btn-sm" style="background:#ef4444;color:#fff;border:none;gap:5px;margin-left:auto" onclick="deleteOrder(${o.id})"><i data-lucide="trash-2" width="14" height="14"></i> Excluir</button>`;
   } catch (e) {
     bodyEl.innerHTML = `<div class="empty"><p style="color:var(--red)">${e.message}</p></div>`;
   }
   lucide.createIcons();
+}
+
+async function deleteOrder(id) {
+  if (!confirm('Excluir este pedido? Esta ação não pode ser desfeita.')) return;
+  try {
+    await api(`/orders/${id}`, { method: 'DELETE' });
+    closeModal('modal-order');
+    if (typeof loadOrders === 'function') loadOrders();
+  } catch (e) {
+    alert('Erro ao excluir: ' + e.message);
+  }
 }
 
 /* ── Print comanda — estilo Zé Delivery ── */
