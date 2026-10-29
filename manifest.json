@@ -1,7 +1,7 @@
 {
-  "name": "Plantão da Cerveja 24h",
+  "name": "Plantão da Cerveja",
   "short_name": "Plantão Cerveja",
-  "description": "Delivery de bebidas geladas 24 horas",
+  "description": "Delivery de bebidas geladas",
   "start_url": "/app.html",
   "display": "standalone",
   "background_color": "#191A12",

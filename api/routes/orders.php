@@ -9,6 +9,33 @@ $pdo = db();
 match ($method) {
     // ── List / Single ────────────────────────────────────────────────────────
     'GET' => (function () use ($pdo, $id) {
+        // Public tracking by order_number + phone (no auth required)
+        if (!empty($_GET['order_number']) && !empty($_GET['phone'])) {
+            $phone = preg_replace('/\D/', '', $_GET['phone']);
+            $s = $pdo->prepare(
+                'SELECT o.order_number, o.status, o.created_at, o.total, o.payment_method, o.delivery_type,
+                        o.address_street, o.address_number,
+                        GROUP_CONCAT(
+                            JSON_OBJECT(
+                                "product_name", oi.product_name,
+                                "quantity", oi.quantity,
+                                "unit_price", oi.unit_price,
+                                "total", oi.total
+                            )
+                        ) AS items_json
+                 FROM orders o
+                 LEFT JOIN order_items oi ON oi.order_id = o.id
+                 WHERE o.order_number = ? AND o.customer_phone = ?
+                 GROUP BY o.id'
+            );
+            $s->execute([trim($_GET['order_number']), $phone]);
+            $row = $s->fetch();
+            if (!$row) json_err('Pedido não encontrado', 404);
+            $row['items'] = $row['items_json'] ? json_decode('[' . $row['items_json'] . ']', true) : [];
+            unset($row['items_json']);
+            json_ok(['success' => true, 'order' => $row]);
+        }
+
         if ($id) {
             $s = $pdo->prepare(
                 'SELECT o.*, GROUP_CONCAT(
@@ -41,10 +68,16 @@ match ($method) {
             $vals[] = $_GET['status'];
         }
         $limit  = min((int)($_GET['limit']  ?? 50), 200);
-        $offset = (int)($_GET['offset'] ?? 0);
+        $page   = max(1, (int)($_GET['page'] ?? 1));
+        $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : ($page - 1) * $limit;
+
+        $cs = $pdo->prepare("SELECT COUNT(*) FROM orders o WHERE $where");
+        $cs->execute($vals);
+        $total = (int)$cs->fetchColumn();
 
         $s = $pdo->prepare(
             "SELECT o.id, o.order_number, o.customer_name, o.customer_phone,
+                    o.address_street, o.address_number, o.address_neighborhood,
                     o.total, o.payment_method, o.payment_status,
                     o.delivery_type, o.status, o.created_at
              FROM orders o
@@ -53,7 +86,7 @@ match ($method) {
              LIMIT $limit OFFSET $offset"
         );
         $s->execute($vals);
-        json_ok($s->fetchAll());
+        json_ok(['data' => $s->fetchAll(), 'total' => $total]);
     })(),
 
     // ── Create order ─────────────────────────────────────────────────────────
@@ -179,7 +212,32 @@ match ($method) {
             ]));
         }
 
-        json_ok(['id' => $orderId, 'order_number' => $orderNumber, 'total' => $total], 201);
+        // Web Push notification (best-effort)
+        try {
+            require_once __DIR__ . '/../lib/webpush.php';
+            $vapid = $pdo->query(
+                "SELECT setting_key, setting_value FROM store_settings WHERE setting_key IN ('vapid_public','vapid_private_pem','vapid_subject')"
+            )->fetchAll(\PDO::FETCH_KEY_PAIR);
+            if (!empty($vapid['vapid_public']) && !empty($vapid['vapid_private_pem'])) {
+                $subs = $pdo->query("SELECT endpoint, p256dh, auth FROM push_subscriptions")->fetchAll();
+                $pvs  = $vapid['vapid_subject'] ?? 'mailto:admin@plantaodacerveja.com.br';
+                $msg  = json_encode([
+                    'title' => '🍺 Novo pedido!',
+                    'body'  => "#{$orderNumber} · {$d['customer_name']} · R$ " . number_format($total, 2, ',', '.'),
+                ]);
+                foreach ($subs as $s2) {
+                    @wp_send(
+                        ['endpoint' => $s2['endpoint'], 'keys' => ['p256dh' => $s2['p256dh'], 'auth' => $s2['auth']]],
+                        $msg,
+                        $vapid['vapid_public'],
+                        $vapid['vapid_private_pem'],
+                        $pvs
+                    );
+                }
+            }
+        } catch (\Throwable $e2) { /* best-effort */ }
+
+        json_ok(['success' => true, 'id' => $orderId, 'order_number' => $orderNumber, 'total' => $total], 201);
     })(),
 
     // ── Update status ─────────────────────────────────────────────────────────

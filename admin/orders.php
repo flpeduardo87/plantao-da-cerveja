@@ -98,7 +98,7 @@
   </div>
 </div>
 
-<script src="assets/app.js"></script>
+<script src="assets/app.js?v=2"></script>
 <script>
 let currentFilter = '';
 let currentPage = 1;
@@ -129,42 +129,6 @@ function playChime() {
       osc.start(t); osc.stop(t + 0.6);
     });
   } catch {}
-}
-
-/* ── Browser Notification ── */
-function askNotifyPermission() {
-  // Unlock + test audio immediately (requires user gesture)
-  playChime();
-  if (!('Notification' in window)) { toast('Som ativado! (notificações não suportadas neste browser)'); return; }
-  Notification.requestPermission().then(p => {
-    toast(p === 'granted' ? '🔔 Alertas e som ativados!' : '🔔 Som ativado! (notificações bloqueadas)');
-    updateNotifyBtn();
-  });
-}
-function sendBrowserNotification(count) {
-  if (Notification.permission !== 'granted') return;
-  const n = new Notification('🍺 Novo pedido!', {
-    body: `${count} pedido(s) aguardando confirmação`,
-    icon: '../favicon-icone.webp',
-    tag: 'new-order',
-    renotify: true,
-  });
-  n.onclick = () => { window.focus(); n.close(); };
-}
-function updateNotifyBtn() {
-  const btn = document.getElementById('btn-notify');
-  if (!btn) return;
-  if (!('Notification' in window)) { btn.style.display = 'none'; return; }
-  if (Notification.permission === 'granted') {
-    btn.innerHTML = '<i data-lucide="bell" width="14" height="14"></i> Alertas ativos';
-    btn.className = 'btn btn-sm btn-ghost'; btn.style.color = 'var(--green)';
-    btn.onclick = null; btn.disabled = true;
-  } else {
-    btn.innerHTML = '<i data-lucide="bell-off" width="14" height="14"></i> Ativar alertas';
-    btn.className = 'btn btn-sm btn-ghost'; btn.style.color = '';
-    btn.onclick = askNotifyPermission; btn.disabled = false;
-  }
-  lucide.createIcons();
 }
 
 /* ── Tab title flash ── */
@@ -241,76 +205,6 @@ async function loadOrders() {
     html += `<span class="info">${total} pedido(s)</span>`;
     pg.innerHTML = html;
   } catch (e) { console.error(e); }
-}
-
-function statusOptions(current) {
-  return [
-    {v:'new',l:'Novo'},{v:'accepted',l:'Aceito'},{v:'preparing',l:'Preparando'},
-    {v:'delivering',l:'A caminho'},{v:'delivered',l:'Entregue'},{v:'cancelled',l:'Cancelado'},
-  ].map(o => `<option value="${o.v}" ${o.v===current?'selected':''}>${o.l}</option>`).join('');
-}
-
-async function changeStatus(id, status) {
-  try {
-    await api(`/orders/${id}`, { method: 'PUT', body: JSON.stringify({ status }) });
-    toast('Status atualizado');
-  } catch (e) { toast(e.message, 'error'); loadOrders(); }
-}
-
-async function viewOrder(id) {
-  const body = document.getElementById('modal-order-body');
-  document.getElementById('modal-order-title').textContent = 'Carregando…';
-  body.innerHTML = '<div class="empty"><i data-lucide="loader-2" width="28" height="28" class="spin"></i></div>';
-  openModal('modal-order');
-  lucide.createIcons();
-  try {
-    const o = await api(`/orders/${id}`);
-    document.getElementById('modal-order-title').textContent = `Pedido #${o.order_number}`;
-    body.innerHTML = `
-      <div class="info-grid">
-        <div class="info-cell">
-          <div class="ic-label">Cliente</div>
-          <div class="ic-value">${o.customer_name}</div>
-          <div class="ic-sub">${o.customer_phone || ''}</div>
-          ${o.customer_email ? `<div class="ic-sub">${o.customer_email}</div>` : ''}
-        </div>
-        <div class="info-cell">
-          <div class="ic-label">Endereço</div>
-          <div class="ic-value">${o.address_street || '—'}, ${o.address_number || ''}</div>
-          <div class="ic-sub">${o.address_neighborhood || ''}${o.address_cep ? ' · CEP ' + o.address_cep : ''}</div>
-          ${o.address_complement ? `<div class="ic-sub">${o.address_complement}</div>` : ''}
-          ${o.address_reference ? `<div class="ic-sub" style="color:var(--fg-3)">Ref: ${o.address_reference}</div>` : ''}
-        </div>
-        <div class="info-cell">
-          <div class="ic-label">Pagamento</div>
-          <div class="ic-value">${fmtPayment(o.payment_method)}</div>
-        </div>
-        <div class="info-cell">
-          <div class="ic-label">Status</div>
-          <div class="ic-value">${fmtStatus(o.status)}</div>
-        </div>
-        ${o.notes ? `<div class="info-cell" style="grid-column:1/-1"><div class="ic-label">Observações</div><div style="font-size:13px;background:#F8FAFC;padding:10px 12px;border-radius:8px;margin-top:4px;border:1px solid var(--border)">${o.notes}</div></div>` : ''}
-      </div>
-      <div class="divider"></div>
-      <div style="font-size:10.5px;font-weight:700;color:var(--fg-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Itens do pedido</div>
-      <ul class="order-items-list">
-        ${(o.items||[]).map(i=>`
-          <li>
-            <span class="qty">${i.quantity}x</span>
-            <span style="flex:1;font-weight:500">${i.product_name}</span>
-            <span class="price">${fmtMoney(i.total)}</span>
-          </li>`).join('')}
-      </ul>
-      <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
-        <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--fg-2);margin-bottom:5px"><span>Subtotal</span><span>${fmtMoney(o.subtotal)}</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--fg-2);margin-bottom:8px"><span>Taxa de entrega</span><span>${fmtMoney(o.delivery_fee)}</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:800"><span>Total</span><span>${fmtMoney(o.total)}</span></div>
-      </div>
-    `;
-  } catch (e) {
-    body.innerHTML = `<div class="empty"><p style="color:var(--red)">${e.message}</p></div>`;
-  }
-  lucide.createIcons();
 }
 
 function goPage(p) { currentPage = p; loadOrders(); }

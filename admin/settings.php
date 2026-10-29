@@ -48,7 +48,7 @@
       </div>
     </div>
 
-    <div class="page" style="max-width:760px;display:flex;flex-direction:column;gap:20px">
+    <div class="page" style="display:flex;flex-direction:column;gap:20px">
 
       <!-- Informações da loja -->
       <div class="card">
@@ -61,7 +61,7 @@
             <div class="form-grid" style="margin-bottom:14px">
               <div class="field form-full">
                 <label>Nome da loja</label>
-                <input type="text" id="s-store-name" placeholder="Plantão da Cerveja 24h">
+                <input type="text" id="s-store-name" placeholder="Plantão da Cerveja">
               </div>
               <div class="field">
                 <label>Pedido mínimo (R$)</label>
@@ -224,7 +224,7 @@
 }
 </style>
 
-<script src="assets/app.js"></script>
+<script src="assets/app.js?v=2"></script>
 <script>
 const DAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const DAYS_DEFAULT = {

@@ -1,5 +1,5 @@
 -- ============================================================
--- Plantão da Cerveja 24h — Database Schema
+-- Plantão da Cerveja — Database Schema
 -- MySQL 5.7+ / MariaDB 10+
 -- ============================================================
 
@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS store_settings (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO store_settings (setting_key, setting_value) VALUES
-  ('store_name',         'Plantão da Cerveja 24h'),
+  ('store_name',         'Plantão da Cerveja'),
   ('store_phone',        ''),
   ('store_whatsapp',     ''),
   ('min_order',          '20.00'),

@@ -101,7 +101,7 @@
       </div>
     </div>
 
-    <div class="page" style="max-width:860px">
+    <div class="page">
       <div class="card">
         <div class="tbl-wrap">
           <table>
@@ -121,7 +121,7 @@
   </div>
 </div>
 
-<script src="assets/app.js"></script>
+<script src="assets/app.js?v=2"></script>
 <script>
 let deleteId = null;
 let catsCache = [];

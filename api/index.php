@@ -20,6 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Pragma: no-cache');
 
 // ── Router ───────────────────────────────────────────────────────────────────
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -58,5 +60,7 @@ match ($route) {
     'orders'     => require __DIR__ . '/routes/orders.php',
     'settings'   => require __DIR__ . '/routes/settings.php',
     'upload'     => require __DIR__ . '/routes/upload.php',
+    'push'       => require __DIR__ . '/routes/push.php',
+    'customer'   => require __DIR__ . '/routes/customer.php',
     default      => json_err('Route not found', 404),
 };
