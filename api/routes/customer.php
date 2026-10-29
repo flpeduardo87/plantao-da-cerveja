@@ -43,7 +43,7 @@ match (true) {
         $msg = "🍺 *Plantão da Cerveja*\n\nSeu código de acesso: *{$code}*\n\nVálido por 10 minutos.";
         // Fonnte requires DDI — prepend 55 if not already present
         $fonnteTarget = (strlen($phone) <= 11) ? '55' . $phone : $phone;
-        @file_get_contents('https://api.fonnte.com/send', false, stream_context_create([
+        $fonnteResp = @file_get_contents('https://api.fonnte.com/send', false, stream_context_create([
             'http' => [
                 'method'  => 'POST',
                 'header'  => "Authorization: {$fonnteToken}\r\nContent-Type: application/x-www-form-urlencoded\r\n",
@@ -52,7 +52,7 @@ match (true) {
             ],
         ]));
 
-        json_ok(['success' => true, 'message' => 'Código enviado via WhatsApp']);
+        json_ok(['success' => true, 'message' => 'Código enviado via WhatsApp', 'debug_target' => $fonnteTarget, 'debug_resp' => $fonnteResp]);
     })(),
 
     // ── Verify OTP ────────────────────────────────────────────────────────────
