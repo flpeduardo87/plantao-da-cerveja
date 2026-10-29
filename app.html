@@ -952,7 +952,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
 <header id="desktop-header">
   <div class="dh-inner">
     <div class="dh-brand">
-      <img class="dh-logo-horiz" src="logo-horizontal.webp" alt="Plantão da Cerveja">
+      <img class="dh-logo-horiz" src="logo-horizontal.webp" alt="Plantão da Cerveja" onclick="goHome()" style="cursor:pointer">
     </div>
     <div class="dh-search-wrap">
       <i data-lucide="search" width="16" height="16" style="color:var(--fg-3)"></i>
@@ -1014,7 +1014,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
   <!-- Search bar sits OUTSIDE feed so it never scrolls away -->
   <div class="search-section">
     <div class="search-bar-row">
-      <img class="mob-logo" src="logo-icone.png" alt="Plantão da Cerveja">
+      <img class="mob-logo" src="logo-icone.png" alt="Plantão da Cerveja" onclick="goHome()" style="cursor:pointer">
       <div class="search-wrap">
         <i data-lucide="search" width="15" height="15" style="color:var(--fg-3)"></i>
         <input type="text" id="s-in" placeholder="Pesquise sua bebida favorita" oninput="search(this.value)">
@@ -1140,6 +1140,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
 <div id="s-account" class="screen slide-right hidden">
   <div id="acct-scroll">
     <div id="acct-login" class="login-wrap">
+      <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--fg-2);font-size:13px;display:flex;align-items:center;gap:6px;margin-bottom:16px;padding:0"><i data-lucide="arrow-left" width="16" height="16"></i> Voltar</button>
       <div class="login-logo"><img src="logo-plantao-da-cerveja.jpg" alt=""></div>
       <div class="login-title">Minha Conta</div>
       <div class="login-sub">Entre com seu número de WhatsApp</div>
@@ -1624,6 +1625,7 @@ function goHome(){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
   document.getElementById('nb-home').classList.add('on');
   hideScreen('s-cart');
+  hideScreen('s-account');
 }
 function goBack(to){
   hideScreen('s-cart');
