@@ -236,6 +236,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .search-wrap input::placeholder{color:var(--fg-3);}
 .feed{
   flex:1;overflow-y:scroll;background:var(--bg-2);
+  -webkit-overflow-scrolling:touch;
   padding-bottom:calc(70px + env(safe-area-inset-bottom,0px));
 }
 .cat-strip{
@@ -366,7 +367,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 }
 
 /* ── CART PAGE (mobile full-screen) ── */
-#s-cart{z-index:20;overflow:hidden;}
+#s-cart{z-index:20;}
 .page-header{
   background:var(--amber);z-index:50;flex-shrink:0;
   padding:env(safe-area-inset-top,0px) max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));
@@ -396,6 +397,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 
 .cart-body{
   flex:1;overflow-y:auto;min-height:0;background:var(--bg-2);
+  -webkit-overflow-scrolling:touch;
   padding:16px max(16px,env(safe-area-inset-right,0px)) calc(80px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
   padding-block:16px calc(80px + env(safe-area-inset-bottom,0px));
   display:flex;flex-direction:column;gap:12px;
@@ -865,7 +867,8 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 @media(max-width:600px){#track-banner{bottom:72px;font-size:12px;padding:10px 16px;}}
 
 /* ── CUSTOMER ACCOUNT SCREEN ── */
-#s-account{z-index:15;overflow-y:auto;}
+#s-account{z-index:15;}
+#acct-scroll{flex:1;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch;}
 .acct-header{
   background:var(--amber);
   padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-left,0px)) 32px;
@@ -1135,44 +1138,46 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
 
 <!-- ═══ CUSTOMER ACCOUNT SCREEN ═══ -->
 <div id="s-account" class="screen slide-right hidden">
-  <div id="acct-login" class="login-wrap">
-    <div class="login-logo"><img src="logo-plantao-da-cerveja.jpg" alt=""></div>
-    <div class="login-title">Minha Conta</div>
-    <div class="login-sub">Entre com seu número de WhatsApp</div>
-    <div id="acct-phone-step">
-      <label class="field-label" style="font-size:13px;font-weight:600;color:var(--fg-2);margin-bottom:10px;display:block;text-transform:uppercase;letter-spacing:.06em">Número do WhatsApp</label>
-      <div class="phone-field">
-        <div class="phone-flag">🇧🇷 <span>+55</span></div>
-        <input id="acct-tel" type="tel" placeholder="(00) 00000-0000" maxlength="15" inputmode="numeric" oninput="maskTel(this)">
+  <div id="acct-scroll">
+    <div id="acct-login" class="login-wrap">
+      <div class="login-logo"><img src="logo-plantao-da-cerveja.jpg" alt=""></div>
+      <div class="login-title">Minha Conta</div>
+      <div class="login-sub">Entre com seu número de WhatsApp</div>
+      <div id="acct-phone-step">
+        <label class="field-label" style="font-size:13px;font-weight:600;color:var(--fg-2);margin-bottom:10px;display:block;text-transform:uppercase;letter-spacing:.06em">Número do WhatsApp</label>
+        <div class="phone-field">
+          <div class="phone-flag">🇧🇷 <span>+55</span></div>
+          <input id="acct-tel" type="tel" placeholder="(00) 00000-0000" maxlength="15" inputmode="numeric" oninput="maskTel(this)">
+        </div>
+        <button class="btn-primary" style="margin-top:20px" onclick="acctSendOtp()">Enviar código →</button>
+        <div id="acct-err" style="color:var(--red);font-size:13px;margin-top:10px;text-align:center;display:none"></div>
       </div>
-      <button class="btn-primary" style="margin-top:20px" onclick="acctSendOtp()">Enviar código →</button>
-      <div id="acct-err" style="color:var(--red);font-size:13px;margin-top:10px;text-align:center;display:none"></div>
-    </div>
-    <div id="acct-otp-step" style="display:none">
-      <div style="text-align:center;font-size:14px;color:var(--fg-2);margin-bottom:4px">Digite o código enviado ao</div>
-      <div style="text-align:center;font-weight:600;margin-bottom:16px" id="acct-otp-phone"></div>
-      <div class="otp-boxes">
-        <input class="otp-box" id="otp0" maxlength="1" inputmode="numeric" oninput="otpNext(this,0)">
-        <input class="otp-box" id="otp1" maxlength="1" inputmode="numeric" oninput="otpNext(this,1)">
-        <input class="otp-box" id="otp2" maxlength="1" inputmode="numeric" oninput="otpNext(this,2)">
-        <input class="otp-box" id="otp3" maxlength="1" inputmode="numeric" oninput="otpNext(this,3)">
+      <div id="acct-otp-step" style="display:none">
+        <div style="text-align:center;font-size:14px;color:var(--fg-2);margin-bottom:4px">Digite o código enviado ao</div>
+        <div style="text-align:center;font-weight:600;margin-bottom:16px" id="acct-otp-phone"></div>
+        <div class="otp-boxes">
+          <input class="otp-box" id="otp0" maxlength="1" inputmode="numeric" oninput="otpNext(this,0)">
+          <input class="otp-box" id="otp1" maxlength="1" inputmode="numeric" oninput="otpNext(this,1)">
+          <input class="otp-box" id="otp2" maxlength="1" inputmode="numeric" oninput="otpNext(this,2)">
+          <input class="otp-box" id="otp3" maxlength="1" inputmode="numeric" oninput="otpNext(this,3)">
+        </div>
+        <button class="btn-primary" onclick="acctVerifyOtp()">Entrar</button>
+        <div id="acct-otp-err" style="color:var(--red);font-size:13px;margin-top:10px;text-align:center;display:none"></div>
+        <button style="display:block;margin:14px auto 0;background:none;border:none;color:var(--fg-2);font-size:13px;cursor:pointer" onclick="acctBackToPhone()">← Trocar número</button>
       </div>
-      <button class="btn-primary" onclick="acctVerifyOtp()">Entrar</button>
-      <div id="acct-otp-err" style="color:var(--red);font-size:13px;margin-top:10px;text-align:center;display:none"></div>
-      <button style="display:block;margin:14px auto 0;background:none;border:none;color:var(--fg-2);font-size:13px;cursor:pointer" onclick="acctBackToPhone()">← Trocar número</button>
     </div>
-  </div>
-  <div id="acct-dashboard" style="display:none">
-    <div class="acct-header">
-      <button class="acct-back" onclick="goBack('s-home')"><i data-lucide="arrow-left" width="22" height="22"></i></button>
-      <div class="acct-avatar"><i data-lucide="user" width="32" height="32" color="#fff"></i></div>
-      <div class="acct-name" id="acct-dname">—</div>
-      <div class="acct-phone" id="acct-dphone">—</div>
-    </div>
-    <div class="acct-body">
-      <div class="acct-section-title">Meus Pedidos</div>
-      <div id="acct-orders-list"><div style="text-align:center;padding:32px;color:var(--fg-3)">Carregando…</div></div>
-      <button class="acct-logout" onclick="acctLogout()"><i data-lucide="log-out" width="16" height="16"></i> Sair da conta</button>
+    <div id="acct-dashboard" style="display:none">
+      <div class="acct-header">
+        <button class="acct-back" onclick="goBack('s-home')"><i data-lucide="arrow-left" width="22" height="22"></i></button>
+        <div class="acct-avatar"><i data-lucide="user" width="32" height="32" color="#fff"></i></div>
+        <div class="acct-name" id="acct-dname">—</div>
+        <div class="acct-phone" id="acct-dphone">—</div>
+      </div>
+      <div class="acct-body">
+        <div class="acct-section-title">Meus Pedidos</div>
+        <div id="acct-orders-list"><div style="text-align:center;padding:32px;color:var(--fg-3)">Carregando…</div></div>
+        <button class="acct-logout" onclick="acctLogout()"><i data-lucide="log-out" width="16" height="16"></i> Sair da conta</button>
+      </div>
     </div>
   </div>
 </div>
