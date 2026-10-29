@@ -41,11 +41,13 @@ match (true) {
         if (!$fonnteToken) json_err('Serviço de verificação não configurado', 503);
 
         $msg = "🍺 *Plantão da Cerveja*\n\nSeu código de acesso: *{$code}*\n\nVálido por 10 minutos.";
+        // Fonnte requires DDI — prepend 55 if not already present
+        $fonnteTarget = (strlen($phone) <= 11) ? '55' . $phone : $phone;
         @file_get_contents('https://api.fonnte.com/send', false, stream_context_create([
             'http' => [
                 'method'  => 'POST',
                 'header'  => "Authorization: {$fonnteToken}\r\nContent-Type: application/x-www-form-urlencoded\r\n",
-                'content' => http_build_query(['target' => $phone, 'message' => $msg]),
+                'content' => http_build_query(['target' => $fonnteTarget, 'message' => $msg]),
                 'timeout' => 5,
             ],
         ]));
