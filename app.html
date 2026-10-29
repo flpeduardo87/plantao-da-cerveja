@@ -952,7 +952,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
 <header id="desktop-header">
   <div class="dh-inner">
     <div class="dh-brand">
-      <img class="dh-logo-horiz" src="logo-horizontal.webp" alt="Plantão da Cerveja">
+      <img class="dh-logo-horiz" src="logo-horizontal.webp" alt="Plantão da Cerveja" onclick="goHome()" style="cursor:pointer">
     </div>
     <div class="dh-search-wrap">
       <i data-lucide="search" width="16" height="16" style="color:var(--fg-3)"></i>
@@ -1014,7 +1014,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
   <!-- Search bar sits OUTSIDE feed so it never scrolls away -->
   <div class="search-section">
     <div class="search-bar-row">
-      <img class="mob-logo" src="logo-icone.png" alt="Plantão da Cerveja">
+      <img class="mob-logo" src="logo-icone.png" alt="Plantão da Cerveja" onclick="goHome()" style="cursor:pointer">
       <div class="search-wrap">
         <i data-lucide="search" width="15" height="15" style="color:var(--fg-3)"></i>
         <input type="text" id="s-in" placeholder="Pesquise sua bebida favorita" oninput="search(this.value)">
