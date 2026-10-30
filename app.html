@@ -1522,7 +1522,7 @@ function enterCatView(slug,name){
   hd.hidden=false;
   document.getElementById('cat-view-title').textContent=name;
   const prods=slug==='ofertas'?allProds.filter(p=>p.featured):(CATALOG[slug]||[]);
-  renderSections(prods.length?prods:[]);
+  renderSections(prods.length?prods:[], name);
   document.getElementById('feed').scrollTo({top:0,behavior:'smooth'});
 }
 function exitCatView(){
@@ -1620,13 +1620,19 @@ function buildOffersSection(){
   buildCats();
   buildCatGrid();
 }
-function renderSections(prods=null){
+function renderSections(prods=null, catTitle=null){
   const box = document.getElementById('sections');
   if(prods!==null){
     if(catObserver) catObserver.disconnect();
+    const title = catTitle || 'Resultados';
+    const inCatView = !!catTitle;
     box.innerHTML = prods.length
-      ? `<div class="section"><div class="sec-hd"><span class="sec-title">Resultados</span></div><div class="prod-row">${prods.map(cardHTML).join('')}</div></div>`
-      : `<div style="text-align:center;padding:48px 16px;color:var(--fg-2)"><div style="margin-bottom:12px"><i data-lucide="search" width="48" height="48"></i></div><p style="font-size:14px">Nenhum produto encontrado.</p></div>`;
+      ? `<div class="section"><div class="sec-hd"><span class="sec-title">${esc(title)}</span></div><div class="prod-row">${prods.map(cardHTML).join('')}</div></div>`
+      : `<div style="text-align:center;padding:56px 16px;color:var(--fg-2)">
+           <div style="margin-bottom:12px"><i data-lucide="package-open" width="48" height="48"></i></div>
+           <p style="font-size:14px;margin-bottom:${inCatView?'20px':'0'}">Nenhum produto nesta categoria ainda.</p>
+           ${inCatView?`<button onclick="exitCatView()" style="background:var(--amber);color:#111;font-weight:700;border:none;border-radius:50px;padding:11px 28px;cursor:pointer;font-size:14px">← Voltar para a loja</button>`:''}
+         </div>`;
     lucide.createIcons(); return;
   }
   const offers = allProds.filter(p=>p.featured);
