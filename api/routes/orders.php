@@ -93,6 +93,16 @@ match ($method) {
     'POST' => (function () use ($pdo) {
         $d = body();
 
+        // Optional: link order to logged-in customer
+        $customerId = null;
+        $h = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+        if (preg_match('/^Bearer\s+(\S+)$/i', $h, $m)) {
+            $cs = $pdo->prepare('SELECT customer_id FROM customer_sessions WHERE token = ? AND expires_at > NOW()');
+            $cs->execute([$m[1]]);
+            $row = $cs->fetch();
+            if ($row) $customerId = (int)$row['customer_id'];
+        }
+
         // Validate required fields
         $required = ['customer_name','customer_phone','items','payment_method'];
         foreach ($required as $f) {
@@ -146,12 +156,13 @@ match ($method) {
         try {
             $ins = $pdo->prepare(
                 'INSERT INTO orders
-                 (order_number, customer_name, customer_phone, customer_email,
+                 (customer_user_id, order_number, customer_name, customer_phone, customer_email,
                   address_cep, address_street, address_number, address_complement, address_neighborhood, address_reference,
                   subtotal, delivery_fee, total, payment_method, delivery_type, scheduled_at, notes)
-                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
             );
             $ins->execute([
+                $customerId,
                 $orderNumber,
                 trim($d['customer_name']),
                 preg_replace('/\D/', '', $d['customer_phone']),

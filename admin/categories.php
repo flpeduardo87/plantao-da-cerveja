@@ -39,6 +39,11 @@
             <label>Ordem de exibição</label>
             <input type="number" id="c-sort" min="0" value="0">
           </div>
+          <div class="field">
+            <label>URL da imagem (opcional)</label>
+            <input type="url" id="c-image" placeholder="https://…/imagem.jpg">
+            <span class="field-hint">Deixe em branco para usar o emoji padrão. Use uma URL pública (Cloudinary, imgbb, etc).</span>
+          </div>
           <div class="field" style="flex-direction:row;align-items:center;gap:10px">
             <label class="toggle"><input type="checkbox" id="c-active" checked><span class="toggle-slider"></span></label>
             <span style="font-size:13px;font-weight:500">Categoria ativa</span>
@@ -152,7 +157,10 @@ async function loadCats() {
     }
     tbody.innerHTML = cats.map(c => `
       <tr>
-        <td style="font-weight:600">${c.name}</td>
+        <td style="font-weight:600;display:flex;align-items:center;gap:10px">
+          ${c.image_url ? `<img src="${c.image_url}" alt="" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0">` : `<span style="font-size:22px;line-height:1;flex-shrink:0">${c.emoji||'📦'}</span>`}
+          ${c.name}
+        </td>
         <td><code style="font-size:12px;background:#F1F5F9;padding:2px 7px;border-radius:5px;color:var(--fg-2)">${c.slug}</code></td>
         <td style="font-size:13px;color:var(--fg-2)">${c.product_count ?? '—'} produto(s)</td>
         <td style="font-size:13px;color:var(--fg-2)">${c.sort_order ?? 0}</td>
@@ -171,6 +179,7 @@ async function loadCats() {
 function openNew() {
   document.getElementById('cat-form').reset();
   document.getElementById('c-id').value = '';
+  document.getElementById('c-image').value = '';
   delete document.getElementById('c-slug').dataset.manual;
   document.getElementById('modal-cat-title').textContent = 'Nova categoria';
   openModal('modal-cat');
@@ -188,6 +197,7 @@ async function editCat(id) {
   document.getElementById('c-name').value = c.name;
   document.getElementById('c-slug').value = c.slug;
   document.getElementById('c-sort').value = c.sort_order ?? 0;
+  document.getElementById('c-image').value = c.image_url ?? '';
   document.getElementById('c-active').checked = c.active == 1;
   document.getElementById('c-slug').dataset.manual = '1';
   document.getElementById('modal-cat-title').textContent = 'Editar categoria';
@@ -200,11 +210,13 @@ async function saveCat(e) {
   btn.disabled = true; btn.textContent = 'Salvando…';
   try {
     const id = document.getElementById('c-id').value;
+    const imgUrl = document.getElementById('c-image').value.trim();
     const body = {
       name: document.getElementById('c-name').value,
       slug: document.getElementById('c-slug').value,
       sort_order: parseInt(document.getElementById('c-sort').value) || 0,
       active: document.getElementById('c-active').checked ? 1 : 0,
+      image_url: imgUrl || null,
     };
     if (id) { await api(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('Categoria atualizada'); }
     else { await api('/categories', { method: 'POST', body: JSON.stringify(body) }); toast('Categoria criada'); }

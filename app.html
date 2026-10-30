@@ -842,13 +842,14 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
   .sec-more{font-size:14px;}
 
   /* Account screen: centered card on desktop */
-  #s-account{display:flex;align-items:flex-start;justify-content:center;background:var(--bg-2);}
-  #acct-scroll{width:100%;max-width:480px;background:var(--bg);min-height:100%;padding:32px 40px;}
+  #s-account{background:var(--bg-2);align-items:center;}
+  #acct-scroll{max-width:520px;background:var(--bg);border-radius:var(--r);margin:32px auto;padding:0 0 32px;min-height:unset;flex:unset;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.10);}
+  .login-wrap{max-width:unset;margin:0;padding:28px 36px 8px;}
   .login-logo img{width:72px;height:72px;}
-  .login-title{font-size:26px;}
-  .acct-header{padding:28px 0 20px;}
-  .acct-body{padding:0;}
-  .acct-logout{margin-top:24px;}
+  .login-title{font-size:24px;}
+  .acct-header{border-radius:var(--r) var(--r) 0 0;}
+  .acct-body{padding:0 24px 8px;}
+  .acct-logout{margin-top:16px;}
 
   /* Products: CSS grid instead of horizontal scroll */
   .prod-row{
@@ -927,7 +928,7 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 
 /* ── CUSTOMER ACCOUNT SCREEN ── */
 #s-account{z-index:15;}
-#acct-scroll{flex:1;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch;}
+#acct-scroll{flex:1;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch;padding-bottom:env(safe-area-inset-bottom,80px);}
 .acct-header{
   background:var(--amber);
   padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-left,0px)) 32px;
@@ -960,7 +961,7 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 .osp-cancelled{background:#FEE2E2;color:#991B1B;}
 
 /* Login form */
-.login-wrap{max-width:380px;margin:40px auto;padding:0 16px;}
+.login-wrap{max-width:380px;margin:40px auto;padding:0 16px 100px;}
 .login-logo{text-align:center;margin-bottom:24px;}
 .login-logo img{width:80px;height:80px;border-radius:50%;}
 .login-title{text-align:center;font-size:20px;font-weight:700;margin-bottom:4px;}
@@ -1103,9 +1104,9 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
     </div>
     <div class="store-info-card">
       <h1 class="store-name">Plantão da Cerveja</h1>
-      <p class="store-tagline">Bebida gelada onde você estiver!</p>
+      <p class="store-tagline">BEBIDA GELADA ONDE VOCÊ ESTIVER!</p>
       <div class="store-meta">
-        <div class="meta-row"><span class="meta-ic"><i data-lucide="clock" width="14" height="14"></i></span><span>Entrega em até <strong>20 min</strong> · <span class="meta-green">Entrega Grátis</span></span></div>
+        <div class="meta-row"><span class="meta-ic"><i data-lucide="clock" width="14" height="14"></i></span><span>Entrega em até <strong>20 min</strong></span></div>
         <div class="meta-row"><span class="meta-ic"><i data-lucide="map-pin" width="14" height="14"></i></span><span>Bem-vindo! · <strong>Sua região, informe sua localização</strong></span></div>
         <div class="meta-row"><span class="meta-ic"><i data-lucide="star" width="14" height="14"></i></span><span>Pedido mínimo: <strong>R$ 20,00</strong></span></div>
       </div>
@@ -1211,9 +1212,9 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
       <div class="login-title">Minha Conta</div>
 
       <!-- Tabs login / cadastro -->
-      <div id="acct-tab-row" style="display:flex;gap:0;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px;">
-        <button id="tab-login" onclick="acctTab('login')" style="flex:1;padding:9px;border:none;background:var(--amber);color:#111;font-weight:700;font-size:14px;cursor:pointer;">Entrar</button>
-        <button id="tab-register" onclick="acctTab('register')" style="flex:1;padding:9px;border:none;background:var(--bg);color:var(--fg-2);font-weight:500;font-size:14px;cursor:pointer;">Criar conta</button>
+      <div id="acct-tab-row" style="display:flex;gap:4px;background:var(--bg-2);border-radius:12px;padding:4px;margin-bottom:24px;">
+        <button id="tab-login" onclick="acctTab('login')" style="flex:1;padding:10px;border:none;border-radius:9px;background:#fff;color:#111;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.10);transition:background .15s,box-shadow .15s,color .15s;">Entrar</button>
+        <button id="tab-register" onclick="acctTab('register')" style="flex:1;padding:10px;border:none;border-radius:9px;background:transparent;color:var(--fg-2);font-weight:500;font-size:14px;cursor:pointer;box-shadow:none;transition:background .15s,box-shadow .15s,color .15s;">Criar conta</button>
       </div>
 
       <!-- Formulário login -->
@@ -1281,7 +1282,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
         <button class="acct-back" onclick="goBack('s-home')"><i data-lucide="arrow-left" width="22" height="22"></i></button>
         <div class="acct-avatar"><i data-lucide="user" width="32" height="32" color="#fff"></i></div>
         <div class="acct-name" id="acct-dname">—</div>
-        <div class="acct-phone" id="acct-dphone" style="font-size:13px;text-align:center;color:rgba(0,0,0,.6);margin-top:2px">—</div>
+        <div class="acct-phone" id="acct-dphone" style="font-size:13px;text-align:center;color:rgba(0,0,0,.55);margin-top:2px">—</div>
       </div>
       <div class="acct-body">
         <div class="acct-section-title">Meus Pedidos</div>
@@ -1322,6 +1323,8 @@ let CATS = [{id:'all',em:'🏠',lb:'Todos'}];
 let CATALOG = {};
 let SEC_LABELS = {};
 let allProds = [];
+let DELIVERY_FEE = 0;
+let MIN_ORDER = 0;
 
 const DEMO_DATA = {
   cats: [
@@ -1553,47 +1556,46 @@ async function enterStore(){
       buildCats(); buildCatGrid(); renderSections();
     }
   } catch(e){ /* keep demo data */ }
-  // Check store open/closed status — only update if endpoint is public and returns store_open
+  // Fetch store settings: open status, delivery fee, min order
   try {
     const res = await fetch(API+'/settings',{signal:AbortSignal.timeout(5000)});
     if(res.ok){
       const cfg = await res.json();
-      if(cfg && cfg.store_open !== undefined){
-        const isOpen = cfg.store_open=='1'||cfg.store_open===1;
-        const badge = document.getElementById('store-badge');
-        const dot   = document.getElementById('store-dot');
-        const txt   = document.getElementById('store-badge-txt');
-        badge.classList.toggle('closed',!isOpen);
-        dot.classList.toggle('closed',!isOpen);
-        txt.textContent = isOpen ? 'PEDIDOS ONLINE' : 'LOJA FECHADA';
+      if(cfg){
+        if(cfg.store_open !== undefined){
+          const isOpen = cfg.store_open=='1'||cfg.store_open===1;
+          const badge = document.getElementById('store-badge');
+          const dot   = document.getElementById('store-dot');
+          const txt   = document.getElementById('store-badge-txt');
+          badge.classList.toggle('closed',!isOpen);
+          dot.classList.toggle('closed',!isOpen);
+          txt.textContent = isOpen ? 'PEDIDOS ONLINE' : 'LOJA FECHADA';
+        }
+        if(cfg.delivery_fee !== undefined) DELIVERY_FEE = parseFloat(cfg.delivery_fee)||0;
+        if(cfg.min_order    !== undefined) MIN_ORDER    = parseFloat(cfg.min_order)||0;
       }
     }
-    // non-OK (401 etc) → keep default "PEDIDOS ONLINE"
+    // non-OK (401 etc) → keep defaults
   } catch(e){}
 }
 
 const IMG_CATS = [
-  // Row 1 — cat: slug da categoria no banco (fallback se o slug próprio não existir)
-  {slug:'ofertas',        name:'Ofertas',         em:'🏷️', color:['#FEE2E2','#B91C1C'], cat:'ofertas'},
-  {slug:'novidades',      name:'Novidades',        em:'✨',  color:['#EDE9FE','#5B21B6'], cat:'ofertas'},
-  {slug:'cervejas-lata',  name:'Cervejas Lata',   em:'🍺', color:['#FEF3C7','#92400E'], cat:'cervejas'},
-  {slug:'packs',          name:'Packs',            em:'📦', color:['#FDE68A','#B45309'], cat:'cervejas'},
-  {slug:'long-necks',     name:'Long Necks',       em:'🍾', color:['#FEF3C7','#78350F'], cat:'cervejas'},
-  {slug:'retornaveis',    name:'Retornáveis',      em:'♻️', color:['#DCFCE7','#166534'], cat:'cervejas'},
-  {slug:'zero',           name:'Zero',             em:'🚫', color:['#F1F5F9','#334155'], cat:'cervejas'},
-  {slug:'baixas-calorias',name:'Baixas Calorias',  em:'💪', color:['#D1FAE5','#065F46'], cat:'cervejas'},
+  // Row 1
+  {slug:'ofertas',        name:'Ofertas',          em:'🏷️', color:['#FEE2E2','#B91C1C'], cat:'ofertas'},
+  {slug:'cervejas',       name:'Cervejas',         em:'🍺', color:['#FEF3C7','#92400E'], cat:'cervejas'},
   {slug:'churrasco',      name:'Churrasco',        em:'🔥', color:['#FFEDD5','#9A3412'], cat:'churrasco'},
-  {slug:'aguas',          name:'Águas/Gelos',      em:'💧', color:['#E0F2FE','#0369A1'], cat:'aguas-gelos'},
-  // Row 2
-  {slug:'drinks-prontos', name:'Drinks Prontos',   em:'🍹', color:['#FCE7F3','#9D174D'], cat:'drinks'},
+  {slug:'aguas-gelos',    name:'Águas/Gelos',      em:'💧', color:['#E0F2FE','#0369A1'], cat:'aguas-gelos'},
+  {slug:'drinks',         name:'Drinks',           em:'🍹', color:['#FCE7F3','#9D174D'], cat:'drinks'},
   {slug:'nao-alcoolicos', name:'Não Alcoólicos',   em:'🥤', color:['#DCFCE7','#166534'], cat:'nao-alcoolicos'},
-  {slug:'energeticos',    name:'Energéticos',      em:'⚡', color:['#FEF9C3','#854D0E'], cat:'nao-alcoolicos'},
   {slug:'destilados',     name:'Destilados',       em:'🥃', color:['#EDE9FE','#5B21B6'], cat:'destilados'},
+  // Row 2
   {slug:'vinhos',         name:'Vinhos',           em:'🍷', color:['#FCE7F3','#9D174D'], cat:'vinhos'},
   {slug:'congelados',     name:'Congelados',       em:'🧊', color:['#E0F2FE','#0C4A6E'], cat:'congelados'},
   {slug:'salgadinhos',    name:'Salgadinhos',      em:'🍟', color:['#FEF9C3','#854D0E'], cat:'salgadinhos'},
   {slug:'doces',          name:'Doces',            em:'🍬', color:['#FCE7F3','#BE185D'], cat:'doces'},
+  {slug:'sorvetes',       name:'Sorvetes',         em:'🍦', color:['#D1FAE5','#065F46'], cat:'sorvetes'},
   {slug:'mercearia',      name:'Mercearia',        em:'🛒', color:['#F1F5F9','#334155'], cat:'mercearia'},
+  {slug:'tabacos',        name:'Tabacos',          em:'🚬', color:['#E7E5E4','#57534E'], cat:'tabacos'},
 ];
 function buildCatGrid(){
   const wrap=document.getElementById('cat-grid-wrap');
@@ -1612,7 +1614,7 @@ function buildCatGrid(){
   function rowHTML(items){
     return `<div class="cat-marquee-row"><div class="cat-marquee-track">${items.map(mcHTML).join('')}</div></div>`;
   }
-  const r1=IMG_CATS.slice(0,10), r2=IMG_CATS.slice(10);
+  const r1=IMG_CATS.slice(0,7), r2=IMG_CATS.slice(7);
   wrap.innerHTML=`<div class="cat-marquee-wrap">${rowHTML(r1)}${rowHTML(r2)}</div>`;
   // Scroll livre — sem auto-scroll. Gradiente já indica mais conteúdo.
 }
@@ -1655,8 +1657,13 @@ const CAT_ICONS = {
   'destilados':'bottle-wine','dose':'bottle-wine','whisky':'bottle-wine','whiskies':'bottle-wine','destilado':'bottle-wine',
   'churrasco':'flame-kindling','churrascos':'flame-kindling',
   'energetico':'zap','energeticos':'zap','energético':'zap','energéticos':'zap',
-  'agua':'droplets','aguas':'droplets','água':'droplets','águas':'droplets',
+  'agua':'droplets','aguas':'droplets','água':'droplets','águas':'droplets','aguasgelos':'droplets','gelos':'droplets',
+  'drinks':'wine','drink':'wine',
+  'naoalcoolicos':'cup-soda','naoalcoolico':'cup-soda',
   'refrigerante':'cup-soda','refrigerantes':'cup-soda','suco':'cup-soda','sucos':'cup-soda',
+  'tabacos':'cigarette','tabaco':'cigarette','cigarro':'cigarette','cigarros':'cigarette',
+  'congelados':'snowflake','congelado':'snowflake',
+  'mercearia':'shopping-basket','mercearias':'shopping-basket',
   'diversos':'shapes','diverso':'shapes','variados':'shapes','outros':'shapes',
   'kit':'package','kits':'package','combo':'package','combos':'package',
   'snack':'cookie','snacks':'cookie','petisco':'cookie','petiscos':'cookie',
@@ -1919,7 +1926,10 @@ function renderDrawerCart(){
     lucide.createIcons();
     return;
   }
-  const total = cartTotal();
+  const subtotal = cartTotal();
+  const grandTotal = subtotal + DELIVERY_FEE;
+  const freteTxt = DELIVERY_FEE > 0 ? `R$ ${fmt(DELIVERY_FEE)}` : 'Grátis';
+  const freteClass = DELIVERY_FEE > 0 ? '' : ' gratis';
   body.innerHTML=`
     <div class="cart-items-card">
       ${cart.map(i=>`
@@ -1938,9 +1948,9 @@ function renderDrawerCart(){
         </div>`).join('')}
     </div>
     <div class="summary-card">
-      <div class="sum-row"><span class="sum-label">Subtotal</span><span class="sum-val">R$ ${fmt(total)}</span></div>
-      <div class="sum-row"><span class="sum-label"><i data-lucide="truck" width="14" height="14"></i> Entrega</span><span class="sum-val gratis">Grátis</span></div>
-      <div class="sum-row total-row"><span class="sum-label">Total</span><span class="sum-val">R$ ${fmt(total)}</span></div>
+      <div class="sum-row"><span class="sum-label">Subtotal</span><span class="sum-val">R$ ${fmt(subtotal)}</span></div>
+      <div class="sum-row"><span class="sum-label"><i data-lucide="truck" width="14" height="14"></i> Entrega</span><span class="sum-val${freteClass}">${freteTxt}</span></div>
+      <div class="sum-row total-row"><span class="sum-label">Total</span><span class="sum-val">R$ ${fmt(grandTotal)}</span></div>
     </div>`;
   footer.classList.remove('hidden');
   footer.innerHTML=`
@@ -1977,7 +1987,10 @@ function renderCartPage(){
       </div>`;
     return;
   }
-  const total = cartTotal();
+  const subtotal = cartTotal();
+  const grandTotal = subtotal + DELIVERY_FEE;
+  const freteTxt2 = DELIVERY_FEE > 0 ? `R$ ${fmt(DELIVERY_FEE)}` : 'Grátis';
+  const freteClass2 = DELIVERY_FEE > 0 ? '' : ' gratis';
   el.innerHTML = `
     <div class="cart-page-title">Minha Sacola</div>
     <div class="cart-items-card">
@@ -1997,9 +2010,9 @@ function renderCartPage(){
         </div>`).join('')}
     </div>
     <div class="summary-card">
-      <div class="sum-row"><span class="sum-label">Subtotal</span><span class="sum-val">R$ ${fmt(total)}</span></div>
-      <div class="sum-row"><span class="sum-label"><i data-lucide="truck" width="14" height="14"></i> Custo de envio</span><span class="sum-val gratis">Grátis</span></div>
-      <div class="sum-row total-row"><span class="sum-label">Total</span><span class="sum-val">R$ ${fmt(total)}</span></div>
+      <div class="sum-row"><span class="sum-label">Subtotal</span><span class="sum-val">R$ ${fmt(subtotal)}</span></div>
+      <div class="sum-row"><span class="sum-label"><i data-lucide="truck" width="14" height="14"></i> Entrega</span><span class="sum-val${freteClass2}">${freteTxt2}</span></div>
+      <div class="sum-row total-row"><span class="sum-label">Total</span><span class="sum-val">R$ ${fmt(grandTotal)}</span></div>
     </div>
     <div class="cart-ctas">
       <button class="btn-primary" onclick="openWhen()">Finalizar Pedido</button>
@@ -2015,9 +2028,8 @@ function removeFromCart(id){
 }
 
 function openWhen(){
-  const MIN_ORDER = 20;
   const total = cartTotal();
-  if(total < MIN_ORDER){ toast(`Pedido mínimo R$ ${fmt(MIN_ORDER)}. Adicione mais R$ ${fmt(MIN_ORDER - total)} para continuar.`); return; }
+  if(MIN_ORDER > 0 && total < MIN_ORDER){ toast(`Pedido mínimo R$ ${fmt(MIN_ORDER)}. Adicione mais R$ ${fmt(MIN_ORDER - total)} para continuar.`); return; }
   chosenWhen = null;
   document.getElementById('when-imediata').classList.remove('selected');
   document.getElementById('when-agendar').classList.remove('selected');
@@ -2054,6 +2066,25 @@ function openCheckout(){
   }
   hide('when-overlay');
   coStep = 1; coData = {}; payMethod = null;
+  // Prefill from logged-in account
+  if(acctToken){
+    try{
+      const n=localStorage.getItem('acct_name')||''; const e=localStorage.getItem('acct_email')||'';
+      if(n) coData.nome=n;
+      if(e) coData.email=e;
+    }catch{}
+  }
+  // Prefill last saved address
+  try{
+    const a=JSON.parse(localStorage.getItem('plantao_addr')||'{}');
+    if(a.cep) coData.cep=a.cep;
+    if(a.rua) coData.rua=a.rua;
+    if(a.num) coData.num=a.num;
+    if(a.comp) coData.comp=a.comp;
+    if(a.bairro) coData.bairro=a.bairro;
+    if(a.ref) coData.ref=a.ref;
+    if(a.tel) coData.tel=a.tel;
+  }catch{}
   show('checkout-overlay');
   renderCoStep();
 }
@@ -2061,20 +2092,21 @@ function closeCheckout(){ stopOrderTracking(); hide('checkout-overlay'); updateT
 
 function renderCoStep(){
   const el = document.getElementById('co-body');
-  const total = cartTotal();
+  const subtotal = cartTotal();
+  const grandTotal = subtotal + DELIVERY_FEE;
   const summaryHtml = `
     <div class="order-summary">
       <button class="os-toggle" id="os-toggle" onclick="toggleSummary()">
-        <span><i data-lucide="package" width="14" height="14"></i> ${cart.reduce((s,i)=>s+i.qty,0)} item(s) · <span class="os-val">R$ ${fmt(total)}</span></span>
+        <span><i data-lucide="package" width="14" height="14"></i> ${cart.reduce((s,i)=>s+i.qty,0)} item(s) · <span class="os-val">R$ ${fmt(grandTotal)}</span></span>
         <span class="os-arrow"><i data-lucide="chevron-down" width="16" height="16"></i></span>
       </button>
       <div class="os-details" id="os-details">
         ${cart.map(i=>`<div class="os-item"><span>${i.name} ×${i.qty}</span><span>R$ ${fmt(i.price*i.qty)}</span></div>`).join('')}
-        <div class="os-meta"><span>Subtotal</span><span>R$ ${fmt(total)}</span></div>
-        <div class="os-meta"><span><i data-lucide="truck" width="13" height="13"></i> Frete</span><span class="gratis">GRÁTIS</span></div>
+        <div class="os-meta"><span>Subtotal</span><span>R$ ${fmt(subtotal)}</span></div>
+        <div class="os-meta"><span><i data-lucide="truck" width="13" height="13"></i> Frete</span><span${DELIVERY_FEE>0?'':' class="gratis"'}>${DELIVERY_FEE>0?'R$ '+fmt(DELIVERY_FEE):'GRÁTIS'}</span></div>
         <div class="os-meta"><span><i data-lucide="clock" width="13" height="13"></i> Entrega</span><span>${chosenWhen==='imediata'?'15–20 min':'Agendada'}</span></div>
       </div>
-      <div class="os-total"><span class="label">Total</span><span class="val">R$ ${fmt(total)}</span></div>
+      <div class="os-total"><span class="label">Total</span><span class="val">R$ ${fmt(grandTotal)}</span></div>
     </div>`;
   const stepperHtml = `
     <div class="stepper">
@@ -2138,6 +2170,7 @@ function renderCoStep(){
       </div>`;
   } else if(coStep===3){
     const orderDate = new Date().toLocaleDateString('pt-BR')+' '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    const rev_sub = subtotal; const rev_total = grandTotal;
     content=`
       <div class="form-section-title"><i data-lucide="clipboard-list" width="16" height="16"></i> Revisão do Pedido</div>
       <div style="background:var(--bg-2);border-radius:var(--r-sm);padding:12px;margin-bottom:16px;font-size:13px">
@@ -2149,13 +2182,13 @@ function renderCoStep(){
           ${cart.map(i=>`<tr><td>${esc(i.name)}</td><td>${i.qty}</td><td>R$ ${fmt(i.price*i.qty)}</td></tr>`).join('')}
         </table>
         <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:6px;border-top:1px solid var(--border);font-size:12px">
-          <span style="color:var(--fg-2)">Subtotal</span><span>R$ ${fmt(total)}</span>
+          <span style="color:var(--fg-2)">Subtotal</span><span>R$ ${fmt(rev_sub)}</span>
         </div>
         <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:3px">
-          <span style="color:var(--fg-2)">Frete</span><span style="color:var(--green-dk);font-weight:500">GRÁTIS</span>
+          <span style="color:var(--fg-2)">Frete</span><span style="${DELIVERY_FEE>0?'':'color:var(--green-dk);font-weight:500'}">${DELIVERY_FEE>0?'R$ '+fmt(DELIVERY_FEE):'GRÁTIS'}</span>
         </div>
         <div style="display:flex;justify-content:space-between;margin-top:8px;font-weight:600">
-          <span>TOTAL</span><span style="font-weight:600">R$ ${fmt(total)}</span>
+          <span>TOTAL</span><span style="font-weight:600">R$ ${fmt(rev_total)}</span>
         </div>
       </div>
       <div class="form-section-title"><i data-lucide="credit-card" width="16" height="16"></i> Forma de Pagamento</div>
@@ -2321,15 +2354,18 @@ async function finalizarPedido(){
     notes: '',
     items: cart.map(i=>({product_id:i.id,product_name:i.name,quantity:i.qty,unit_price:i.price})),
   };
+  const orderHeaders = {'Content-Type':'application/json'};
+  if(acctToken) orderHeaders['Authorization'] = 'Bearer '+acctToken;
   try {
     const r = await fetch(API+'/orders',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:orderHeaders,
       body:JSON.stringify(payload),
     });
     const j = await r.json();
     if(!r.ok||!j.success) throw new Error(j.message||'Erro ao registrar pedido.');
     try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, phone: coData.tel, ts: Date.now()})); }catch{}
+    try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
     cart=[]; saveCart(); updateBadge();
     coStep=4;
     renderCoStep();
@@ -2485,8 +2521,11 @@ function acctShowLogin(){
 function acctShowDashboard(){
   document.getElementById('acct-login').style.display='none';
   document.getElementById('acct-dashboard').style.display='';
-  const name = (() => { try{ return localStorage.getItem('acct_name')||''; }catch{ return ''; } })();
+  const name  = (() => { try{ return localStorage.getItem('acct_name')||''; }catch{ return ''; } })();
+  const email = (() => { try{ return localStorage.getItem('acct_email')||''; }catch{ return ''; } })();
   if(name) document.getElementById('acct-dname').textContent = name;
+  const ph = document.getElementById('acct-dphone');
+  if(ph) ph.textContent = email || '';
   acctLoadOrders();
   lucide.createIcons();
 }
@@ -2506,13 +2545,11 @@ function acctTab(tab){
   const btnLogin = document.getElementById('tab-login');
   const btnReg   = document.getElementById('tab-register');
   if(btnLogin && btnReg){
-    if(tab==='login'){
-      btnLogin.style.background='var(--amber)'; btnLogin.style.color='#111'; btnLogin.style.fontWeight='700';
-      btnReg.style.background='var(--bg)'; btnReg.style.color='var(--fg-2)'; btnReg.style.fontWeight='500';
-    } else if(tab==='register'){
-      btnReg.style.background='var(--amber)'; btnReg.style.color='#111'; btnReg.style.fontWeight='700';
-      btnLogin.style.background='var(--bg)'; btnLogin.style.color='var(--fg-2)'; btnLogin.style.fontWeight='500';
-    }
+    const activeStyle  = {background:'#fff', color:'#111', fontWeight:'700', boxShadow:'0 1px 4px rgba(0,0,0,.10)'};
+    const inactiveStyle= {background:'transparent', color:'var(--fg-2)', fontWeight:'500', boxShadow:'none'};
+    const applyStyle   = (el, s) => { el.style.background=s.background; el.style.color=s.color; el.style.fontWeight=s.fontWeight; el.style.boxShadow=s.boxShadow; };
+    if(tab==='login'){ applyStyle(btnLogin, activeStyle); applyStyle(btnReg, inactiveStyle); }
+    else if(tab==='register'){ applyStyle(btnReg, activeStyle); applyStyle(btnLogin, inactiveStyle); }
   }
   // hide tab row on track screen
   const tabRow = document.getElementById('acct-tab-row');
@@ -2532,9 +2569,9 @@ async function acctLogin(){
     const j = await r.json();
     if(!j.success){ err.textContent=j.error||'E-mail ou senha incorretos'; err.style.display=''; btn.disabled=false; btn.textContent='Entrar →'; return; }
     acctToken = j.token;
-    try{ localStorage.setItem('cust_token',acctToken); if(j.name) localStorage.setItem('acct_name',j.name); }catch{}
+    try{ localStorage.setItem('cust_token',acctToken); if(j.name) localStorage.setItem('acct_name',j.name); localStorage.setItem('acct_email',email); }catch{}
     document.getElementById('acct-dname').textContent = j.name||'';
-    document.getElementById('acct-dphone').textContent = j.phone ? fmtPhoneDisplay(j.phone) : '';
+    document.getElementById('acct-dphone').textContent = j.phone ? fmtPhoneDisplay(j.phone) : email;
     acctShowDashboard();
   } catch {
     err.textContent='Erro de conexão. Tente novamente.'; err.style.display='';
@@ -2559,9 +2596,9 @@ async function acctRegister(){
     const j = await r.json();
     if(!j.success){ err.textContent=j.error||'Erro ao criar conta'; err.style.display=''; btn.disabled=false; btn.textContent='Criar conta →'; return; }
     acctToken = j.token;
-    try{ localStorage.setItem('cust_token',acctToken); localStorage.setItem('acct_name',name); }catch{}
+    try{ localStorage.setItem('cust_token',acctToken); localStorage.setItem('acct_name',name); localStorage.setItem('acct_email',email); }catch{}
     document.getElementById('acct-dname').textContent = name;
-    document.getElementById('acct-dphone').textContent = phone ? fmtPhoneDisplay(phone) : '';
+    document.getElementById('acct-dphone').textContent = phone ? fmtPhoneDisplay(phone) : email;
     acctShowDashboard();
   } catch {
     err.textContent='Erro de conexão. Tente novamente.'; err.style.display='';
@@ -2649,7 +2686,7 @@ function acctOpenOrder(orderNumber){
 function acctLogout(){
   try{ fetch(`${API}/customer/logout`,{method:'POST',headers:{'Authorization':'Bearer '+acctToken}}); }catch{}
   acctToken=null;
-  try{ localStorage.removeItem('cust_token'); localStorage.removeItem('acct_token'); localStorage.removeItem('acct_name'); }catch{}
+  try{ localStorage.removeItem('cust_token'); localStorage.removeItem('acct_token'); localStorage.removeItem('acct_name'); localStorage.removeItem('acct_email'); }catch{}
   acctShowLogin();
 }
 
