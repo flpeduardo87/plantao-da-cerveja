@@ -267,20 +267,14 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .cat-pill.on .em{color:#191A12;}
 .cat-pill .lb{font-size:13px;font-weight:500;font-family:'Inter',sans-serif;color:var(--fg-2);white-space:nowrap;}
 .cat-pill.on .lb{color:#191A12;}
-/* ── Category marquee carousel ── */
-.cat-marquee-wrap{padding:14px 0 16px;position:relative;}
-.cat-marquee-wrap::after{
-  content:'';pointer-events:none;position:absolute;top:0;right:0;bottom:0;width:56px;
-  background:linear-gradient(to right,transparent,var(--bg));z-index:2;
-}
-.cat-marquee-row{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-bottom:10px;}
-.cat-marquee-row::-webkit-scrollbar{display:none;}
-.cat-marquee-track{display:flex;gap:12px;padding:4px max(16px,env(safe-area-inset-left,0px)) 8px;width:max-content;}
-.cat-mc{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;border-radius:12px;overflow:hidden;width:100px;background:var(--bg);box-shadow:0 1px 6px rgba(0,0,0,.10);transition:transform .12s,box-shadow .12s;user-select:none;}
+/* ── Category grid ── */
+.cat-marquee-wrap{padding:12px max(16px,env(safe-area-inset-left,0px)) 16px;}
+.cat-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.cat-mc{display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;border-radius:12px;overflow:hidden;background:var(--bg);box-shadow:0 1px 6px rgba(0,0,0,.10);transition:transform .12s,box-shadow .12s;user-select:none;}
 .cat-mc:active{transform:scale(.93);box-shadow:0 1px 3px rgba(0,0,0,.08);}
-.cat-mc-img{width:100%;height:100px;display:flex;align-items:center;justify-content:center;font-size:42px;line-height:1;pointer-events:none;overflow:hidden;flex-shrink:0;}
+.cat-mc-img{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:clamp(22px,6vw,42px);line-height:1;pointer-events:none;overflow:hidden;flex-shrink:0;}
 .cat-mc-img img{width:100%;height:100%;object-fit:cover;display:block;}
-.cat-mc-name{font-size:11px;font-weight:600;text-align:center;padding:6px 5px 8px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg);background:var(--bg);pointer-events:none;letter-spacing:-.1px;}
+.cat-mc-name{font-size:clamp(9px,2.4vw,11px);font-weight:600;text-align:center;padding:4px 3px 7px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg);background:var(--bg);pointer-events:none;letter-spacing:-.1px;}
 /* ── Category view header ── */
 .cat-view-hd{display:flex;align-items:center;gap:10px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:19;}
 .cat-view-hd-back{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:none;background:var(--bg-2);cursor:pointer;color:var(--fg);flex-shrink:0;}
@@ -828,11 +822,11 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
   .cat-pill .lb{font-size:16px;font-weight:500;font-family:'Inter',sans-serif;color:#111;}
   .cat-pill.on .lb{color:#191A12;font-weight:600;font-family:'Inter',sans-serif;}
 
-  /* Category cards: larger on desktop, aligned with 40px grid */
-  .cat-marquee-track{padding:0 40px;}
-  .cat-marquee-wrap::after{width:80px;}
-  .cat-mc{width:120px;border-radius:14px;}
-  .cat-mc-img{height:120px;font-size:52px;}
+  /* Category grid: larger cards on desktop */
+  .cat-marquee-wrap{padding:14px 40px 18px;}
+  .cat-grid{gap:10px;}
+  .cat-mc{border-radius:14px;}
+  .cat-mc-img{font-size:44px;}
   .cat-mc-name{font-size:13px;padding:7px 6px 10px;}
 
   /* Section */
@@ -1611,11 +1605,7 @@ function buildCatGrid(){
       <div class="cat-mc-name">${c.name}</div>
     </div>`;
   }
-  function rowHTML(items){
-    return `<div class="cat-marquee-row"><div class="cat-marquee-track">${items.map(mcHTML).join('')}</div></div>`;
-  }
-  const r1=IMG_CATS.slice(0,7), r2=IMG_CATS.slice(7);
-  wrap.innerHTML=`<div class="cat-marquee-wrap">${rowHTML(r1)}${rowHTML(r2)}</div>`;
+  wrap.innerHTML=`<div class="cat-marquee-wrap"><div class="cat-grid">${IMG_CATS.map(mcHTML).join('')}</div></div>`;
   // Scroll livre — sem auto-scroll. Gradiente já indica mais conteúdo.
 }
 function enterCatView(slug,name,catFallback=''){
