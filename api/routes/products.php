@@ -21,6 +21,9 @@ match ($method) {
             if (!empty($_GET['category_id'])) {
                 $where .= ' AND p.category_id = ?';
                 $vals[] = (int)$_GET['category_id'];
+            } elseif (!empty($_GET['category'])) {
+                $where .= ' AND c.slug = ?';
+                $vals[] = $_GET['category'];
             }
             $sql = "SELECT p.*, c.slug AS category_slug, c.name AS category_name
                     FROM products p
