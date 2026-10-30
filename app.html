@@ -301,6 +301,14 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   padding:12px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));
 }
 .prod-grid .pcard{width:auto;flex-shrink:unset;}
+/* Brand filter pills */
+.brand-pills{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;
+  padding:0 max(16px,env(safe-area-inset-right,0px)) 14px max(16px,env(safe-area-inset-left,0px));}
+.brand-pills::-webkit-scrollbar{display:none;}
+.brand-pill{flex-shrink:0;padding:6px 14px;border-radius:999px;border:1.5px solid var(--border);
+  background:var(--bg);color:var(--fg);font-size:13px;font-weight:500;cursor:pointer;
+  transition:background .12s,color .12s,border-color .12s;white-space:nowrap;}
+.brand-pill.active{background:var(--amber);color:#111;border-color:var(--amber);font-weight:700;}
 .pcard{
   flex-shrink:0;width:148px;background:var(--bg);
   border-radius:var(--r-sm);border:1.5px solid var(--border);
@@ -1660,19 +1668,61 @@ function buildOffersSection(){
   buildCats();
   buildCatGrid();
 }
+// Extract brand from product name (first 1-2 meaningful words)
+function extractBrand(name){
+  const stop = /^(cerveja|bebida|kit|pack|caixa|combo|dose|lata|garrafa|long|neck|retorn|sem|zero|baixa)/i;
+  const words = name.trim().split(/\s+/);
+  // Skip leading stop-words, take up to 2 words
+  let i=0; while(i<words.length && stop.test(words[i])) i++;
+  return words.slice(i, i+2).join(' ') || words[0] || name;
+}
+
+let _catProds = []; // current category products for pill filtering
+function renderCatGrid(prods){
+  const grid = document.getElementById('cat-prod-grid');
+  if(!grid) return;
+  grid.innerHTML = prods.map(cardHTML).join('');
+  lucide.createIcons();
+}
+function filterBrand(brand){
+  document.querySelectorAll('.brand-pill').forEach(p=>{
+    p.classList.toggle('active', p.dataset.brand===brand);
+  });
+  const filtered = brand==='Todos' ? _catProds : _catProds.filter(p=>extractBrand(p.name)===brand);
+  renderCatGrid(filtered);
+}
+
 function renderSections(prods=null, catTitle=null){
   const box = document.getElementById('sections');
   if(prods!==null){
     if(catObserver) catObserver.disconnect();
     const title = catTitle || 'Resultados';
     const inCatView = !!catTitle;
-    box.innerHTML = prods.length
-      ? `<div class="section"><div class="sec-hd"><span class="sec-title">${esc(title)}</span></div><div class="prod-grid">${prods.map(cardHTML).join('')}</div></div>`
-      : `<div style="text-align:center;padding:56px 16px;color:var(--fg-2)">
+    if(!prods.length){
+      box.innerHTML=`<div style="text-align:center;padding:56px 16px;color:var(--fg-2)">
            <div style="margin-bottom:12px"><i data-lucide="package-open" width="48" height="48"></i></div>
            <p style="font-size:14px;margin-bottom:${inCatView?'20px':'0'}">Nenhum produto nesta categoria ainda.</p>
            ${inCatView?`<button onclick="exitCatView()" style="background:var(--amber);color:#111;font-weight:700;border:none;border-radius:50px;padding:11px 28px;cursor:pointer;font-size:14px">← Voltar para a loja</button>`:''}
          </div>`;
+      lucide.createIcons(); return;
+    }
+    _catProds = prods;
+    // Build brand pills when 4+ products
+    let pillsHTML = '';
+    if(inCatView && prods.length >= 4){
+      const brands = [...new Set(prods.map(p=>extractBrand(p.name)))].sort();
+      if(brands.length >= 2){
+        const pills = ['Todos',...brands].map(b=>
+          `<button class="brand-pill${b==='Todos'?' active':''}" data-brand="${esc(b)}" onclick="filterBrand('${b.replace(/'/g,"\\'")}')">${esc(b)}</button>`
+        ).join('');
+        pillsHTML = `<div class="brand-pills">${pills}</div>`;
+      }
+    }
+    box.innerHTML=`<div class="section">
+      <div class="sec-hd"><span class="sec-title">${esc(title)}</span></div>
+      ${pillsHTML}
+      <div class="prod-grid" id="cat-prod-grid">${prods.map(cardHTML).join('')}</div>
+    </div>`;
     lucide.createIcons(); return;
   }
   const offers = allProds.filter(p=>p.featured);
