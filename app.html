@@ -2357,6 +2357,10 @@ async function finalizarPedido(){
     try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, phone: coData.tel, ts: Date.now()})); }catch{}
     try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
     cart=[]; saveCart(); updateBadge();
+    // If Stone returned a payment link, open it in a new tab then show tracking
+    if(j.payment_url){
+      window.open(j.payment_url,'_blank','noopener,noreferrer');
+    }
     coStep=4;
     renderCoStep();
     document.getElementById('co-body').scrollTop=0;
