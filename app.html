@@ -268,10 +268,13 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .cat-pill .lb{font-size:13px;font-weight:500;font-family:'Inter',sans-serif;color:var(--fg-2);white-space:nowrap;}
 .cat-pill.on .lb{color:#191A12;}
 /* ── Category marquee carousel ── */
-.cat-marquee-wrap{padding:14px 0 16px;}
-.cat-marquee-row{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-bottom:10px;cursor:grab;}
+.cat-marquee-wrap{padding:14px 0 16px;position:relative;}
+.cat-marquee-wrap::after{
+  content:'';pointer-events:none;position:absolute;top:0;right:0;bottom:0;width:56px;
+  background:linear-gradient(to right,transparent,var(--bg));z-index:2;
+}
+.cat-marquee-row{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-bottom:10px;}
 .cat-marquee-row::-webkit-scrollbar{display:none;}
-.cat-marquee-row.grabbing{cursor:grabbing;}
 .cat-marquee-track{display:flex;gap:10px;padding:0 max(16px,env(safe-area-inset-left,0px));width:max-content;}
 .cat-mc{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;border-radius:14px;overflow:hidden;width:82px;border:1px solid var(--border);background:var(--bg);transition:transform .12s;user-select:none;}
 .cat-mc:active{transform:scale(.93);}
@@ -1528,27 +1531,7 @@ function buildCatGrid(){
   }
   const r1=IMG_CATS.slice(0,10), r2=IMG_CATS.slice(10);
   wrap.innerHTML=`<div class="cat-marquee-wrap">${rowHTML(r1)}${rowHTML(r2)}</div>`;
-  // Auto-scroll ping-pong: vai até o fim, volta, repete
-  wrap.querySelectorAll('.cat-marquee-row').forEach((row,i)=>{
-    let dir=i===0?1:-1;
-    let touching=false, speed=0.6;
-    const tick=()=>{
-      if(!touching){
-        const max=row.scrollWidth-row.clientWidth;
-        row.scrollLeft+=dir*speed;
-        if(row.scrollLeft>=max){ row.scrollLeft=max; dir=-1; }
-        else if(row.scrollLeft<=0){ row.scrollLeft=0; dir=1; }
-      }
-      requestAnimationFrame(tick);
-    };
-    // Start row 2 near the end so they're out of phase
-    if(i===1) row.scrollLeft=row.scrollWidth;
-    requestAnimationFrame(tick);
-    row.addEventListener('touchstart',()=>{touching=true;},{passive:true});
-    row.addEventListener('touchend',()=>{touching=false;},{passive:true});
-    row.addEventListener('mouseenter',()=>{touching=true;});
-    row.addEventListener('mouseleave',()=>{touching=false;});
-  });
+  // Scroll livre — sem auto-scroll. Gradiente já indica mais conteúdo.
 }
 function enterCatView(slug,name,catFallback=''){
   // Hide everything above products — hero, store info, category strips
