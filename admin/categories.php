@@ -40,9 +40,19 @@
             <input type="number" id="c-sort" min="0" value="0">
           </div>
           <div class="field">
-            <label>URL da imagem (opcional)</label>
-            <input type="url" id="c-image" placeholder="https://…/imagem.jpg">
-            <span class="field-hint">Deixe em branco para usar o emoji padrão. Use uma URL pública (Cloudinary, imgbb, etc).</span>
+            <label>Imagem (opcional)</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="url" id="c-image" placeholder="https://…/imagem.jpg" style="flex:1" oninput="previewCatImg()">
+              <label class="btn btn-ghost btn-sm" style="cursor:pointer;white-space:nowrap;flex-shrink:0" id="upload-img-label">
+                <i data-lucide="upload" width="14" height="14"></i> Enviar
+                <input type="file" id="c-image-file" accept="image/*" style="display:none" onchange="uploadCatImg(this)">
+              </label>
+            </div>
+            <div id="c-image-preview" style="margin-top:8px;display:none">
+              <img id="c-image-preview-img" src="" alt="" style="height:60px;border-radius:6px;object-fit:cover;border:1px solid var(--border)">
+              <button type="button" class="btn btn-ghost btn-sm" style="margin-left:8px;color:var(--red)" onclick="clearCatImg()">Remover</button>
+            </div>
+            <span class="field-hint">Deixe em branco para usar o emoji padrão.</span>
           </div>
           <div class="field" style="flex-direction:row;align-items:center;gap:10px">
             <label class="toggle"><input type="checkbox" id="c-active" checked><span class="toggle-slider"></span></label>
@@ -176,10 +186,53 @@ async function loadCats() {
   }
 }
 
+function previewCatImg() {
+  const url = document.getElementById('c-image').value.trim();
+  const wrap = document.getElementById('c-image-preview');
+  const img  = document.getElementById('c-image-preview-img');
+  if (url) { img.src = url; wrap.style.display = ''; }
+  else { wrap.style.display = 'none'; img.src = ''; }
+}
+
+function clearCatImg() {
+  document.getElementById('c-image').value = '';
+  document.getElementById('c-image-file').value = '';
+  document.getElementById('c-image-preview').style.display = 'none';
+  document.getElementById('c-image-preview-img').src = '';
+}
+
+async function uploadCatImg(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const label = document.getElementById('upload-img-label');
+  label.style.opacity = '.5';
+  label.style.pointerEvents = 'none';
+  try {
+    const fd = new FormData();
+    fd.append('image', file);
+    const res = await fetch(API + '/upload', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + getToken() },
+      body: fd
+    });
+    const j = await res.json();
+    if (!j.url) throw new Error(j.error || 'Erro no upload');
+    document.getElementById('c-image').value = j.url;
+    previewCatImg();
+    toast('Imagem enviada!');
+  } catch (e) {
+    toast(e.message, 'error');
+  } finally {
+    label.style.opacity = '';
+    label.style.pointerEvents = '';
+    input.value = '';
+  }
+}
+
 function openNew() {
   document.getElementById('cat-form').reset();
   document.getElementById('c-id').value = '';
-  document.getElementById('c-image').value = '';
+  clearCatImg();
   delete document.getElementById('c-slug').dataset.manual;
   document.getElementById('modal-cat-title').textContent = 'Nova categoria';
   openModal('modal-cat');
@@ -201,6 +254,7 @@ async function editCat(id) {
   document.getElementById('c-active').checked = c.active == 1;
   document.getElementById('c-slug').dataset.manual = '1';
   document.getElementById('modal-cat-title').textContent = 'Editar categoria';
+  previewCatImg();
   openModal('modal-cat');
 }
 
