@@ -267,17 +267,15 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .cat-pill .lb{font-size:13px;font-weight:500;font-family:'Inter',sans-serif;color:var(--fg-2);white-space:nowrap;}
 .cat-pill.on .lb{color:#191A12;}
 /* ── Category marquee carousel ── */
-@keyframes marquee-left{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-@keyframes marquee-right{0%{transform:translateX(-50%)}100%{transform:translateX(0)}}
-.cat-marquee-wrap{overflow:hidden;padding:14px 0 16px;}
-.cat-marquee-row{display:flex;overflow:hidden;margin-bottom:10px;}
-.cat-marquee-track{display:flex;gap:10px;padding:0 5px;animation:marquee-left 32s linear infinite;will-change:transform;}
-.cat-marquee-track.rev{animation-name:marquee-right;}
-.cat-marquee-track:hover,.cat-marquee-track.dragging{animation-play-state:paused;}
-.cat-mc{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;border-radius:14px;overflow:hidden;width:82px;border:1px solid var(--border);background:var(--bg);transition:transform .12s;}
+.cat-marquee-wrap{padding:14px 0 16px;}
+.cat-marquee-row{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-bottom:10px;cursor:grab;}
+.cat-marquee-row::-webkit-scrollbar{display:none;}
+.cat-marquee-row.grabbing{cursor:grabbing;}
+.cat-marquee-track{display:flex;gap:10px;padding:0 max(16px,env(safe-area-inset-left,0px));width:max-content;}
+.cat-mc{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;border-radius:14px;overflow:hidden;width:82px;border:1px solid var(--border);background:var(--bg);transition:transform .12s;user-select:none;}
 .cat-mc:active{transform:scale(.93);}
-.cat-mc-img{width:82px;height:82px;display:flex;align-items:center;justify-content:center;font-size:34px;line-height:1;}
-.cat-mc-name{font-size:10.5px;font-weight:600;text-align:center;padding:5px 4px 6px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg);background:var(--bg);}
+.cat-mc-img{width:82px;height:82px;display:flex;align-items:center;justify-content:center;font-size:34px;line-height:1;pointer-events:none;}
+.cat-mc-name{font-size:10.5px;font-weight:600;text-align:center;padding:5px 4px 6px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg);background:var(--bg);pointer-events:none;}
 /* ── Category view header ── */
 .cat-view-hd{display:flex;align-items:center;gap:10px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--border);background:var(--bg);}
 .cat-view-hd-back{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:none;background:var(--bg-2);cursor:pointer;color:var(--fg);flex-shrink:0;}
@@ -1510,30 +1508,29 @@ function buildCatGrid(){
       <div class="cat-mc-name">${c.name}</div>
     </div>`;
   }
-  function rowHTML(items,rev){
-    const doubled=[...items,...items].map(mcHTML).join('');
-    return `<div class="cat-marquee-row"><div class="cat-marquee-track${rev?' rev':''}">${doubled}</div></div>`;
+  function rowHTML(items){
+    return `<div class="cat-marquee-row"><div class="cat-marquee-track">${items.map(mcHTML).join('')}</div></div>`;
   }
   const r1=IMG_CATS.slice(0,10), r2=IMG_CATS.slice(10);
-  wrap.innerHTML=`<div class="cat-marquee-wrap">${rowHTML(r1,false)}${rowHTML(r2,true)}</div>`;
-  // Touch/mouse drag to scroll each track
-  wrap.querySelectorAll('.cat-marquee-track').forEach(track=>{
-    let startX=0, startOffset=0, dragging=false;
-    const getOffset=()=>{
-      const st=getComputedStyle(track).transform;
-      const m=st.match(/matrix.*\((.+)\)/);
-      return m?parseFloat(m[1].split(', ')[4]):0;
+  wrap.innerHTML=`<div class="cat-marquee-wrap">${rowHTML(r1)}${rowHTML(r2)}</div>`;
+  // Auto-scroll suave com pausa no toque
+  wrap.querySelectorAll('.cat-marquee-row').forEach((row,i)=>{
+    const dir=i===0?1:-1;
+    let raf, touching=false, speed=0.6;
+    const tick=()=>{
+      if(!touching){
+        row.scrollLeft+=dir*speed;
+        const max=row.scrollWidth-row.clientWidth;
+        if(row.scrollLeft<=0) row.scrollLeft=max;
+        if(row.scrollLeft>=max) row.scrollLeft=0;
+      }
+      raf=requestAnimationFrame(tick);
     };
-    const start=x=>{dragging=true;startX=x;startOffset=getOffset();track.classList.add('dragging');track.style.transform=`translateX(${startOffset}px)`;track.style.transition='none';};
-    const move=x=>{if(!dragging)return;const dx=x-startX;track.style.transform=`translateX(${startOffset+dx}px)`;};
-    const end=()=>{if(!dragging)return;dragging=false;track.classList.remove('dragging');track.style.transition='';track.style.transform='';};
-    track.addEventListener('mousedown',e=>start(e.clientX));
-    track.addEventListener('mousemove',e=>move(e.clientX));
-    track.addEventListener('mouseup',end);
-    track.addEventListener('mouseleave',end);
-    track.addEventListener('touchstart',e=>{e.preventDefault();start(e.touches[0].clientX);},{passive:false});
-    track.addEventListener('touchmove',e=>{e.preventDefault();move(e.touches[0].clientX);},{passive:false});
-    track.addEventListener('touchend',end);
+    raf=requestAnimationFrame(tick);
+    row.addEventListener('touchstart',()=>{touching=true;},{passive:true});
+    row.addEventListener('touchend',()=>{touching=false;},{passive:true});
+    row.addEventListener('mouseenter',()=>{touching=true;});
+    row.addEventListener('mouseleave',()=>{touching=false;});
   });
 }
 function enterCatView(slug,name,catFallback=''){
