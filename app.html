@@ -298,9 +298,11 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   padding:2px max(16px,env(safe-area-inset-right,0px)) 14px max(16px,env(safe-area-inset-left,0px));
 }
 .prod-row::-webkit-scrollbar{display:none;}
-/* 2-column grid for category pages */
+/* responsive grid for category pages */
 .prod-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:12px;
   padding:12px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));
 }
 .prod-grid .pcard{width:auto;flex-shrink:unset;}
@@ -838,6 +840,11 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
     overflow:visible!important;
     padding:4px 40px 20px!important;
     gap:16px;
+  }
+  .prod-grid{
+    grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+    gap:16px;
+    padding:12px 40px 28px;
   }
   .pcard{width:auto!important;flex-shrink:unset;}
   .pcard-img{height:130px;}
