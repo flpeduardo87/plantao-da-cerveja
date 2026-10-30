@@ -842,13 +842,14 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
   .sec-more{font-size:14px;}
 
   /* Account screen: centered card on desktop */
-  #s-account{display:flex;align-items:flex-start;justify-content:center;background:var(--bg-2);}
-  #acct-scroll{width:100%;max-width:480px;background:var(--bg);min-height:100%;padding:32px 40px;}
+  #s-account{background:var(--bg-2);align-items:center;}
+  #acct-scroll{max-width:520px;background:var(--bg);border-radius:var(--r);margin:32px auto;padding:0 0 32px;min-height:unset;flex:unset;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.10);}
+  .login-wrap{max-width:unset;margin:0;padding:28px 36px 8px;}
   .login-logo img{width:72px;height:72px;}
-  .login-title{font-size:26px;}
-  .acct-header{padding:28px 0 20px;}
-  .acct-body{padding:0;}
-  .acct-logout{margin-top:24px;}
+  .login-title{font-size:24px;}
+  .acct-header{border-radius:var(--r) var(--r) 0 0;}
+  .acct-body{padding:0 24px 8px;}
+  .acct-logout{margin-top:16px;}
 
   /* Products: CSS grid instead of horizontal scroll */
   .prod-row{
@@ -927,7 +928,7 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 
 /* ── CUSTOMER ACCOUNT SCREEN ── */
 #s-account{z-index:15;}
-#acct-scroll{flex:1;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch;}
+#acct-scroll{flex:1;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch;padding-bottom:env(safe-area-inset-bottom,80px);}
 .acct-header{
   background:var(--amber);
   padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-left,0px)) 32px;
@@ -960,7 +961,7 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 .osp-cancelled{background:#FEE2E2;color:#991B1B;}
 
 /* Login form */
-.login-wrap{max-width:380px;margin:40px auto;padding:0 16px;}
+.login-wrap{max-width:380px;margin:40px auto;padding:0 16px 100px;}
 .login-logo{text-align:center;margin-bottom:24px;}
 .login-logo img{width:80px;height:80px;border-radius:50%;}
 .login-title{text-align:center;font-size:20px;font-weight:700;margin-bottom:4px;}
@@ -1281,7 +1282,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
         <button class="acct-back" onclick="goBack('s-home')"><i data-lucide="arrow-left" width="22" height="22"></i></button>
         <div class="acct-avatar"><i data-lucide="user" width="32" height="32" color="#fff"></i></div>
         <div class="acct-name" id="acct-dname">—</div>
-        <div class="acct-phone" id="acct-dphone" style="font-size:13px;text-align:center;color:rgba(0,0,0,.6);margin-top:2px">—</div>
+        <div class="acct-phone" id="acct-dphone" style="font-size:13px;text-align:center;color:rgba(0,0,0,.55);margin-top:2px">—</div>
       </div>
       <div class="acct-body">
         <div class="acct-section-title">Meus Pedidos</div>
@@ -2054,6 +2055,25 @@ function openCheckout(){
   }
   hide('when-overlay');
   coStep = 1; coData = {}; payMethod = null;
+  // Prefill from logged-in account
+  if(acctToken){
+    try{
+      const n=localStorage.getItem('acct_name')||''; const e=localStorage.getItem('acct_email')||'';
+      if(n) coData.nome=n;
+      if(e) coData.email=e;
+    }catch{}
+  }
+  // Prefill last saved address
+  try{
+    const a=JSON.parse(localStorage.getItem('plantao_addr')||'{}');
+    if(a.cep) coData.cep=a.cep;
+    if(a.rua) coData.rua=a.rua;
+    if(a.num) coData.num=a.num;
+    if(a.comp) coData.comp=a.comp;
+    if(a.bairro) coData.bairro=a.bairro;
+    if(a.ref) coData.ref=a.ref;
+    if(a.tel) coData.tel=a.tel;
+  }catch{}
   show('checkout-overlay');
   renderCoStep();
 }
@@ -2321,15 +2341,18 @@ async function finalizarPedido(){
     notes: '',
     items: cart.map(i=>({product_id:i.id,product_name:i.name,quantity:i.qty,unit_price:i.price})),
   };
+  const orderHeaders = {'Content-Type':'application/json'};
+  if(acctToken) orderHeaders['Authorization'] = 'Bearer '+acctToken;
   try {
     const r = await fetch(API+'/orders',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:orderHeaders,
       body:JSON.stringify(payload),
     });
     const j = await r.json();
     if(!r.ok||!j.success) throw new Error(j.message||'Erro ao registrar pedido.');
     try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, phone: coData.tel, ts: Date.now()})); }catch{}
+    try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
     cart=[]; saveCart(); updateBadge();
     coStep=4;
     renderCoStep();
@@ -2485,8 +2508,11 @@ function acctShowLogin(){
 function acctShowDashboard(){
   document.getElementById('acct-login').style.display='none';
   document.getElementById('acct-dashboard').style.display='';
-  const name = (() => { try{ return localStorage.getItem('acct_name')||''; }catch{ return ''; } })();
+  const name  = (() => { try{ return localStorage.getItem('acct_name')||''; }catch{ return ''; } })();
+  const email = (() => { try{ return localStorage.getItem('acct_email')||''; }catch{ return ''; } })();
   if(name) document.getElementById('acct-dname').textContent = name;
+  const ph = document.getElementById('acct-dphone');
+  if(ph) ph.textContent = email || '';
   acctLoadOrders();
   lucide.createIcons();
 }
@@ -2532,9 +2558,7 @@ async function acctLogin(){
     const j = await r.json();
     if(!j.success){ err.textContent=j.error||'E-mail ou senha incorretos'; err.style.display=''; btn.disabled=false; btn.textContent='Entrar →'; return; }
     acctToken = j.token;
-    try{ localStorage.setItem('cust_token',acctToken); if(j.name) localStorage.setItem('acct_name',j.name); }catch{}
-    document.getElementById('acct-dname').textContent = j.name||'';
-    document.getElementById('acct-dphone').textContent = j.phone ? fmtPhoneDisplay(j.phone) : '';
+    try{ localStorage.setItem('cust_token',acctToken); if(j.name) localStorage.setItem('acct_name',j.name); localStorage.setItem('acct_email',email); }catch{}
     acctShowDashboard();
   } catch {
     err.textContent='Erro de conexão. Tente novamente.'; err.style.display='';
@@ -2559,9 +2583,7 @@ async function acctRegister(){
     const j = await r.json();
     if(!j.success){ err.textContent=j.error||'Erro ao criar conta'; err.style.display=''; btn.disabled=false; btn.textContent='Criar conta →'; return; }
     acctToken = j.token;
-    try{ localStorage.setItem('cust_token',acctToken); localStorage.setItem('acct_name',name); }catch{}
-    document.getElementById('acct-dname').textContent = name;
-    document.getElementById('acct-dphone').textContent = phone ? fmtPhoneDisplay(phone) : '';
+    try{ localStorage.setItem('cust_token',acctToken); localStorage.setItem('acct_name',name); localStorage.setItem('acct_email',email); }catch{}
     acctShowDashboard();
   } catch {
     err.textContent='Erro de conexão. Tente novamente.'; err.style.display='';
@@ -2649,7 +2671,7 @@ function acctOpenOrder(orderNumber){
 function acctLogout(){
   try{ fetch(`${API}/customer/logout`,{method:'POST',headers:{'Authorization':'Bearer '+acctToken}}); }catch{}
   acctToken=null;
-  try{ localStorage.removeItem('cust_token'); localStorage.removeItem('acct_token'); localStorage.removeItem('acct_name'); }catch{}
+  try{ localStorage.removeItem('cust_token'); localStorage.removeItem('acct_token'); localStorage.removeItem('acct_name'); localStorage.removeItem('acct_email'); }catch{}
   acctShowLogin();
 }
 
