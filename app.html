@@ -275,11 +275,12 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 }
 .cat-marquee-row{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-bottom:10px;}
 .cat-marquee-row::-webkit-scrollbar{display:none;}
-.cat-marquee-track{display:flex;gap:10px;padding:0 max(16px,env(safe-area-inset-left,0px));width:max-content;}
-.cat-mc{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;border-radius:14px;overflow:hidden;width:82px;border:1px solid var(--border);background:var(--bg);transition:transform .12s;user-select:none;}
-.cat-mc:active{transform:scale(.93);}
-.cat-mc-img{width:82px;height:82px;display:flex;align-items:center;justify-content:center;font-size:34px;line-height:1;pointer-events:none;}
-.cat-mc-name{font-size:10.5px;font-weight:600;text-align:center;padding:5px 4px 6px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg);background:var(--bg);pointer-events:none;}
+.cat-marquee-track{display:flex;gap:12px;padding:4px max(16px,env(safe-area-inset-left,0px)) 8px;width:max-content;}
+.cat-mc{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;border-radius:12px;overflow:hidden;width:100px;background:var(--bg);box-shadow:0 1px 6px rgba(0,0,0,.10);transition:transform .12s,box-shadow .12s;user-select:none;}
+.cat-mc:active{transform:scale(.93);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.cat-mc-img{width:100%;height:100px;display:flex;align-items:center;justify-content:center;font-size:42px;line-height:1;pointer-events:none;overflow:hidden;flex-shrink:0;}
+.cat-mc-img img{width:100%;height:100%;object-fit:cover;display:block;}
+.cat-mc-name{font-size:11px;font-weight:600;text-align:center;padding:6px 5px 8px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg);background:var(--bg);pointer-events:none;letter-spacing:-.1px;}
 /* ── Category view header ── */
 .cat-view-hd{display:flex;align-items:center;gap:10px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:19;}
 .cat-view-hd-back{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:none;background:var(--bg-2);cursor:pointer;color:var(--fg);flex-shrink:0;}
@@ -298,9 +299,11 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   padding:2px max(16px,env(safe-area-inset-right,0px)) 14px max(16px,env(safe-area-inset-left,0px));
 }
 .prod-row::-webkit-scrollbar{display:none;}
-/* 2-column grid for category pages */
+/* responsive grid for category pages */
 .prod-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:12px;
   padding:12px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));
 }
 .prod-grid .pcard{width:auto;flex-shrink:unset;}
@@ -825,11 +828,27 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
   .cat-pill .lb{font-size:16px;font-weight:500;font-family:'Inter',sans-serif;color:#111;}
   .cat-pill.on .lb{color:#191A12;font-weight:600;font-family:'Inter',sans-serif;}
 
+  /* Category cards: larger on desktop, aligned with 40px grid */
+  .cat-marquee-track{padding:0 40px;}
+  .cat-marquee-wrap::after{width:80px;}
+  .cat-mc{width:120px;border-radius:14px;}
+  .cat-mc-img{height:120px;font-size:52px;}
+  .cat-mc-name{font-size:13px;padding:7px 6px 10px;}
+
   /* Section */
   .section{background:var(--bg);margin-bottom:12px;}
   .sec-hd{padding:16px 40px 8px;}
   .sec-title{font-size:22px;}
   .sec-more{font-size:14px;}
+
+  /* Account screen: centered card on desktop */
+  #s-account{display:flex;align-items:flex-start;justify-content:center;background:var(--bg-2);}
+  #acct-scroll{width:100%;max-width:480px;background:var(--bg);min-height:100%;padding:32px 40px;}
+  .login-logo img{width:72px;height:72px;}
+  .login-title{font-size:26px;}
+  .acct-header{padding:28px 0 20px;}
+  .acct-body{padding:0;}
+  .acct-logout{margin-top:24px;}
 
   /* Products: CSS grid instead of horizontal scroll */
   .prod-row{
@@ -838,6 +857,11 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
     overflow:visible!important;
     padding:4px 40px 20px!important;
     gap:16px;
+  }
+  .prod-grid{
+    grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+    gap:16px;
+    padding:12px 40px 28px;
   }
   .pcard{width:auto!important;flex-shrink:unset;}
   .pcard-img{height:130px;}
@@ -1179,40 +1203,85 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
 <!-- ═══ CUSTOMER ACCOUNT SCREEN ═══ -->
 <div id="s-account" class="screen slide-right hidden">
   <div id="acct-scroll">
+
+    <!-- ── Login / Cadastro ── -->
     <div id="acct-login" class="login-wrap">
       <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--fg-2);font-size:13px;display:flex;align-items:center;gap:6px;margin-bottom:16px;padding:0"><i data-lucide="arrow-left" width="16" height="16"></i> Voltar</button>
       <div class="login-logo"><img src="logo-plantao-da-cerveja.jpg" alt=""></div>
       <div class="login-title">Minha Conta</div>
-      <div class="login-sub">Entre com seu número de WhatsApp</div>
-      <div id="acct-phone-step">
-        <label class="field-label" style="font-size:13px;font-weight:600;color:var(--fg-2);margin-bottom:10px;display:block;text-transform:uppercase;letter-spacing:.06em">Número do WhatsApp</label>
-        <div class="phone-field">
-          <div class="phone-flag">🇧🇷 <span>+55</span></div>
-          <input id="acct-tel" type="tel" placeholder="(00) 00000-0000" maxlength="15" inputmode="numeric" oninput="maskTel(this)">
-        </div>
-        <button class="btn-primary" style="margin-top:20px" onclick="acctSendOtp()">Enviar código →</button>
-        <div id="acct-err" style="color:var(--red);font-size:13px;margin-top:10px;text-align:center;display:none"></div>
+
+      <!-- Tabs login / cadastro -->
+      <div id="acct-tab-row" style="display:flex;gap:0;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px;">
+        <button id="tab-login" onclick="acctTab('login')" style="flex:1;padding:9px;border:none;background:var(--amber);color:#111;font-weight:700;font-size:14px;cursor:pointer;">Entrar</button>
+        <button id="tab-register" onclick="acctTab('register')" style="flex:1;padding:9px;border:none;background:var(--bg);color:var(--fg-2);font-weight:500;font-size:14px;cursor:pointer;">Criar conta</button>
       </div>
-      <div id="acct-otp-step" style="display:none">
-        <div style="text-align:center;font-size:14px;color:var(--fg-2);margin-bottom:4px">Digite o código enviado ao</div>
-        <div style="text-align:center;font-weight:600;margin-bottom:16px" id="acct-otp-phone"></div>
-        <div class="otp-boxes">
-          <input class="otp-box" id="otp0" maxlength="1" inputmode="numeric" oninput="otpNext(this,0)">
-          <input class="otp-box" id="otp1" maxlength="1" inputmode="numeric" oninput="otpNext(this,1)">
-          <input class="otp-box" id="otp2" maxlength="1" inputmode="numeric" oninput="otpNext(this,2)">
-          <input class="otp-box" id="otp3" maxlength="1" inputmode="numeric" oninput="otpNext(this,3)">
+
+      <!-- Formulário login -->
+      <div id="acct-login-form">
+        <div class="field" style="margin-bottom:12px">
+          <label class="field-label">E-mail</label>
+          <input id="acct-email" type="email" inputmode="email" autocomplete="email" placeholder="seu@email.com" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;background:var(--bg);color:var(--fg)">
         </div>
-        <button class="btn-primary" onclick="acctVerifyOtp()">Entrar</button>
-        <div id="acct-otp-err" style="color:var(--red);font-size:13px;margin-top:10px;text-align:center;display:none"></div>
-        <button style="display:block;margin:14px auto 0;background:none;border:none;color:var(--fg-2);font-size:13px;cursor:pointer" onclick="acctBackToPhone()">← Trocar número</button>
+        <div class="field" style="margin-bottom:8px">
+          <label class="field-label">Senha</label>
+          <input id="acct-password" type="password" autocomplete="current-password" placeholder="Sua senha" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;background:var(--bg);color:var(--fg)">
+        </div>
+        <div id="acct-err" style="color:var(--red);font-size:13px;margin-bottom:10px;display:none"></div>
+        <button class="btn-primary" onclick="acctLogin()">Entrar →</button>
+        <!-- Rastrear pedido sem conta -->
+        <div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+          <p style="font-size:13px;color:var(--fg-2);margin-bottom:10px">Não tem conta? Rastreie seu pedido:</p>
+          <button onclick="acctTab('track')" style="background:none;border:1.5px solid var(--border);border-radius:50px;padding:8px 20px;font-size:13px;font-weight:600;color:var(--fg);cursor:pointer">Rastrear pedido</button>
+        </div>
+      </div>
+
+      <!-- Formulário cadastro -->
+      <div id="acct-register-form" style="display:none">
+        <div class="field" style="margin-bottom:12px">
+          <label class="field-label">Nome completo</label>
+          <input id="reg-name" type="text" autocomplete="name" placeholder="Seu nome" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;background:var(--bg);color:var(--fg)">
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label class="field-label">E-mail</label>
+          <input id="reg-email" type="email" inputmode="email" autocomplete="email" placeholder="seu@email.com" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;background:var(--bg);color:var(--fg)">
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label class="field-label">Telefone (opcional)</label>
+          <input id="reg-phone" type="tel" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" oninput="maskTel(this)" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;background:var(--bg);color:var(--fg)">
+        </div>
+        <div class="field" style="margin-bottom:8px">
+          <label class="field-label">Senha</label>
+          <input id="reg-password" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;background:var(--bg);color:var(--fg)">
+        </div>
+        <div id="reg-err" style="color:var(--red);font-size:13px;margin-bottom:10px;display:none"></div>
+        <button class="btn-primary" onclick="acctRegister()">Criar conta →</button>
+      </div>
+
+      <!-- Rastreamento sem conta -->
+      <div id="acct-track-form" style="display:none">
+        <p style="font-size:14px;color:var(--fg-2);margin-bottom:16px;text-align:center">Informe os dados do seu pedido</p>
+        <div class="field" style="margin-bottom:12px">
+          <label class="field-label">Número do pedido</label>
+          <input id="track-number" type="text" placeholder="Ex: PC261030AB1C" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;background:var(--bg);color:var(--fg);text-transform:uppercase">
+        </div>
+        <div class="field" style="margin-bottom:8px">
+          <label class="field-label">Telefone do pedido</label>
+          <input id="track-phone" type="tel" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" oninput="maskTel(this)" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;background:var(--bg);color:var(--fg)">
+        </div>
+        <div id="track-err" style="color:var(--red);font-size:13px;margin-bottom:10px;display:none"></div>
+        <button class="btn-primary" onclick="acctTrackOrder()">Buscar pedido →</button>
+        <button onclick="acctTab('login')" style="display:block;margin:14px auto 0;background:none;border:none;color:var(--fg-2);font-size:13px;cursor:pointer">← Voltar ao login</button>
+        <div id="track-result" style="margin-top:20px;display:none"></div>
       </div>
     </div>
+
+    <!-- ── Dashboard (logado) ── -->
     <div id="acct-dashboard" style="display:none">
       <div class="acct-header">
         <button class="acct-back" onclick="goBack('s-home')"><i data-lucide="arrow-left" width="22" height="22"></i></button>
         <div class="acct-avatar"><i data-lucide="user" width="32" height="32" color="#fff"></i></div>
         <div class="acct-name" id="acct-dname">—</div>
-        <div class="acct-phone" id="acct-dphone">—</div>
+        <div class="acct-phone" id="acct-dphone" style="font-size:13px;text-align:center;color:rgba(0,0,0,.6);margin-top:2px">—</div>
       </div>
       <div class="acct-body">
         <div class="acct-section-title">Meus Pedidos</div>
@@ -1220,6 +1289,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
         <button class="acct-logout" onclick="acctLogout()"><i data-lucide="log-out" width="16" height="16"></i> Sair da conta</button>
       </div>
     </div>
+
   </div>
 </div>
 
@@ -1467,7 +1537,12 @@ async function enterStore(){
       CATS = [{id:'all',lb:'Todos'},...cats.map(c=>({id:c.slug,lb:c.name,em:c.emoji||''}))];
       CATALOG={}; SEC_LABELS={};
       const catById={};
-      cats.forEach(c=>{catById[c.id]=c;CATALOG[c.slug]=[];SEC_LABELS[c.slug]=c.name;});
+      cats.forEach(c=>{
+        catById[c.id]=c;CATALOG[c.slug]=[];SEC_LABELS[c.slug]=c.name;
+        // Merge image_url from DB into IMG_CATS
+        const mc=IMG_CATS.find(m=>m.slug===c.slug||m.cat===c.slug);
+        if(mc && c.image_url) mc.image_url=c.image_url;
+      });
       prods.forEach(p=>{
         const cat=catById[p.category_id];
         if(cat&&CATALOG[cat.slug]) CATALOG[cat.slug].push({id:p.id,name:p.name,price:parseFloat(p.price),old:p.old_price?parseFloat(p.old_price):null,disc:parseInt(p.discount_pct)||0,image_url:p.image_url||null,featured:p.featured==1||p.featured===true,brand:p.brand||null,unit_type:p.unit_type||null,size:p.size||null,has_deposit:p.has_deposit==1,deposit_value:parseFloat(p.deposit_value)||0});
@@ -1526,8 +1601,11 @@ function buildCatGrid(){
   function mcHTML(c){
     const [bg]=c.color;
     const catFb=c.cat||c.slug;
+    const imgContent = c.image_url
+      ? `<img src="${esc(c.image_url)}" alt="${esc(c.name)}" loading="lazy">`
+      : c.em;
     return `<div class="cat-mc" onclick="enterCatView('${c.slug}','${c.name.replace(/'/g,"\\'")}','${catFb}')">
-      <div class="cat-mc-img" style="background:${bg}">${c.em}</div>
+      <div class="cat-mc-img" style="background:${bg}">${imgContent}</div>
       <div class="cat-mc-name">${c.name}</div>
     </div>`;
   }
@@ -2388,8 +2466,7 @@ lucide.createIcons();
 
 // ── CUSTOMER ACCOUNT ──────────────────────────────────────────────────────────
 let acctToken = null;
-let acctPhone = null;
-try { acctToken = localStorage.getItem('acct_token'); acctPhone = localStorage.getItem('acct_phone'); } catch{}
+try { acctToken = localStorage.getItem('cust_token') || localStorage.getItem('acct_token'); } catch{}
 
 function goToAccount(){
   setNavActive('nb-acct');
@@ -2403,13 +2480,13 @@ function goToAccount(){
 function acctShowLogin(){
   document.getElementById('acct-login').style.display='';
   document.getElementById('acct-dashboard').style.display='none';
-  document.getElementById('acct-phone-step').style.display='';
-  document.getElementById('acct-otp-step').style.display='none';
+  acctTab('login');
 }
 function acctShowDashboard(){
   document.getElementById('acct-login').style.display='none';
   document.getElementById('acct-dashboard').style.display='';
-  document.getElementById('acct-dphone').textContent = acctPhone ? fmtPhoneDisplay(acctPhone) : '';
+  const name = (() => { try{ return localStorage.getItem('acct_name')||''; }catch{ return ''; } })();
+  if(name) document.getElementById('acct-dname').textContent = name;
   acctLoadOrders();
   lucide.createIcons();
 }
@@ -2420,61 +2497,119 @@ function fmtPhoneDisplay(p){
   return p;
 }
 
-async function acctSendOtp(){
-  const tel = document.getElementById('acct-tel').value.replace(/\D/g,'');
-  const err = document.getElementById('acct-err');
+function acctTab(tab){
+  const tabs = ['login','register','track'];
+  tabs.forEach(t => {
+    const form = document.getElementById(`acct-${t}-form`);
+    if(form) form.style.display = t===tab ? '' : 'none';
+  });
+  const btnLogin = document.getElementById('tab-login');
+  const btnReg   = document.getElementById('tab-register');
+  if(btnLogin && btnReg){
+    if(tab==='login'){
+      btnLogin.style.background='var(--amber)'; btnLogin.style.color='#111'; btnLogin.style.fontWeight='700';
+      btnReg.style.background='var(--bg)'; btnReg.style.color='var(--fg-2)'; btnReg.style.fontWeight='500';
+    } else if(tab==='register'){
+      btnReg.style.background='var(--amber)'; btnReg.style.color='#111'; btnReg.style.fontWeight='700';
+      btnLogin.style.background='var(--bg)'; btnLogin.style.color='var(--fg-2)'; btnLogin.style.fontWeight='500';
+    }
+  }
+  // hide tab row on track screen
+  const tabRow = document.getElementById('acct-tab-row');
+  if(tabRow) tabRow.style.display = tab==='track' ? 'none' : '';
+}
+
+async function acctLogin(){
+  const email = (document.getElementById('acct-email').value||'').trim().toLowerCase();
+  const pwd   = document.getElementById('acct-password').value||'';
+  const err   = document.getElementById('acct-err');
   err.style.display='none';
-  if(tel.length < 10){ err.textContent='Digite um telefone válido'; err.style.display=''; return; }
-  const btn = document.querySelector('#acct-phone-step .btn-primary');
-  btn.disabled=true; btn.textContent='Enviando…';
+  if(!email || !pwd){ err.textContent='Preencha e-mail e senha'; err.style.display=''; return; }
+  const btn = document.querySelector('#acct-login-form .btn-primary');
+  btn.disabled=true; btn.textContent='Entrando…';
   try {
-    const r = await fetch(`${API}/customer/otp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:tel})});
+    const r = await fetch(`${API}/customer/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pwd})});
     const j = await r.json();
-    if(!j.success){ err.textContent=j.error||'Erro ao enviar código'; err.style.display=''; btn.disabled=false; btn.textContent='Enviar código →'; return; }
-    document.getElementById('acct-otp-phone').textContent = fmtPhoneDisplay(tel);
-    document.getElementById('acct-phone-step').style.display='none';
-    document.getElementById('acct-otp-step').style.display='';
-    document.getElementById('otp0').focus();
-    acctPhone = tel;
+    if(!j.success){ err.textContent=j.error||'E-mail ou senha incorretos'; err.style.display=''; btn.disabled=false; btn.textContent='Entrar →'; return; }
+    acctToken = j.token;
+    try{ localStorage.setItem('cust_token',acctToken); if(j.name) localStorage.setItem('acct_name',j.name); }catch{}
+    document.getElementById('acct-dname').textContent = j.name||'';
+    document.getElementById('acct-dphone').textContent = j.phone ? fmtPhoneDisplay(j.phone) : '';
+    acctShowDashboard();
   } catch {
     err.textContent='Erro de conexão. Tente novamente.'; err.style.display='';
   }
-  btn.disabled=false; btn.textContent='Enviar código →';
+  btn.disabled=false; btn.textContent='Entrar →';
 }
-function acctBackToPhone(){
-  document.getElementById('acct-otp-step').style.display='none';
-  document.getElementById('acct-phone-step').style.display='';
-  [0,1,2,3].forEach(i=>{ const el=document.getElementById('otp'+i); if(el) el.value=''; });
-}
-function otpNext(el, idx){
-  el.value = el.value.replace(/\D/g,'');
-  if(el.value && idx < 3) document.getElementById('otp'+(idx+1)).focus();
-  if(idx===3 && el.value) acctVerifyOtp();
-}
-async function acctVerifyOtp(){
-  const code = [0,1,2,3].map(i=>document.getElementById('otp'+i).value).join('');
-  const err = document.getElementById('acct-otp-err');
+
+async function acctRegister(){
+  const name  = (document.getElementById('reg-name').value||'').trim();
+  const email = (document.getElementById('reg-email').value||'').trim().toLowerCase();
+  const phone = (document.getElementById('reg-phone').value||'').replace(/\D/g,'');
+  const pwd   = document.getElementById('reg-password').value||'';
+  const err   = document.getElementById('reg-err');
   err.style.display='none';
-  if(code.length < 4){ err.textContent='Digite os 4 dígitos'; err.style.display=''; return; }
-  const btn = document.querySelector('#acct-otp-step .btn-primary');
-  btn.disabled=true; btn.textContent='Verificando…';
+  if(!name){ err.textContent='Digite seu nome'; err.style.display=''; return; }
+  if(!email){ err.textContent='Digite seu e-mail'; err.style.display=''; return; }
+  if(pwd.length < 6){ err.textContent='Senha deve ter pelo menos 6 caracteres'; err.style.display=''; return; }
+  const btn = document.querySelector('#acct-register-form .btn-primary');
+  btn.disabled=true; btn.textContent='Criando conta…';
   try {
-    const r = await fetch(`${API}/customer/verify`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:acctPhone, code})});
+    const r = await fetch(`${API}/customer/register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password:pwd,phone:phone||null})});
     const j = await r.json();
-    if(!j.success){ err.textContent=j.error||'Código inválido'; err.style.display=''; btn.disabled=false; btn.textContent='Entrar'; return; }
+    if(!j.success){ err.textContent=j.error||'Erro ao criar conta'; err.style.display=''; btn.disabled=false; btn.textContent='Criar conta →'; return; }
     acctToken = j.token;
-    try{ localStorage.setItem('acct_token',acctToken); localStorage.setItem('acct_phone',acctPhone); if(j.name) localStorage.setItem('acct_name',j.name); }catch{}
-    if(j.name) document.getElementById('acct-dname').textContent = j.name;
+    try{ localStorage.setItem('cust_token',acctToken); localStorage.setItem('acct_name',name); }catch{}
+    document.getElementById('acct-dname').textContent = name;
+    document.getElementById('acct-dphone').textContent = phone ? fmtPhoneDisplay(phone) : '';
     acctShowDashboard();
   } catch {
-    err.textContent='Erro de conexão.'; err.style.display='';
+    err.textContent='Erro de conexão. Tente novamente.'; err.style.display='';
   }
-  btn.disabled=false; btn.textContent='Entrar';
+  btn.disabled=false; btn.textContent='Criar conta →';
 }
+
+async function acctTrackOrder(){
+  const num = (document.getElementById('track-number').value||'').trim().toUpperCase();
+  const tel = (document.getElementById('track-phone').value||'').replace(/\D/g,'');
+  const err = document.getElementById('track-err');
+  const res = document.getElementById('track-result');
+  err.style.display='none'; res.style.display='none';
+  if(!num){ err.textContent='Digite o número do pedido'; err.style.display=''; return; }
+  if(tel.length < 10){ err.textContent='Digite o telefone usado no pedido'; err.style.display=''; return; }
+  const btn = document.querySelector('#acct-track-form .btn-primary');
+  btn.disabled=true; btn.textContent='Buscando…';
+  try {
+    const r = await fetch(`${API}/orders?order_number=${encodeURIComponent(num)}&phone=${encodeURIComponent(tel)}`);
+    const j = await r.json();
+    if(!j.success || !j.orders || !j.orders.length){
+      err.textContent='Pedido não encontrado. Verifique o número e telefone.'; err.style.display='';
+      btn.disabled=false; btn.textContent='Buscar pedido →'; return;
+    }
+    const o = j.orders[0];
+    const st = o.status||'new';
+    const label = STATUS_LABELS[st]||st;
+    res.style.display='';
+    res.innerHTML = `<div class="order-card" onclick="acctOpenOrder('${esc(o.order_number)}')">
+      <div class="order-card-top">
+        <div><div class="order-num">#${esc(o.order_number)}</div><div class="order-date">${fmtDate(o.created_at)}</div></div>
+        <div class="order-total">R$ ${fmt(o.total)}</div>
+      </div>
+      <span class="order-status-pill osp-${esc(st)}">${esc(label)}</span>
+      <div style="font-size:12px;color:var(--fg-2);margin-top:8px">Toque para ver detalhes</div>
+    </div>`;
+    // Pre-fill for tracking
+    try{ const d = JSON.parse(localStorage.getItem('plantao_last_order')||'{}'); d.order_number=o.order_number; d.phone=tel; d.done=false; d.ts=Date.now(); localStorage.setItem('plantao_last_order',JSON.stringify(d)); }catch{}
+    coData.tel = tel;
+  } catch {
+    err.textContent='Erro de conexão. Tente novamente.'; err.style.display='';
+  }
+  btn.disabled=false; btn.textContent='Buscar pedido →';
+}
+
 async function acctLoadOrders(){
   const list = document.getElementById('acct-orders-list');
-  const name = (() => { try{ return localStorage.getItem('acct_name')||''; }catch{ return ''; } })();
-  if(name) document.getElementById('acct-dname').textContent = name;
+  list.innerHTML='<div style="text-align:center;padding:32px;color:var(--fg-3)">Carregando…</div>';
   try {
     const r = await fetch(`${API}/customer/orders`,{headers:{'Authorization':'Bearer '+acctToken}});
     if(r.status===401){ acctLogout(); return; }
@@ -2482,11 +2617,6 @@ async function acctLoadOrders(){
     if(!j.success || !j.orders.length){
       list.innerHTML='<div style="text-align:center;padding:32px;color:var(--fg-3)"><i data-lucide="package-open" width="40" height="40"></i><br><br>Nenhum pedido ainda.</div>';
       lucide.createIcons(); return;
-    }
-    // Update name from first order if not set
-    if(!name && j.orders[0]?.customer_name){
-      try{ localStorage.setItem('acct_name', j.orders[0].customer_name); }catch{}
-      document.getElementById('acct-dname').textContent = j.orders[0].customer_name;
     }
     list.innerHTML = j.orders.map(o => {
       const st = o.status||'new';
@@ -2511,26 +2641,20 @@ async function acctLoadOrders(){
 function acctOpenOrder(orderNumber){
   try{
     const last = JSON.parse(localStorage.getItem('plantao_last_order')||'{}');
-    if(last.order_number === orderNumber){
-      if(last.phone) coData.tel = last.phone;
-      coStep=4; show('checkout-overlay'); renderCoStep(); startOrderTracking();
-    } else {
-      // Reopen tracking with stored phone
-      if(acctPhone){ coData.tel = acctPhone; }
-      try{ const o = JSON.parse(localStorage.getItem('plantao_last_order')||'{}'); o.order_number=orderNumber; o.phone=acctPhone||o.phone; o.done=false; o.ts=Date.now(); localStorage.setItem('plantao_last_order',JSON.stringify(o)); }catch{}
-      coStep=4; show('checkout-overlay'); renderCoStep(); startOrderTracking();
-    }
+    try{ const d = JSON.parse(localStorage.getItem('plantao_last_order')||'{}'); d.order_number=orderNumber; d.done=false; d.ts=Date.now(); localStorage.setItem('plantao_last_order',JSON.stringify(d)); }catch{}
+    if(last.phone) coData.tel = last.phone;
+    coStep=4; show('checkout-overlay'); renderCoStep(); startOrderTracking();
   } catch {}
 }
 function acctLogout(){
-  try{ fetch(`${API}/customer/session`,{method:'DELETE',headers:{'Authorization':'Bearer '+acctToken}}); }catch{}
-  acctToken=null; acctPhone=null;
-  try{ localStorage.removeItem('acct_token'); localStorage.removeItem('acct_phone'); localStorage.removeItem('acct_name'); }catch{}
+  try{ fetch(`${API}/customer/logout`,{method:'POST',headers:{'Authorization':'Bearer '+acctToken}}); }catch{}
+  acctToken=null;
+  try{ localStorage.removeItem('cust_token'); localStorage.removeItem('acct_token'); localStorage.removeItem('acct_name'); }catch{}
   acctShowLogin();
 }
 
 // Init: restore name if logged in
-try{ if(acctToken && localStorage.getItem('acct_name')) document.getElementById('acct-dname') && (document.getElementById('acct-dname').textContent = localStorage.getItem('acct_name')); }catch{}
+try{ if(acctToken && localStorage.getItem('acct_name')) { const el=document.getElementById('acct-dname'); if(el) el.textContent=localStorage.getItem('acct_name'); } }catch{}
 
 function setNavActive(id){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));

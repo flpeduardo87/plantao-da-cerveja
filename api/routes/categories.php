@@ -33,8 +33,8 @@ match ($method) {
     'POST' => (function () use ($pdo) {
         $d = body();
         if (empty($d['name']) || empty($d['slug'])) json_err('name and slug required');
-        $s = $pdo->prepare('INSERT INTO categories (name, emoji, slug, sort_order, active) VALUES (?,?,?,?,?)');
-        $s->execute([$d['name'], $d['emoji'] ?? '', $d['slug'], $d['sort_order'] ?? 0, $d['active'] ?? 1]);
+        $s = $pdo->prepare('INSERT INTO categories (name, emoji, slug, sort_order, active, image_url) VALUES (?,?,?,?,?,?)');
+        $s->execute([$d['name'], $d['emoji'] ?? '', $d['slug'], $d['sort_order'] ?? 0, $d['active'] ?? 1, $d['image_url'] ?? null]);
         json_ok(['id' => (int)$pdo->lastInsertId()], 201);
     })(),
 
@@ -43,7 +43,7 @@ match ($method) {
         $d = body();
         $fields = [];
         $vals   = [];
-        foreach (['name','emoji','slug','sort_order','active'] as $f) {
+        foreach (['name','emoji','slug','sort_order','active','image_url'] as $f) {
             if (array_key_exists($f, $d)) { $fields[] = "$f = ?"; $vals[] = $d[$f]; }
         }
         if (!$fields) json_err('Nothing to update');

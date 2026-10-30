@@ -1,125 +1,171 @@
 <?php
-// POST /customer/otp      — send 4-digit OTP via WhatsApp
-// POST /customer/verify   — verify OTP → session token
-// GET  /customer/orders   — list customer's orders  [auth]
-// GET  /customer/me       — get customer profile    [auth]
-// DELETE /customer/session — logout                 [auth]
+// POST /customer/register   — criar conta (nome, email, senha, telefone)
+// POST /customer/login      — autenticar (email, senha) → token
+// POST /customer/logout     — invalidar token
+// GET  /customer/me         — dados do cliente autenticado
+// PUT  /customer/me         — atualizar nome/telefone/senha
+// GET  /customer/orders     — pedidos do cliente autenticado
+// POST /customer/address    — salvar/atualizar endereço padrão
+// GET  /customer/address    — buscar endereço padrão
 
 $pdo = db();
 
-function customer_auth(\PDO $pdo): string {
+// ── Helper: autenticar token do cliente ─────────────────────────────────────
+function customerAuth(\PDO $pdo): array {
     $h = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-    if (!preg_match('/^Bearer\s+(\S+)$/i', $h, $m)) json_err('Não autorizado', 401);
-    $s = $pdo->prepare("SELECT phone FROM customer_sessions WHERE token = ? AND expires_at > NOW()");
-    $s->execute([$m[1]]);
-    $phone = $s->fetchColumn();
-    if (!$phone) json_err('Sessão expirada. Faça login novamente.', 401);
-    return (string)$phone;
+    $token = preg_match('/^Bearer\s+(\S+)$/i', $h, $m) ? $m[1] : '';
+    if (!$token) json_err('Não autenticado', 401);
+    $s = $pdo->prepare(
+        'SELECT cu.* FROM customer_sessions cs
+         JOIN customer_users cu ON cu.id = cs.customer_id
+         WHERE cs.token = ? AND cs.expires_at > NOW()'
+    );
+    $s->execute([$token]);
+    $user = $s->fetch();
+    if (!$user) json_err('Sessão inválida ou expirada', 401);
+    return $user;
 }
 
-$action = $sub ?? '';
+match ($method) {
 
-match (true) {
+    // ── Registro ─────────────────────────────────────────────────────────────
+    'POST' => (function () use ($pdo, $sub) {
+        match ($sub) {
 
-    // ── Send OTP ──────────────────────────────────────────────────────────────
-    $method === 'POST' && $action === 'otp' => (function() use ($pdo) {
-        $d = body();
-        $phone = preg_replace('/\D/', '', $d['phone'] ?? '');
-        if (strlen($phone) < 10) json_err('Telefone inválido');
+            'register' => (function () use ($pdo) {
+                $d = body();
+                if (empty($d['name']) || empty($d['email']) || empty($d['password'])) {
+                    json_err('Nome, e-mail e senha são obrigatórios');
+                }
+                if (strlen($d['password']) < 6) json_err('Senha deve ter pelo menos 6 caracteres');
+                $email = strtolower(trim($d['email']));
+                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) json_err('E-mail inválido');
 
-        // Rate limit: max 3 per 10 min
-        $cnt = $pdo->prepare("SELECT COUNT(*) FROM customer_otps WHERE phone = ? AND created_at > DATE_SUB(NOW(), INTERVAL 10 MINUTE)");
-        $cnt->execute([$phone]);
-        if ((int)$cnt->fetchColumn() >= 3) json_err('Muitas tentativas. Aguarde alguns minutos.', 429);
+                // Check duplicate
+                $chk = $pdo->prepare('SELECT id FROM customer_users WHERE email = ?');
+                $chk->execute([$email]);
+                if ($chk->fetch()) json_err('E-mail já cadastrado', 409);
 
-        $code = str_pad((string)random_int(1000, 9999), 4, '0', STR_PAD_LEFT);
-        $pdo->prepare("INSERT INTO customer_otps (phone, code, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))")
-            ->execute([$phone, $code]);
+                $hash = password_hash($d['password'], PASSWORD_BCRYPT, ['cost' => 10]);
+                $ins  = $pdo->prepare(
+                    'INSERT INTO customer_users (name, email, password_hash, phone) VALUES (?,?,?,?)'
+                );
+                $ins->execute([
+                    trim($d['name']),
+                    $email,
+                    $hash,
+                    isset($d['phone']) ? preg_replace('/\D/', '', $d['phone']) : null,
+                ]);
+                $userId = (int)$pdo->lastInsertId();
 
-        $cfg = $pdo->query("SELECT setting_key, setting_value FROM store_settings WHERE setting_key = 'fonnte_token'")->fetchAll(\PDO::FETCH_KEY_PAIR);
-        $fonnteToken = $cfg['fonnte_token'] ?? '';
-        if (!$fonnteToken) json_err('Serviço de verificação não configurado', 503);
+                // Auto-login after register
+                $token = bin2hex(random_bytes(32));
+                $pdo->prepare(
+                    'INSERT INTO customer_sessions (customer_id, token, expires_at) VALUES (?,?, DATE_ADD(NOW(), INTERVAL 30 DAY))'
+                )->execute([$userId, $token]);
 
-        $msg = "🍺 *Plantão da Cerveja*\n\nSeu código de acesso: *{$code}*\n\nVálido por 10 minutos.";
-        // Fonnte requires full international format
-        $fonnteTarget = (strlen($phone) <= 11) ? '55' . $phone : $phone;
-        $ch = curl_init('https://api.fonnte.com/send');
-        curl_setopt_array($ch, [
-            CURLOPT_POST           => true,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => 8,
-            CURLOPT_HTTPHEADER     => ["Authorization: {$fonnteToken}"],
-            CURLOPT_POSTFIELDS     => http_build_query(['target' => $fonnteTarget, 'message' => $msg, 'countryCode' => '55']),
-        ]);
-        $fonnteResp = curl_exec($ch);
-        $curlErr    = curl_error($ch);
-        curl_close($ch);
+                json_ok(['token' => $token, 'name' => trim($d['name']), 'email' => $email], 201);
+            })(),
 
-        json_ok(['success' => true, 'message' => 'Código enviado via WhatsApp', 'debug_target' => $fonnteTarget, 'debug_resp' => $fonnteResp, 'debug_err' => $curlErr]);
+            'login' => (function () use ($pdo) {
+                $d = body();
+                if (empty($d['email']) || empty($d['password'])) json_err('E-mail e senha são obrigatórios');
+                $email = strtolower(trim($d['email']));
+                $s = $pdo->prepare('SELECT * FROM customer_users WHERE email = ?');
+                $s->execute([$email]);
+                $user = $s->fetch();
+                if (!$user || !password_verify($d['password'], $user['password_hash'])) {
+                    json_err('E-mail ou senha incorretos', 401);
+                }
+                $token = bin2hex(random_bytes(32));
+                $pdo->prepare(
+                    'INSERT INTO customer_sessions (customer_id, token, expires_at) VALUES (?,?, DATE_ADD(NOW(), INTERVAL 30 DAY))'
+                )->execute([$user['id'], $token]);
+                json_ok(['token' => $token, 'name' => $user['name'], 'email' => $user['email'], 'phone' => $user['phone']]);
+            })(),
+
+            'logout' => (function () use ($pdo) {
+                $h = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+                $token = preg_match('/^Bearer\s+(\S+)$/i', $h, $m) ? $m[1] : '';
+                if ($token) $pdo->prepare('DELETE FROM customer_sessions WHERE token = ?')->execute([$token]);
+                json_ok(['ok' => true]);
+            })(),
+
+            'address' => (function () use ($pdo) {
+                $user = customerAuth($pdo);
+                $d = body();
+                // Upsert default address
+                $pdo->prepare('DELETE FROM customer_addresses WHERE customer_id = ?')->execute([$user['id']]);
+                $pdo->prepare(
+                    'INSERT INTO customer_addresses (customer_id, cep, street, number, complement, neighborhood, reference) VALUES (?,?,?,?,?,?,?)'
+                )->execute([
+                    $user['id'],
+                    $d['cep'] ?? null,
+                    $d['street'] ?? null,
+                    $d['number'] ?? null,
+                    $d['complement'] ?? null,
+                    $d['neighborhood'] ?? null,
+                    $d['reference'] ?? null,
+                ]);
+                json_ok(['saved' => true]);
+            })(),
+
+            default => json_err('Not found', 404),
+        };
     })(),
 
-    // ── Verify OTP ────────────────────────────────────────────────────────────
-    $method === 'POST' && $action === 'verify' => (function() use ($pdo) {
-        $d = body();
-        $phone = preg_replace('/\D/', '', $d['phone'] ?? '');
-        $code  = trim($d['code'] ?? '');
-        if (!$phone || !$code) json_err('Dados inválidos');
+    // ── GET ───────────────────────────────────────────────────────────────────
+    'GET' => (function () use ($pdo, $sub) {
+        match ($sub) {
 
-        $s = $pdo->prepare("SELECT id FROM customer_otps WHERE phone = ? AND code = ? AND expires_at > NOW() AND used = 0 ORDER BY id DESC LIMIT 1");
-        $s->execute([$phone, $code]);
-        $otpId = $s->fetchColumn();
-        if (!$otpId) json_err('Código inválido ou expirado', 401);
+            'me' => (function () use ($pdo) {
+                $user = customerAuth($pdo);
+                json_ok(['id' => $user['id'], 'name' => $user['name'], 'email' => $user['email'], 'phone' => $user['phone']]);
+            })(),
 
-        $pdo->prepare("UPDATE customer_otps SET used = 1 WHERE id = ?")->execute([$otpId]);
+            'orders' => (function () use ($pdo) {
+                $user = customerAuth($pdo);
+                $s = $pdo->prepare(
+                    'SELECT id, order_number, status, total, payment_method, delivery_type, created_at
+                     FROM orders WHERE customer_user_id = ? ORDER BY created_at DESC LIMIT 50'
+                );
+                $s->execute([$user['id']]);
+                json_ok(['orders' => $s->fetchAll()]);
+            })(),
 
-        $token = bin2hex(random_bytes(32));
-        $pdo->prepare("INSERT INTO customer_sessions (phone, token, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 DAY))")
-            ->execute([$phone, $token]);
+            'address' => (function () use ($pdo) {
+                $user = customerAuth($pdo);
+                $s = $pdo->prepare('SELECT * FROM customer_addresses WHERE customer_id = ? ORDER BY id DESC LIMIT 1');
+                $s->execute([$user['id']]);
+                $addr = $s->fetch();
+                json_ok($addr ?: (object)[]);
+            })(),
 
-        // Get customer name from last order
-        $info = $pdo->prepare("SELECT customer_name FROM orders WHERE customer_phone = ? ORDER BY id DESC LIMIT 1");
-        $info->execute([$phone]);
-        $name = $info->fetchColumn() ?: '';
-
-        json_ok(['success' => true, 'token' => $token, 'name' => $name]);
+            default => json_err('Not found', 404),
+        };
     })(),
 
-    // ── Orders ────────────────────────────────────────────────────────────────
-    $method === 'GET' && $action === 'orders' => (function() use ($pdo) {
-        $phone = customer_auth($pdo);
-        $s = $pdo->prepare(
-            "SELECT id, order_number, status, payment_method, delivery_type,
-                    subtotal, delivery_fee, total, address_street, address_number,
-                    notes, created_at
-             FROM orders WHERE customer_phone = ?
-             ORDER BY created_at DESC LIMIT 30"
-        );
-        $s->execute([$phone]);
-        json_ok(['success' => true, 'orders' => $s->fetchAll()]);
-    })(),
-
-    // ── Profile ───────────────────────────────────────────────────────────────
-    $method === 'GET' && $action === 'me' => (function() use ($pdo) {
-        $phone = customer_auth($pdo);
-        $s = $pdo->prepare(
-            "SELECT customer_name, customer_phone, customer_email,
-                    address_cep, address_street, address_number,
-                    address_complement, address_neighborhood
-             FROM orders WHERE customer_phone = ? ORDER BY id DESC LIMIT 1"
-        );
-        $s->execute([$phone]);
-        $row = $s->fetch() ?: ['customer_phone' => $phone];
-        json_ok(['success' => true, 'customer' => $row]);
-    })(),
-
-    // ── Logout ────────────────────────────────────────────────────────────────
-    $method === 'DELETE' => (function() use ($pdo) {
-        $h = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-        if (preg_match('/^Bearer\s+(\S+)$/i', $h, $m)) {
-            $pdo->prepare("DELETE FROM customer_sessions WHERE token = ?")->execute([$m[1]]);
+    // ── PUT (atualizar perfil) ────────────────────────────────────────────────
+    'PUT' => (function () use ($pdo, $sub) {
+        if ($sub === 'me') {
+            $user = customerAuth($pdo);
+            $d = body();
+            $fields = []; $vals = [];
+            if (!empty($d['name']))  { $fields[] = 'name = ?';  $vals[] = trim($d['name']); }
+            if (!empty($d['phone'])) { $fields[] = 'phone = ?'; $vals[] = preg_replace('/\D/', '', $d['phone']); }
+            if (!empty($d['password'])) {
+                if (strlen($d['password']) < 6) json_err('Senha deve ter pelo menos 6 caracteres');
+                $fields[] = 'password_hash = ?';
+                $vals[]   = password_hash($d['password'], PASSWORD_BCRYPT, ['cost' => 10]);
+            }
+            if ($fields) {
+                $vals[] = $user['id'];
+                $pdo->prepare('UPDATE customer_users SET ' . implode(', ', $fields) . ' WHERE id = ?')->execute($vals);
+            }
+            json_ok(['updated' => true]);
         }
-        json_ok(['success' => true]);
+        json_err('Not found', 404);
     })(),
 
-    default => json_err('Not found', 404),
+    default => json_err('Method not allowed', 405),
 };
