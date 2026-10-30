@@ -50,6 +50,41 @@
             <label>Descrição</label>
             <textarea id="p-description" placeholder="Descrição curta do produto"></textarea>
           </div>
+
+          <!-- Marca / Tipo / Tamanho -->
+          <div class="field-section-label form-full" style="font-size:12px;font-weight:600;color:var(--fg-3);text-transform:uppercase;letter-spacing:.05em;margin:4px 0 -2px">Variante do produto</div>
+          <div class="field">
+            <label>Marca</label>
+            <input type="text" id="p-brand" placeholder="Ex: Brahma, Heineken, Skol">
+          </div>
+          <div class="field">
+            <label>Tipo</label>
+            <select id="p-unit-type">
+              <option value="">— Selecione —</option>
+              <option value="Lata">Lata</option>
+              <option value="Long Neck">Long Neck</option>
+              <option value="Garrafa">Garrafa</option>
+              <option value="Retornável">Retornável</option>
+              <option value="Pack">Pack</option>
+              <option value="Caixa">Caixa</option>
+              <option value="Bag-in-Box">Bag-in-Box</option>
+              <option value="Dose">Dose</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tamanho / Quantidade</label>
+            <input type="text" id="p-size" placeholder="Ex: 350ml, 600ml, Pack c/12">
+          </div>
+          <div class="field" style="flex-direction:row;align-items:center;gap:10px">
+            <label class="toggle"><input type="checkbox" id="p-has-deposit" onchange="toggleDeposit(this.checked)"><span class="toggle-slider"></span></label>
+            <span style="font-size:13px;font-weight:500">Inclui depósito de casco?</span>
+          </div>
+          <div class="field" id="deposit-value-field" style="display:none">
+            <label>Valor do depósito (R$)</label>
+            <input type="number" id="p-deposit-value" min="0" step="0.01" placeholder="Ex: 5,00">
+          </div>
+
           <div class="field">
             <label>Ordem de exibição</label>
             <input type="number" id="p-sort" min="0" value="0">
@@ -220,12 +255,18 @@ async function loadProducts() {
   }
 }
 
+function toggleDeposit(checked) {
+  document.getElementById('deposit-value-field').style.display = checked ? '' : 'none';
+  if (!checked) document.getElementById('p-deposit-value').value = '';
+}
+
 function openNew() {
   document.getElementById('product-form').reset();
   document.getElementById('p-id').value = '';
   document.getElementById('p-image-url').value = '';
   const prev = document.getElementById('p-img-preview');
   prev.style.display = 'none'; prev.src = '';
+  toggleDeposit(false);
   document.getElementById('modal-product-title').textContent = 'Novo produto';
   openModal('modal-product');
 }
@@ -246,6 +287,14 @@ async function editProduct(id) {
     document.getElementById('p-active').checked = p.active == 1;
     document.getElementById('p-featured').checked = p.featured == 1;
     document.getElementById('p-image-url').value = p.image_url || '';
+    // Variant fields
+    document.getElementById('p-brand').value = p.brand || '';
+    document.getElementById('p-unit-type').value = p.unit_type || '';
+    document.getElementById('p-size').value = p.size || '';
+    const hasDeposit = p.has_deposit == 1;
+    document.getElementById('p-has-deposit').checked = hasDeposit;
+    document.getElementById('p-deposit-value').value = p.deposit_value || '';
+    toggleDeposit(hasDeposit);
     const prev = document.getElementById('p-img-preview');
     if (p.image_url) { prev.src = p.image_url; prev.style.display = 'block'; }
     else { prev.style.display = 'none'; }
@@ -293,6 +342,11 @@ async function saveProduct(e) {
       active: document.getElementById('p-active').checked ? 1 : 0,
       featured: document.getElementById('p-featured').checked ? 1 : 0,
       image_url: imageUrl,
+      brand: document.getElementById('p-brand').value.trim() || null,
+      unit_type: document.getElementById('p-unit-type').value || null,
+      size: document.getElementById('p-size').value.trim() || null,
+      has_deposit: document.getElementById('p-has-deposit').checked ? 1 : 0,
+      deposit_value: parseFloat(document.getElementById('p-deposit-value').value) || 0,
     };
     if (id) { await api(`/products/${id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('Produto atualizado'); }
     else { await api('/products', { method: 'POST', body: JSON.stringify(body) }); toast('Produto criado'); }

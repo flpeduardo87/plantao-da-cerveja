@@ -343,6 +343,9 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .addbtn:hover{background:var(--green-dk);}
 .addbtn:active{transform:scale(.88);}
 .addbtn.in{background:var(--amber);color:#111;}
+.pvariant{font-size:11px;color:var(--fg-3);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pdeposit{display:inline-block;margin-top:4px;font-size:10.5px;background:var(--bg-2);border:1px solid var(--border);border-radius:999px;padding:1px 7px;color:var(--fg-3);}
+
 
 /* ── CART DRAWER (desktop sidebar) ── */
 #cart-drawer-overlay{
@@ -1330,6 +1333,8 @@ async function loadData(){
         disc:parseInt(p.discount_pct)||0,
         image_url:p.image_url||null,
         featured:p.featured==1||p.featured===true,
+        brand:p.brand||null, unit_type:p.unit_type||null, size:p.size||null,
+        has_deposit:p.has_deposit==1, deposit_value:parseFloat(p.deposit_value)||0,
       });
     });
     Object.keys(CATALOG).forEach(k=>{ if(!CATALOG[k].length) delete CATALOG[k]; });
@@ -1465,7 +1470,7 @@ async function enterStore(){
       cats.forEach(c=>{catById[c.id]=c;CATALOG[c.slug]=[];SEC_LABELS[c.slug]=c.name;});
       prods.forEach(p=>{
         const cat=catById[p.category_id];
-        if(cat&&CATALOG[cat.slug]) CATALOG[cat.slug].push({id:p.id,name:p.name,price:parseFloat(p.price),old:p.old_price?parseFloat(p.old_price):null,disc:parseInt(p.discount_pct)||0,image_url:p.image_url||null,featured:p.featured==1||p.featured===true});
+        if(cat&&CATALOG[cat.slug]) CATALOG[cat.slug].push({id:p.id,name:p.name,price:parseFloat(p.price),old:p.old_price?parseFloat(p.old_price):null,disc:parseInt(p.discount_pct)||0,image_url:p.image_url||null,featured:p.featured==1||p.featured===true,brand:p.brand||null,unit_type:p.unit_type||null,size:p.size||null,has_deposit:p.has_deposit==1,deposit_value:parseFloat(p.deposit_value)||0});
       });
       Object.keys(CATALOG).forEach(k=>{if(!CATALOG[k].length)delete CATALOG[k];});
       allProds=Object.values(CATALOG).flat();
@@ -1653,11 +1658,12 @@ function buildOffersSection(){
   buildCats();
   buildCatGrid();
 }
-// Extract brand from product name (first 1-2 meaningful words)
-function extractBrand(name){
+// Extract brand: use brand field if available, otherwise parse from name
+function extractBrand(p){
+  if(p.brand) return p.brand;
+  const name = p.name||p;
   const stop = /^(cerveja|bebida|kit|pack|caixa|combo|dose|lata|garrafa|long|neck|retorn|sem|zero|baixa)/i;
   const words = name.trim().split(/\s+/);
-  // Skip leading stop-words, take up to 2 words
   let i=0; while(i<words.length && stop.test(words[i])) i++;
   return words.slice(i, i+2).join(' ') || words[0] || name;
 }
@@ -1673,7 +1679,7 @@ function filterBrand(brand){
   document.querySelectorAll('.brand-pill').forEach(p=>{
     p.classList.toggle('active', p.dataset.brand===brand);
   });
-  const filtered = brand==='Todos' ? _catProds : _catProds.filter(p=>extractBrand(p.name)===brand);
+  const filtered = brand==='Todos' ? _catProds : _catProds.filter(p=>extractBrand(p)===brand);
   renderCatGrid(filtered);
 }
 
@@ -1695,7 +1701,7 @@ function renderSections(prods=null, catTitle=null){
     // Build brand pills when 4+ products
     let pillsHTML = '';
     if(inCatView && prods.length >= 4){
-      const brands = [...new Set(prods.map(p=>extractBrand(p.name)))].sort();
+      const brands = [...new Set(prods.map(p=>extractBrand(p)))].sort();
       if(brands.length >= 2){
         const pills = ['Todos',...brands].map(b=>
           `<button class="brand-pill${b==='Todos'?' active':''}" data-brand="${esc(b)}" onclick="filterBrand('${b.replace(/'/g,"\\'")}')">${esc(b)}</button>`
@@ -1737,7 +1743,9 @@ function cardHTML(p){
       ${discPct?`<span class="disc-badge">-${discPct}%</span>`:''}
     </div>
     <div class="pcard-body">
+      ${(p.brand||p.unit_type||p.size)?`<div class="pvariant">${[p.brand,p.unit_type,p.size].filter(Boolean).join(' · ')}</div>`:''}
       <div class="pname">${esc(p.name)}</div>
+      ${p.has_deposit&&p.deposit_value>0?`<span class="pdeposit">+ R$ ${fmt(p.deposit_value)} casco</span>`:''}
       ${p.old?`<div class="pold">R$ ${fmt(p.old)}</div>`:''}
       <div class="prow">
         <span class="pnew">R$ ${fmt(p.price)}</span>

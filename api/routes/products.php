@@ -39,8 +39,8 @@ match ($method) {
             json_err('name, price and category_id required');
         }
         $s = $pdo->prepare(
-            'INSERT INTO products (category_id, name, description, price, old_price, discount_pct, image_url, active, featured, sort_order)
-             VALUES (?,?,?,?,?,?,?,?,?,?)'
+            'INSERT INTO products (category_id, name, description, price, old_price, discount_pct, image_url, active, featured, sort_order, brand, unit_type, size, has_deposit, deposit_value)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
         );
         $s->execute([
             (int)$d['category_id'],
@@ -53,6 +53,11 @@ match ($method) {
             (int)($d['active'] ?? 1),
             (int)($d['featured'] ?? 0),
             (int)($d['sort_order'] ?? 0),
+            $d['brand'] ?? null,
+            $d['unit_type'] ?? null,
+            $d['size'] ?? null,
+            (int)($d['has_deposit'] ?? 0),
+            (float)($d['deposit_value'] ?? 0),
         ]);
         json_ok(['id' => (int)$pdo->lastInsertId()], 201);
     })(),
@@ -60,7 +65,7 @@ match ($method) {
     'PUT', 'PATCH' => (function () use ($pdo, $id, $method) {
         if (!$id) json_err('ID required');
         $d = body();
-        $allowed = ['category_id','name','description','price','old_price','discount_pct','image_url','active','featured','sort_order','stock'];
+        $allowed = ['category_id','name','description','price','old_price','discount_pct','image_url','active','featured','sort_order','stock','brand','unit_type','size','has_deposit','deposit_value'];
         $fields = [];
         $vals   = [];
         foreach ($allowed as $f) {
