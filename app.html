@@ -266,6 +266,16 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .cat-pill.on .em{color:#191A12;}
 .cat-pill .lb{font-size:13px;font-weight:500;font-family:'Inter',sans-serif;color:var(--fg-2);white-space:nowrap;}
 .cat-pill.on .lb{color:#191A12;}
+/* ── Category card grid ── */
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 max(16px,env(safe-area-inset-left,0px)) 16px;}
+.cat-card{display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;border-radius:12px;overflow:hidden;background:var(--bg-2);border:1px solid var(--border);transition:transform .15s,box-shadow .15s;}
+.cat-card:active{transform:scale(.96);}
+.cat-card-bg{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:30px;line-height:1;}
+.cat-card-name{font-size:11px;font-weight:600;text-align:center;color:var(--fg);padding:5px 4px 6px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* ── Category view header ── */
+.cat-view-hd{display:flex;align-items:center;gap:10px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--border);background:var(--bg);}
+.cat-view-hd-back{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:none;background:var(--bg-2);cursor:pointer;color:var(--fg);flex-shrink:0;}
+.cat-view-hd-title{font-size:17px;font-weight:700;color:var(--fg);}
 .section{background:var(--bg);margin-bottom:8px;}
 .sec-hd{
   display:flex;justify-content:space-between;align-items:baseline;
@@ -1056,6 +1066,11 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
       </div>
       <div class="online-badge" id="store-badge"><span class="online-dot" id="store-dot"></span><span id="store-badge-txt">PEDIDOS ONLINE</span></div>
     </div>
+    <div id="cat-grid-wrap"></div>
+    <div id="cat-view-hd" class="cat-view-hd hidden">
+      <button class="cat-view-hd-back" onclick="exitCatView()"><i data-lucide="arrow-left" width="18" height="18"></i></button>
+      <span class="cat-view-hd-title" id="cat-view-title"></span>
+    </div>
     <div class="cat-strip"><div class="cat-scroll" id="cats"></div></div>
     <div id="sections"></div>
   </div>
@@ -1422,7 +1437,7 @@ async function enterStore(){
     const cats = (Array.isArray(catsRes)?catsRes:(catsRes.data||[])).filter(c=>c.active);
     const prods = Array.isArray(prodsRes)?prodsRes:(prodsRes.data||[]);
     if(cats.length && prods.length){
-      CATS = [{id:'all',lb:'Todos'},...cats.map(c=>({id:c.slug,lb:c.name}))];
+      CATS = [{id:'all',lb:'Todos'},...cats.map(c=>({id:c.slug,lb:c.name,em:c.emoji||''}))];
       CATALOG={}; SEC_LABELS={};
       const catById={};
       cats.forEach(c=>{catById[c.id]=c;CATALOG[c.slug]=[];SEC_LABELS[c.slug]=c.name;});
@@ -1433,7 +1448,7 @@ async function enterStore(){
       Object.keys(CATALOG).forEach(k=>{if(!CATALOG[k].length)delete CATALOG[k];});
       allProds=Object.values(CATALOG).flat();
       buildOffersSection();
-      buildCats(); renderSections();
+      buildCats(); buildCatGrid(); renderSections();
     }
   } catch(e){ /* keep demo data */ }
   // Check store open/closed status — only update if endpoint is public and returns store_open
@@ -1455,6 +1470,56 @@ async function enterStore(){
   } catch(e){}
 }
 
+const CAT_BG = {
+  'ofertas':['#FEE2E2','#B91C1C'],'all':['#FEF3C7','#92400E'],
+  'cervejas':['#FEF3C7','#92400E'],'cerveja':['#FEF3C7','#92400E'],
+  'chopp':['#FDE68A','#B45309'],
+  'destilados':['#EDE9FE','#5B21B6'],'destilado':['#EDE9FE','#5B21B6'],
+  'vinhos':['#FCE7F3','#9D174D'],'vinho':['#FCE7F3','#9D174D'],
+  'churrasco':['#FFEDD5','#9A3412'],'churrascos':['#FFEDD5','#9A3412'],
+  'aguas':['#E0F2FE','#0369A1'],'agua':['#E0F2FE','#0369A1'],
+  'refrigerantes':['#DCFCE7','#166534'],'refrigerante':['#DCFCE7','#166534'],
+  'sucos':['#D1FAE5','#065F46'],'suco':['#D1FAE5','#065F46'],
+  'energeticos':['#FEF9C3','#854D0E'],'energetico':['#FEF9C3','#854D0E'],
+  'kits':['#E0E7FF','#3730A3'],'kit':['#E0E7FF','#3730A3'],
+  'combos':['#E0E7FF','#3730A3'],'combo':['#E0E7FF','#3730A3'],
+  'naoacolicos':['#DCFCE7','#166534'],'nacoalcolicos':['#DCFCE7','#166534'],
+  'snacks':['#FEF9C3','#854D0E'],'petiscos':['#FEF9C3','#854D0E'],
+};
+function catBg(slug){
+  const k=(slug||'').toLowerCase().replace(/[^a-z]/g,'');
+  return CAT_BG[k]||['#F3F4F6','#374151'];
+}
+function buildCatGrid(){
+  const wrap=document.getElementById('cat-grid-wrap');
+  if(!wrap)return;
+  const cats=CATS.filter(c=>c.id!=='all');
+  if(!cats.length){wrap.innerHTML='';return;}
+  wrap.innerHTML=`<div class="cat-grid">${cats.map(c=>{
+    const [bg,fg]=catBg(c.id);
+    const em=c.em&&c.em.trim()?`<span>${c.em}</span>`:catIconEl(c.id,c.lb,28);
+    return `<div class="cat-card" onclick="enterCatView('${esc(c.id)}','${esc(c.lb)}')">
+      <div class="cat-card-bg" style="background:${bg};color:${fg}">${em}</div>
+      <div class="cat-card-name" style="color:${fg}">${esc(c.lb)}</div>
+    </div>`;
+  }).join('')}</div>`;
+  lucide.createIcons();
+}
+function enterCatView(slug,name){
+  document.getElementById('cat-grid-wrap').hidden=true;
+  const hd=document.getElementById('cat-view-hd');
+  hd.hidden=false;
+  document.getElementById('cat-view-title').textContent=name;
+  const prods=slug==='ofertas'?allProds.filter(p=>p.featured):(CATALOG[slug]||[]);
+  renderSections(prods.length?prods:[]);
+  document.getElementById('feed').scrollTo({top:0,behavior:'smooth'});
+}
+function exitCatView(){
+  document.getElementById('cat-grid-wrap').hidden=false;
+  document.getElementById('cat-view-hd').hidden=true;
+  renderSections();
+  document.getElementById('feed').scrollTo({top:0,behavior:'smooth'});
+}
 const CAT_ICONS = {
   'all':'layout-grid','todos':'layout-grid',
   'ofertas':'tag',
@@ -1540,8 +1605,9 @@ function buildOffersSection(){
   const hasOffers = offers.length > 0;
   // Manage "Ofertas" tab in CATS
   CATS = CATS.filter(c=>c.id!=='ofertas');
-  if(hasOffers) CATS.splice(1,0,{id:'ofertas',lb:'Ofertas'});
+  if(hasOffers) CATS.splice(1,0,{id:'ofertas',lb:'Ofertas',em:'🏷️'});
   buildCats();
+  buildCatGrid();
 }
 function renderSections(prods=null){
   const box = document.getElementById('sections');
@@ -1586,7 +1652,13 @@ function cardHTML(p){
   </div>`;
 }
 function search(q){
-  if(!q.trim()){ renderSections(); return; }
+  if(!q.trim()){
+    document.getElementById('cat-grid-wrap').hidden=false;
+    document.getElementById('cat-view-hd').hidden=true;
+    renderSections(); return;
+  }
+  document.getElementById('cat-grid-wrap').hidden=true;
+  document.getElementById('cat-view-hd').hidden=true;
   renderSections(allProds.filter(p=>p.name.toLowerCase().includes(q.toLowerCase())));
 }
 
