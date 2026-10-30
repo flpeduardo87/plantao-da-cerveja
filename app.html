@@ -268,9 +268,11 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .cat-pill .lb{font-size:13px;font-weight:500;font-family:'Inter',sans-serif;color:var(--fg-2);white-space:nowrap;}
 .cat-pill.on .lb{color:#191A12;}
 /* ── Category grid ── */
-.cat-marquee-wrap{padding:12px max(16px,env(safe-area-inset-left,0px)) 16px;}
-.cat-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
-.cat-mc{display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;border-radius:12px;overflow:hidden;background:var(--bg);box-shadow:0 1px 6px rgba(0,0,0,.10);transition:transform .12s,box-shadow .12s;user-select:none;}
+.cat-marquee-wrap{padding:12px 0 16px;position:relative;overflow:hidden;}
+.cat-marquee-wrap::after{content:'';position:absolute;right:0;top:0;bottom:0;width:52px;background:linear-gradient(to right,transparent,var(--bg-2));pointer-events:none;z-index:1;}
+.cat-grid{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:0 max(16px,env(safe-area-inset-left,0px));}
+.cat-grid::-webkit-scrollbar{display:none;}
+.cat-mc{display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;border-radius:12px;overflow:hidden;background:var(--bg);box-shadow:0 1px 6px rgba(0,0,0,.10);transition:transform .12s,box-shadow .12s;user-select:none;flex-shrink:0;width:80px;}
 .cat-mc:active{transform:scale(.93);box-shadow:0 1px 3px rgba(0,0,0,.08);}
 .cat-mc-img{width:100%;height:clamp(52px,13vw,80px);display:flex;align-items:center;justify-content:center;font-size:clamp(20px,5vw,34px);line-height:1;pointer-events:none;overflow:hidden;flex-shrink:0;}
 .cat-mc-img img{width:100%;height:100%;object-fit:cover;display:block;}
@@ -823,9 +825,10 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
   .cat-pill.on .lb{color:#191A12;font-weight:600;font-family:'Inter',sans-serif;}
 
   /* Category grid: larger cards on desktop */
-  .cat-marquee-wrap{padding:14px 40px 18px;}
-  .cat-grid{gap:10px;}
-  .cat-mc{border-radius:14px;}
+  .cat-marquee-wrap{padding:14px 40px 18px;overflow:visible;}
+  .cat-marquee-wrap::after{display:none;}
+  .cat-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;overflow:visible;padding:0;}
+  .cat-mc{border-radius:14px;width:auto;}
   .cat-mc-img{font-size:36px;}
   .cat-mc-name{font-size:13px;padding:7px 6px 10px;}
 
