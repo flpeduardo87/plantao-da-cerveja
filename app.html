@@ -277,7 +277,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .cat-mc-img{width:82px;height:82px;display:flex;align-items:center;justify-content:center;font-size:34px;line-height:1;pointer-events:none;}
 .cat-mc-name{font-size:10.5px;font-weight:600;text-align:center;padding:5px 4px 6px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg);background:var(--bg);pointer-events:none;}
 /* ── Category view header ── */
-.cat-view-hd{display:flex;align-items:center;gap:10px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--border);background:var(--bg);}
+.cat-view-hd{display:flex;align-items:center;gap:10px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:19;}
 .cat-view-hd-back{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:none;background:var(--bg-2);cursor:pointer;color:var(--fg);flex-shrink:0;}
 .cat-view-hd-title{font-size:17px;font-weight:700;color:var(--fg);}
 .section{background:var(--bg);margin-bottom:8px;}
@@ -1072,7 +1072,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
     </div>
     <div class="cat-strip"><div class="cat-scroll" id="cats"></div></div>
     <div id="cat-grid-wrap"></div>
-    <div id="cat-view-hd" class="cat-view-hd hidden">
+    <div id="cat-view-hd" class="cat-view-hd" hidden>
       <button class="cat-view-hd-back" onclick="exitCatView()"><i data-lucide="arrow-left" width="18" height="18"></i></button>
       <span class="cat-view-hd-title" id="cat-view-title"></span>
     </div>
@@ -1545,7 +1545,15 @@ function enterCatView(slug,name,catFallback=''){
     if(!prods.length&&catFallback&&catFallback!==slug) prods=CATALOG[catFallback]||[];
   }
   renderSections(prods, name);
-  document.getElementById('feed').scrollTo({top:0,behavior:'smooth'});
+  requestAnimationFrame(()=>{
+    const feed=document.getElementById('feed');
+    const sections=document.getElementById('sections');
+    const hd=document.getElementById('cat-view-hd');
+    const feedRect=feed.getBoundingClientRect();
+    const secTop=feed.scrollTop+sections.getBoundingClientRect().top-feedRect.top;
+    const hdH=hd?hd.offsetHeight:0;
+    feed.scrollTo({top:Math.max(0,secTop-hdH),behavior:'smooth'});
+  });
 }
 function exitCatView(){
   document.getElementById('cat-grid-wrap').hidden=false;
