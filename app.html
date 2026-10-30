@@ -269,7 +269,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 /* ── Category marquee carousel ── */
 @keyframes marquee-left{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 @keyframes marquee-right{0%{transform:translateX(-50%)}100%{transform:translateX(0)}}
-.cat-marquee-wrap{overflow:hidden;padding-bottom:16px;}
+.cat-marquee-wrap{overflow:hidden;padding:14px 0 16px;}
 .cat-marquee-row{display:flex;overflow:hidden;margin-bottom:10px;}
 .cat-marquee-track{display:flex;gap:10px;padding:0 5px;animation:marquee-left 32s linear infinite;will-change:transform;}
 .cat-marquee-track.rev{animation-name:marquee-right;}
