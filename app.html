@@ -1528,20 +1528,22 @@ function buildCatGrid(){
   }
   const r1=IMG_CATS.slice(0,10), r2=IMG_CATS.slice(10);
   wrap.innerHTML=`<div class="cat-marquee-wrap">${rowHTML(r1)}${rowHTML(r2)}</div>`;
-  // Auto-scroll suave com pausa no toque
+  // Auto-scroll ping-pong: vai até o fim, volta, repete
   wrap.querySelectorAll('.cat-marquee-row').forEach((row,i)=>{
-    const dir=i===0?1:-1;
-    let raf, touching=false, speed=0.6;
+    let dir=i===0?1:-1;
+    let touching=false, speed=0.6;
     const tick=()=>{
       if(!touching){
-        row.scrollLeft+=dir*speed;
         const max=row.scrollWidth-row.clientWidth;
-        if(row.scrollLeft<=0) row.scrollLeft=max;
-        if(row.scrollLeft>=max) row.scrollLeft=0;
+        row.scrollLeft+=dir*speed;
+        if(row.scrollLeft>=max){ row.scrollLeft=max; dir=-1; }
+        else if(row.scrollLeft<=0){ row.scrollLeft=0; dir=1; }
       }
-      raf=requestAnimationFrame(tick);
+      requestAnimationFrame(tick);
     };
-    raf=requestAnimationFrame(tick);
+    // Start row 2 near the end so they're out of phase
+    if(i===1) row.scrollLeft=row.scrollWidth;
+    requestAnimationFrame(tick);
     row.addEventListener('touchstart',()=>{touching=true;},{passive:true});
     row.addEventListener('touchend',()=>{touching=false;},{passive:true});
     row.addEventListener('mouseenter',()=>{touching=true;});
