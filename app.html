@@ -1323,6 +1323,8 @@ let CATS = [{id:'all',em:'🏠',lb:'Todos'}];
 let CATALOG = {};
 let SEC_LABELS = {};
 let allProds = [];
+let DELIVERY_FEE = 0;
+let MIN_ORDER = 0;
 
 const DEMO_DATA = {
   cats: [
@@ -1554,22 +1556,26 @@ async function enterStore(){
       buildCats(); buildCatGrid(); renderSections();
     }
   } catch(e){ /* keep demo data */ }
-  // Check store open/closed status — only update if endpoint is public and returns store_open
+  // Fetch store settings: open status, delivery fee, min order
   try {
     const res = await fetch(API+'/settings',{signal:AbortSignal.timeout(5000)});
     if(res.ok){
       const cfg = await res.json();
-      if(cfg && cfg.store_open !== undefined){
-        const isOpen = cfg.store_open=='1'||cfg.store_open===1;
-        const badge = document.getElementById('store-badge');
-        const dot   = document.getElementById('store-dot');
-        const txt   = document.getElementById('store-badge-txt');
-        badge.classList.toggle('closed',!isOpen);
-        dot.classList.toggle('closed',!isOpen);
-        txt.textContent = isOpen ? 'PEDIDOS ONLINE' : 'LOJA FECHADA';
+      if(cfg){
+        if(cfg.store_open !== undefined){
+          const isOpen = cfg.store_open=='1'||cfg.store_open===1;
+          const badge = document.getElementById('store-badge');
+          const dot   = document.getElementById('store-dot');
+          const txt   = document.getElementById('store-badge-txt');
+          badge.classList.toggle('closed',!isOpen);
+          dot.classList.toggle('closed',!isOpen);
+          txt.textContent = isOpen ? 'PEDIDOS ONLINE' : 'LOJA FECHADA';
+        }
+        if(cfg.delivery_fee !== undefined) DELIVERY_FEE = parseFloat(cfg.delivery_fee)||0;
+        if(cfg.min_order    !== undefined) MIN_ORDER    = parseFloat(cfg.min_order)||0;
       }
     }
-    // non-OK (401 etc) → keep default "PEDIDOS ONLINE"
+    // non-OK (401 etc) → keep defaults
   } catch(e){}
 }
 
@@ -1920,7 +1926,10 @@ function renderDrawerCart(){
     lucide.createIcons();
     return;
   }
-  const total = cartTotal();
+  const subtotal = cartTotal();
+  const grandTotal = subtotal + DELIVERY_FEE;
+  const freteTxt = DELIVERY_FEE > 0 ? `R$ ${fmt(DELIVERY_FEE)}` : 'Grátis';
+  const freteClass = DELIVERY_FEE > 0 ? '' : ' gratis';
   body.innerHTML=`
     <div class="cart-items-card">
       ${cart.map(i=>`
@@ -1939,9 +1948,9 @@ function renderDrawerCart(){
         </div>`).join('')}
     </div>
     <div class="summary-card">
-      <div class="sum-row"><span class="sum-label">Subtotal</span><span class="sum-val">R$ ${fmt(total)}</span></div>
-      <div class="sum-row"><span class="sum-label"><i data-lucide="truck" width="14" height="14"></i> Entrega</span><span class="sum-val gratis">Grátis</span></div>
-      <div class="sum-row total-row"><span class="sum-label">Total</span><span class="sum-val">R$ ${fmt(total)}</span></div>
+      <div class="sum-row"><span class="sum-label">Subtotal</span><span class="sum-val">R$ ${fmt(subtotal)}</span></div>
+      <div class="sum-row"><span class="sum-label"><i data-lucide="truck" width="14" height="14"></i> Entrega</span><span class="sum-val${freteClass}">${freteTxt}</span></div>
+      <div class="sum-row total-row"><span class="sum-label">Total</span><span class="sum-val">R$ ${fmt(grandTotal)}</span></div>
     </div>`;
   footer.classList.remove('hidden');
   footer.innerHTML=`
@@ -1978,7 +1987,10 @@ function renderCartPage(){
       </div>`;
     return;
   }
-  const total = cartTotal();
+  const subtotal = cartTotal();
+  const grandTotal = subtotal + DELIVERY_FEE;
+  const freteTxt2 = DELIVERY_FEE > 0 ? `R$ ${fmt(DELIVERY_FEE)}` : 'Grátis';
+  const freteClass2 = DELIVERY_FEE > 0 ? '' : ' gratis';
   el.innerHTML = `
     <div class="cart-page-title">Minha Sacola</div>
     <div class="cart-items-card">
@@ -1998,9 +2010,9 @@ function renderCartPage(){
         </div>`).join('')}
     </div>
     <div class="summary-card">
-      <div class="sum-row"><span class="sum-label">Subtotal</span><span class="sum-val">R$ ${fmt(total)}</span></div>
-      <div class="sum-row"><span class="sum-label"><i data-lucide="truck" width="14" height="14"></i> Custo de envio</span><span class="sum-val gratis">Grátis</span></div>
-      <div class="sum-row total-row"><span class="sum-label">Total</span><span class="sum-val">R$ ${fmt(total)}</span></div>
+      <div class="sum-row"><span class="sum-label">Subtotal</span><span class="sum-val">R$ ${fmt(subtotal)}</span></div>
+      <div class="sum-row"><span class="sum-label"><i data-lucide="truck" width="14" height="14"></i> Entrega</span><span class="sum-val${freteClass2}">${freteTxt2}</span></div>
+      <div class="sum-row total-row"><span class="sum-label">Total</span><span class="sum-val">R$ ${fmt(grandTotal)}</span></div>
     </div>
     <div class="cart-ctas">
       <button class="btn-primary" onclick="openWhen()">Finalizar Pedido</button>
@@ -2016,9 +2028,8 @@ function removeFromCart(id){
 }
 
 function openWhen(){
-  const MIN_ORDER = 20;
   const total = cartTotal();
-  if(total < MIN_ORDER){ toast(`Pedido mínimo R$ ${fmt(MIN_ORDER)}. Adicione mais R$ ${fmt(MIN_ORDER - total)} para continuar.`); return; }
+  if(MIN_ORDER > 0 && total < MIN_ORDER){ toast(`Pedido mínimo R$ ${fmt(MIN_ORDER)}. Adicione mais R$ ${fmt(MIN_ORDER - total)} para continuar.`); return; }
   chosenWhen = null;
   document.getElementById('when-imediata').classList.remove('selected');
   document.getElementById('when-agendar').classList.remove('selected');
@@ -2081,20 +2092,21 @@ function closeCheckout(){ stopOrderTracking(); hide('checkout-overlay'); updateT
 
 function renderCoStep(){
   const el = document.getElementById('co-body');
-  const total = cartTotal();
+  const subtotal = cartTotal();
+  const grandTotal = subtotal + DELIVERY_FEE;
   const summaryHtml = `
     <div class="order-summary">
       <button class="os-toggle" id="os-toggle" onclick="toggleSummary()">
-        <span><i data-lucide="package" width="14" height="14"></i> ${cart.reduce((s,i)=>s+i.qty,0)} item(s) · <span class="os-val">R$ ${fmt(total)}</span></span>
+        <span><i data-lucide="package" width="14" height="14"></i> ${cart.reduce((s,i)=>s+i.qty,0)} item(s) · <span class="os-val">R$ ${fmt(grandTotal)}</span></span>
         <span class="os-arrow"><i data-lucide="chevron-down" width="16" height="16"></i></span>
       </button>
       <div class="os-details" id="os-details">
         ${cart.map(i=>`<div class="os-item"><span>${i.name} ×${i.qty}</span><span>R$ ${fmt(i.price*i.qty)}</span></div>`).join('')}
-        <div class="os-meta"><span>Subtotal</span><span>R$ ${fmt(total)}</span></div>
-        <div class="os-meta"><span><i data-lucide="truck" width="13" height="13"></i> Frete</span><span class="gratis">GRÁTIS</span></div>
+        <div class="os-meta"><span>Subtotal</span><span>R$ ${fmt(subtotal)}</span></div>
+        <div class="os-meta"><span><i data-lucide="truck" width="13" height="13"></i> Frete</span><span${DELIVERY_FEE>0?'':' class="gratis"'}>${DELIVERY_FEE>0?'R$ '+fmt(DELIVERY_FEE):'GRÁTIS'}</span></div>
         <div class="os-meta"><span><i data-lucide="clock" width="13" height="13"></i> Entrega</span><span>${chosenWhen==='imediata'?'15–20 min':'Agendada'}</span></div>
       </div>
-      <div class="os-total"><span class="label">Total</span><span class="val">R$ ${fmt(total)}</span></div>
+      <div class="os-total"><span class="label">Total</span><span class="val">R$ ${fmt(grandTotal)}</span></div>
     </div>`;
   const stepperHtml = `
     <div class="stepper">
@@ -2158,6 +2170,7 @@ function renderCoStep(){
       </div>`;
   } else if(coStep===3){
     const orderDate = new Date().toLocaleDateString('pt-BR')+' '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    const rev_sub = subtotal; const rev_total = grandTotal;
     content=`
       <div class="form-section-title"><i data-lucide="clipboard-list" width="16" height="16"></i> Revisão do Pedido</div>
       <div style="background:var(--bg-2);border-radius:var(--r-sm);padding:12px;margin-bottom:16px;font-size:13px">
@@ -2169,13 +2182,13 @@ function renderCoStep(){
           ${cart.map(i=>`<tr><td>${esc(i.name)}</td><td>${i.qty}</td><td>R$ ${fmt(i.price*i.qty)}</td></tr>`).join('')}
         </table>
         <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:6px;border-top:1px solid var(--border);font-size:12px">
-          <span style="color:var(--fg-2)">Subtotal</span><span>R$ ${fmt(total)}</span>
+          <span style="color:var(--fg-2)">Subtotal</span><span>R$ ${fmt(rev_sub)}</span>
         </div>
         <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:3px">
-          <span style="color:var(--fg-2)">Frete</span><span style="color:var(--green-dk);font-weight:500">GRÁTIS</span>
+          <span style="color:var(--fg-2)">Frete</span><span style="${DELIVERY_FEE>0?'':'color:var(--green-dk);font-weight:500'}">${DELIVERY_FEE>0?'R$ '+fmt(DELIVERY_FEE):'GRÁTIS'}</span>
         </div>
         <div style="display:flex;justify-content:space-between;margin-top:8px;font-weight:600">
-          <span>TOTAL</span><span style="font-weight:600">R$ ${fmt(total)}</span>
+          <span>TOTAL</span><span style="font-weight:600">R$ ${fmt(rev_total)}</span>
         </div>
       </div>
       <div class="form-section-title"><i data-lucide="credit-card" width="16" height="16"></i> Forma de Pagamento</div>
