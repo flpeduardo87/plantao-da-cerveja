@@ -266,12 +266,18 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .cat-pill.on .em{color:#191A12;}
 .cat-pill .lb{font-size:13px;font-weight:500;font-family:'Inter',sans-serif;color:var(--fg-2);white-space:nowrap;}
 .cat-pill.on .lb{color:#191A12;}
-/* ── Category card grid ── */
-.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 max(16px,env(safe-area-inset-left,0px)) 16px;}
-.cat-card{display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;border-radius:12px;overflow:hidden;background:var(--bg-2);border:1px solid var(--border);transition:transform .15s,box-shadow .15s;}
-.cat-card:active{transform:scale(.96);}
-.cat-card-bg{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:30px;line-height:1;}
-.cat-card-name{font-size:11px;font-weight:600;text-align:center;color:var(--fg);padding:5px 4px 6px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* ── Category marquee carousel ── */
+@keyframes marquee-left{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes marquee-right{0%{transform:translateX(-50%)}100%{transform:translateX(0)}}
+.cat-marquee-wrap{overflow:hidden;padding-bottom:16px;}
+.cat-marquee-row{display:flex;overflow:hidden;margin-bottom:10px;}
+.cat-marquee-track{display:flex;gap:10px;padding:0 5px;animation:marquee-left 32s linear infinite;will-change:transform;}
+.cat-marquee-track.rev{animation-name:marquee-right;}
+.cat-marquee-track:hover{animation-play-state:paused;}
+.cat-mc{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;border-radius:14px;overflow:hidden;width:82px;border:1px solid var(--border);background:var(--bg);transition:transform .12s;}
+.cat-mc:active{transform:scale(.93);}
+.cat-mc-img{width:82px;height:82px;display:flex;align-items:center;justify-content:center;font-size:34px;line-height:1;}
+.cat-mc-name{font-size:10.5px;font-weight:600;text-align:center;padding:5px 4px 6px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg);background:var(--bg);}
 /* ── Category view header ── */
 .cat-view-hd{display:flex;align-items:center;gap:10px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--border);background:var(--bg);}
 .cat-view-hd-back{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:none;background:var(--bg-2);cursor:pointer;color:var(--fg);flex-shrink:0;}
@@ -1470,40 +1476,45 @@ async function enterStore(){
   } catch(e){}
 }
 
-const CAT_BG = {
-  'ofertas':['#FEE2E2','#B91C1C'],'all':['#FEF3C7','#92400E'],
-  'cervejas':['#FEF3C7','#92400E'],'cerveja':['#FEF3C7','#92400E'],
-  'chopp':['#FDE68A','#B45309'],
-  'destilados':['#EDE9FE','#5B21B6'],'destilado':['#EDE9FE','#5B21B6'],
-  'vinhos':['#FCE7F3','#9D174D'],'vinho':['#FCE7F3','#9D174D'],
-  'churrasco':['#FFEDD5','#9A3412'],'churrascos':['#FFEDD5','#9A3412'],
-  'aguas':['#E0F2FE','#0369A1'],'agua':['#E0F2FE','#0369A1'],
-  'refrigerantes':['#DCFCE7','#166534'],'refrigerante':['#DCFCE7','#166534'],
-  'sucos':['#D1FAE5','#065F46'],'suco':['#D1FAE5','#065F46'],
-  'energeticos':['#FEF9C3','#854D0E'],'energetico':['#FEF9C3','#854D0E'],
-  'kits':['#E0E7FF','#3730A3'],'kit':['#E0E7FF','#3730A3'],
-  'combos':['#E0E7FF','#3730A3'],'combo':['#E0E7FF','#3730A3'],
-  'naoacolicos':['#DCFCE7','#166534'],'nacoalcolicos':['#DCFCE7','#166534'],
-  'snacks':['#FEF9C3','#854D0E'],'petiscos':['#FEF9C3','#854D0E'],
-};
-function catBg(slug){
-  const k=(slug||'').toLowerCase().replace(/[^a-z]/g,'');
-  return CAT_BG[k]||['#F3F4F6','#374151'];
-}
+const IMG_CATS = [
+  // Row 1
+  {slug:'ofertas',        name:'Ofertas',         em:'🏷️', color:['#FEE2E2','#B91C1C']},
+  {slug:'novidades',      name:'Novidades',        em:'✨',  color:['#EDE9FE','#5B21B6']},
+  {slug:'cervejas-lata',  name:'Cervejas Lata',   em:'🍺', color:['#FEF3C7','#92400E']},
+  {slug:'packs',          name:'Packs',            em:'📦', color:['#FDE68A','#B45309']},
+  {slug:'long-necks',     name:'Long Necks',       em:'🍾', color:['#FEF3C7','#78350F']},
+  {slug:'retornaveis',    name:'Retornáveis',      em:'♻️', color:['#DCFCE7','#166534']},
+  {slug:'zero',           name:'Zero',             em:'🚫', color:['#F1F5F9','#334155']},
+  {slug:'baixas-calorias',name:'Baixas Calorias',  em:'💪', color:['#D1FAE5','#065F46']},
+  {slug:'churrasco',      name:'Churrasco',        em:'🔥', color:['#FFEDD5','#9A3412']},
+  {slug:'aguas',          name:'Águas/Gelos',      em:'💧', color:['#E0F2FE','#0369A1']},
+  // Row 2
+  {slug:'drinks-prontos', name:'Drinks Prontos',   em:'🍹', color:['#FCE7F3','#9D174D']},
+  {slug:'nao-alcoolicos', name:'Não Alcoólicos',   em:'🥤', color:['#DCFCE7','#166534']},
+  {slug:'energeticos',    name:'Energéticos',      em:'⚡', color:['#FEF9C3','#854D0E']},
+  {slug:'destilados',     name:'Destilados',       em:'🥃', color:['#EDE9FE','#5B21B6']},
+  {slug:'vinhos',         name:'Vinhos',           em:'🍷', color:['#FCE7F3','#9D174D']},
+  {slug:'congelados',     name:'Congelados',       em:'🧊', color:['#E0F2FE','#0C4A6E']},
+  {slug:'salgadinhos',    name:'Salgadinhos',      em:'🍟', color:['#FEF9C3','#854D0E']},
+  {slug:'doces',          name:'Doces',            em:'🍬', color:['#FCE7F3','#BE185D']},
+  {slug:'mercearia',      name:'Mercearia',        em:'🛒', color:['#F1F5F9','#334155']},
+];
 function buildCatGrid(){
   const wrap=document.getElementById('cat-grid-wrap');
   if(!wrap)return;
-  const cats=CATS.filter(c=>c.id!=='all');
-  if(!cats.length){wrap.innerHTML='';return;}
-  wrap.innerHTML=`<div class="cat-grid">${cats.map(c=>{
-    const [bg,fg]=catBg(c.id);
-    const em=c.em&&c.em.trim()?`<span>${c.em}</span>`:catIconEl(c.id,c.lb,28);
-    return `<div class="cat-card" onclick="enterCatView('${esc(c.id)}','${esc(c.lb)}')">
-      <div class="cat-card-bg" style="background:${bg};color:${fg}">${em}</div>
-      <div class="cat-card-name" style="color:${fg}">${esc(c.lb)}</div>
+  function mcHTML(c){
+    const [bg]=c.color;
+    return `<div class="cat-mc" onclick="enterCatView('${c.slug}','${c.name.replace(/'/g,"\\'")}')">
+      <div class="cat-mc-img" style="background:${bg}">${c.em}</div>
+      <div class="cat-mc-name">${c.name}</div>
     </div>`;
-  }).join('')}</div>`;
-  lucide.createIcons();
+  }
+  function rowHTML(items,rev){
+    const doubled=[...items,...items].map(mcHTML).join('');
+    return `<div class="cat-marquee-row"><div class="cat-marquee-track${rev?' rev':''}">${doubled}</div></div>`;
+  }
+  const r1=IMG_CATS.slice(0,10), r2=IMG_CATS.slice(10);
+  wrap.innerHTML=`<div class="cat-marquee-wrap">${rowHTML(r1,false)}${rowHTML(r2,true)}</div>`;
 }
 function enterCatView(slug,name){
   document.getElementById('cat-grid-wrap').hidden=true;
