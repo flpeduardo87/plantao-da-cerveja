@@ -273,7 +273,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .cat-marquee-row{display:flex;overflow:hidden;margin-bottom:10px;}
 .cat-marquee-track{display:flex;gap:10px;padding:0 5px;animation:marquee-left 32s linear infinite;will-change:transform;}
 .cat-marquee-track.rev{animation-name:marquee-right;}
-.cat-marquee-track:hover{animation-play-state:paused;}
+.cat-marquee-track:hover,.cat-marquee-track.dragging{animation-play-state:paused;}
 .cat-mc{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;border-radius:14px;overflow:hidden;width:82px;border:1px solid var(--border);background:var(--bg);transition:transform .12s;}
 .cat-mc:active{transform:scale(.93);}
 .cat-mc-img{width:82px;height:82px;display:flex;align-items:center;justify-content:center;font-size:34px;line-height:1;}
@@ -1477,34 +1477,35 @@ async function enterStore(){
 }
 
 const IMG_CATS = [
-  // Row 1
-  {slug:'ofertas',        name:'Ofertas',         em:'🏷️', color:['#FEE2E2','#B91C1C']},
-  {slug:'novidades',      name:'Novidades',        em:'✨',  color:['#EDE9FE','#5B21B6']},
-  {slug:'cervejas-lata',  name:'Cervejas Lata',   em:'🍺', color:['#FEF3C7','#92400E']},
-  {slug:'packs',          name:'Packs',            em:'📦', color:['#FDE68A','#B45309']},
-  {slug:'long-necks',     name:'Long Necks',       em:'🍾', color:['#FEF3C7','#78350F']},
-  {slug:'retornaveis',    name:'Retornáveis',      em:'♻️', color:['#DCFCE7','#166534']},
-  {slug:'zero',           name:'Zero',             em:'🚫', color:['#F1F5F9','#334155']},
-  {slug:'baixas-calorias',name:'Baixas Calorias',  em:'💪', color:['#D1FAE5','#065F46']},
-  {slug:'churrasco',      name:'Churrasco',        em:'🔥', color:['#FFEDD5','#9A3412']},
-  {slug:'aguas',          name:'Águas/Gelos',      em:'💧', color:['#E0F2FE','#0369A1']},
+  // Row 1 — cat: slug da categoria no banco (fallback se o slug próprio não existir)
+  {slug:'ofertas',        name:'Ofertas',         em:'🏷️', color:['#FEE2E2','#B91C1C'], cat:'ofertas'},
+  {slug:'novidades',      name:'Novidades',        em:'✨',  color:['#EDE9FE','#5B21B6'], cat:'ofertas'},
+  {slug:'cervejas-lata',  name:'Cervejas Lata',   em:'🍺', color:['#FEF3C7','#92400E'], cat:'cervejas'},
+  {slug:'packs',          name:'Packs',            em:'📦', color:['#FDE68A','#B45309'], cat:'cervejas'},
+  {slug:'long-necks',     name:'Long Necks',       em:'🍾', color:['#FEF3C7','#78350F'], cat:'cervejas'},
+  {slug:'retornaveis',    name:'Retornáveis',      em:'♻️', color:['#DCFCE7','#166534'], cat:'cervejas'},
+  {slug:'zero',           name:'Zero',             em:'🚫', color:['#F1F5F9','#334155'], cat:'cervejas'},
+  {slug:'baixas-calorias',name:'Baixas Calorias',  em:'💪', color:['#D1FAE5','#065F46'], cat:'cervejas'},
+  {slug:'churrasco',      name:'Churrasco',        em:'🔥', color:['#FFEDD5','#9A3412'], cat:'churrasco'},
+  {slug:'aguas',          name:'Águas/Gelos',      em:'💧', color:['#E0F2FE','#0369A1'], cat:'aguas-gelos'},
   // Row 2
-  {slug:'drinks-prontos', name:'Drinks Prontos',   em:'🍹', color:['#FCE7F3','#9D174D']},
-  {slug:'nao-alcoolicos', name:'Não Alcoólicos',   em:'🥤', color:['#DCFCE7','#166534']},
-  {slug:'energeticos',    name:'Energéticos',      em:'⚡', color:['#FEF9C3','#854D0E']},
-  {slug:'destilados',     name:'Destilados',       em:'🥃', color:['#EDE9FE','#5B21B6']},
-  {slug:'vinhos',         name:'Vinhos',           em:'🍷', color:['#FCE7F3','#9D174D']},
-  {slug:'congelados',     name:'Congelados',       em:'🧊', color:['#E0F2FE','#0C4A6E']},
-  {slug:'salgadinhos',    name:'Salgadinhos',      em:'🍟', color:['#FEF9C3','#854D0E']},
-  {slug:'doces',          name:'Doces',            em:'🍬', color:['#FCE7F3','#BE185D']},
-  {slug:'mercearia',      name:'Mercearia',        em:'🛒', color:['#F1F5F9','#334155']},
+  {slug:'drinks-prontos', name:'Drinks Prontos',   em:'🍹', color:['#FCE7F3','#9D174D'], cat:'drinks'},
+  {slug:'nao-alcoolicos', name:'Não Alcoólicos',   em:'🥤', color:['#DCFCE7','#166534'], cat:'nao-alcoolicos'},
+  {slug:'energeticos',    name:'Energéticos',      em:'⚡', color:['#FEF9C3','#854D0E'], cat:'nao-alcoolicos'},
+  {slug:'destilados',     name:'Destilados',       em:'🥃', color:['#EDE9FE','#5B21B6'], cat:'destilados'},
+  {slug:'vinhos',         name:'Vinhos',           em:'🍷', color:['#FCE7F3','#9D174D'], cat:'vinhos'},
+  {slug:'congelados',     name:'Congelados',       em:'🧊', color:['#E0F2FE','#0C4A6E'], cat:'congelados'},
+  {slug:'salgadinhos',    name:'Salgadinhos',      em:'🍟', color:['#FEF9C3','#854D0E'], cat:'salgadinhos'},
+  {slug:'doces',          name:'Doces',            em:'🍬', color:['#FCE7F3','#BE185D'], cat:'doces'},
+  {slug:'mercearia',      name:'Mercearia',        em:'🛒', color:['#F1F5F9','#334155'], cat:'mercearia'},
 ];
 function buildCatGrid(){
   const wrap=document.getElementById('cat-grid-wrap');
   if(!wrap)return;
   function mcHTML(c){
     const [bg]=c.color;
-    return `<div class="cat-mc" onclick="enterCatView('${c.slug}','${c.name.replace(/'/g,"\\'")}')">
+    const catFb=c.cat||c.slug;
+    return `<div class="cat-mc" onclick="enterCatView('${c.slug}','${c.name.replace(/'/g,"\\'")}','${catFb}')">
       <div class="cat-mc-img" style="background:${bg}">${c.em}</div>
       <div class="cat-mc-name">${c.name}</div>
     </div>`;
@@ -1515,14 +1516,38 @@ function buildCatGrid(){
   }
   const r1=IMG_CATS.slice(0,10), r2=IMG_CATS.slice(10);
   wrap.innerHTML=`<div class="cat-marquee-wrap">${rowHTML(r1,false)}${rowHTML(r2,true)}</div>`;
+  // Touch/mouse drag to scroll each track
+  wrap.querySelectorAll('.cat-marquee-track').forEach(track=>{
+    let startX=0, startOffset=0, dragging=false;
+    const getOffset=()=>{
+      const st=getComputedStyle(track).transform;
+      const m=st.match(/matrix.*\((.+)\)/);
+      return m?parseFloat(m[1].split(', ')[4]):0;
+    };
+    const start=x=>{dragging=true;startX=x;startOffset=getOffset();track.classList.add('dragging');track.style.transform=`translateX(${startOffset}px)`;track.style.transition='none';};
+    const move=x=>{if(!dragging)return;const dx=x-startX;track.style.transform=`translateX(${startOffset+dx}px)`;};
+    const end=()=>{if(!dragging)return;dragging=false;track.classList.remove('dragging');track.style.transition='';track.style.transform='';};
+    track.addEventListener('mousedown',e=>start(e.clientX));
+    track.addEventListener('mousemove',e=>move(e.clientX));
+    track.addEventListener('mouseup',end);
+    track.addEventListener('mouseleave',end);
+    track.addEventListener('touchstart',e=>{e.preventDefault();start(e.touches[0].clientX);},{passive:false});
+    track.addEventListener('touchmove',e=>{e.preventDefault();move(e.touches[0].clientX);},{passive:false});
+    track.addEventListener('touchend',end);
+  });
 }
-function enterCatView(slug,name){
+function enterCatView(slug,name,catFallback=''){
   document.getElementById('cat-grid-wrap').hidden=true;
   const hd=document.getElementById('cat-view-hd');
   hd.hidden=false;
   document.getElementById('cat-view-title').textContent=name;
-  const prods=slug==='ofertas'?allProds.filter(p=>p.featured):(CATALOG[slug]||[]);
-  renderSections(prods.length?prods:[], name);
+  let prods=[];
+  if(slug==='ofertas'||catFallback==='ofertas') prods=allProds.filter(p=>p.featured);
+  else {
+    prods=CATALOG[slug]||[];
+    if(!prods.length&&catFallback&&catFallback!==slug) prods=CATALOG[catFallback]||[];
+  }
+  renderSections(prods, name);
   document.getElementById('feed').scrollTo({top:0,behavior:'smooth'});
 }
 function exitCatView(){
