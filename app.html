@@ -2570,6 +2570,8 @@ async function acctLogin(){
     if(!j.success){ err.textContent=j.error||'E-mail ou senha incorretos'; err.style.display=''; btn.disabled=false; btn.textContent='Entrar →'; return; }
     acctToken = j.token;
     try{ localStorage.setItem('cust_token',acctToken); if(j.name) localStorage.setItem('acct_name',j.name); localStorage.setItem('acct_email',email); }catch{}
+    document.getElementById('acct-dname').textContent = j.name||'';
+    document.getElementById('acct-dphone').textContent = j.phone ? fmtPhoneDisplay(j.phone) : email;
     acctShowDashboard();
   } catch {
     err.textContent='Erro de conexão. Tente novamente.'; err.style.display='';
@@ -2595,6 +2597,8 @@ async function acctRegister(){
     if(!j.success){ err.textContent=j.error||'Erro ao criar conta'; err.style.display=''; btn.disabled=false; btn.textContent='Criar conta →'; return; }
     acctToken = j.token;
     try{ localStorage.setItem('cust_token',acctToken); localStorage.setItem('acct_name',name); localStorage.setItem('acct_email',email); }catch{}
+    document.getElementById('acct-dname').textContent = name;
+    document.getElementById('acct-dphone').textContent = phone ? fmtPhoneDisplay(phone) : email;
     acctShowDashboard();
   } catch {
     err.textContent='Erro de conexão. Tente novamente.'; err.style.display='';
