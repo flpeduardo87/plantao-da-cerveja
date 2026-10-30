@@ -1535,10 +1535,16 @@ function buildCatGrid(){
   });
 }
 function enterCatView(slug,name,catFallback=''){
+  // Hide everything above products — hero, store info, category strips
+  document.querySelector('.store-hero').hidden=true;
+  document.querySelector('.store-info-card').hidden=true;
+  document.querySelector('.cat-strip').hidden=true;
   document.getElementById('cat-grid-wrap').hidden=true;
+  // Show category page header
   const hd=document.getElementById('cat-view-hd');
   hd.hidden=false;
   document.getElementById('cat-view-title').textContent=name;
+  // Resolve products
   let prods=[];
   if(slug==='ofertas'||catFallback==='ofertas') prods=allProds.filter(p=>p.featured);
   else {
@@ -1546,17 +1552,14 @@ function enterCatView(slug,name,catFallback=''){
     if(!prods.length&&catFallback&&catFallback!==slug) prods=CATALOG[catFallback]||[];
   }
   renderSections(prods, name);
-  requestAnimationFrame(()=>{
-    const feed=document.getElementById('feed');
-    const sections=document.getElementById('sections');
-    const hd=document.getElementById('cat-view-hd');
-    const feedRect=feed.getBoundingClientRect();
-    const secTop=feed.scrollTop+sections.getBoundingClientRect().top-feedRect.top;
-    const hdH=hd?hd.offsetHeight:0;
-    feed.scrollTo({top:Math.max(0,secTop-hdH),behavior:'smooth'});
-  });
+  // Scroll to very top so cat header is first thing visible
+  document.getElementById('feed').scrollTo({top:0,behavior:'instant'});
 }
 function exitCatView(){
+  // Restore full store view
+  document.querySelector('.store-hero').hidden=false;
+  document.querySelector('.store-info-card').hidden=false;
+  document.querySelector('.cat-strip').hidden=false;
   document.getElementById('cat-grid-wrap').hidden=false;
   document.getElementById('cat-view-hd').hidden=true;
   renderSections();
