@@ -1212,9 +1212,9 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
       <div class="login-title">Minha Conta</div>
 
       <!-- Tabs login / cadastro -->
-      <div id="acct-tab-row" style="display:flex;gap:0;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px;">
-        <button id="tab-login" onclick="acctTab('login')" style="flex:1;padding:9px;border:none;background:var(--amber);color:#111;font-weight:700;font-size:14px;cursor:pointer;">Entrar</button>
-        <button id="tab-register" onclick="acctTab('register')" style="flex:1;padding:9px;border:none;background:var(--bg);color:var(--fg-2);font-weight:500;font-size:14px;cursor:pointer;">Criar conta</button>
+      <div id="acct-tab-row" style="display:flex;gap:4px;background:var(--bg-2);border-radius:12px;padding:4px;margin-bottom:24px;">
+        <button id="tab-login" onclick="acctTab('login')" style="flex:1;padding:10px;border:none;border-radius:9px;background:#fff;color:#111;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.10);transition:background .15s,box-shadow .15s,color .15s;">Entrar</button>
+        <button id="tab-register" onclick="acctTab('register')" style="flex:1;padding:10px;border:none;border-radius:9px;background:transparent;color:var(--fg-2);font-weight:500;font-size:14px;cursor:pointer;box-shadow:none;transition:background .15s,box-shadow .15s,color .15s;">Criar conta</button>
       </div>
 
       <!-- Formulário login -->
@@ -2532,13 +2532,11 @@ function acctTab(tab){
   const btnLogin = document.getElementById('tab-login');
   const btnReg   = document.getElementById('tab-register');
   if(btnLogin && btnReg){
-    if(tab==='login'){
-      btnLogin.style.background='var(--amber)'; btnLogin.style.color='#111'; btnLogin.style.fontWeight='700';
-      btnReg.style.background='var(--bg)'; btnReg.style.color='var(--fg-2)'; btnReg.style.fontWeight='500';
-    } else if(tab==='register'){
-      btnReg.style.background='var(--amber)'; btnReg.style.color='#111'; btnReg.style.fontWeight='700';
-      btnLogin.style.background='var(--bg)'; btnLogin.style.color='var(--fg-2)'; btnLogin.style.fontWeight='500';
-    }
+    const activeStyle  = {background:'#fff', color:'#111', fontWeight:'700', boxShadow:'0 1px 4px rgba(0,0,0,.10)'};
+    const inactiveStyle= {background:'transparent', color:'var(--fg-2)', fontWeight:'500', boxShadow:'none'};
+    const applyStyle   = (el, s) => { el.style.background=s.background; el.style.color=s.color; el.style.fontWeight=s.fontWeight; el.style.boxShadow=s.boxShadow; };
+    if(tab==='login'){ applyStyle(btnLogin, activeStyle); applyStyle(btnReg, inactiveStyle); }
+    else if(tab==='register'){ applyStyle(btnReg, activeStyle); applyStyle(btnLogin, inactiveStyle); }
   }
   // hide tab row on track screen
   const tabRow = document.getElementById('acct-tab-row');
