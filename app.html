@@ -295,6 +295,12 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   padding:2px max(16px,env(safe-area-inset-right,0px)) 14px max(16px,env(safe-area-inset-left,0px));
 }
 .prod-row::-webkit-scrollbar{display:none;}
+/* 2-column grid for category pages */
+.prod-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+  padding:12px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));
+}
+.prod-grid .pcard{width:auto;flex-shrink:unset;}
 .pcard{
   flex-shrink:0;width:148px;background:var(--bg);
   border-radius:var(--r-sm);border:1.5px solid var(--border);
@@ -1661,7 +1667,7 @@ function renderSections(prods=null, catTitle=null){
     const title = catTitle || 'Resultados';
     const inCatView = !!catTitle;
     box.innerHTML = prods.length
-      ? `<div class="section"><div class="sec-hd"><span class="sec-title">${esc(title)}</span></div><div class="prod-row">${prods.map(cardHTML).join('')}</div></div>`
+      ? `<div class="section"><div class="sec-hd"><span class="sec-title">${esc(title)}</span></div><div class="prod-grid">${prods.map(cardHTML).join('')}</div></div>`
       : `<div style="text-align:center;padding:56px 16px;color:var(--fg-2)">
            <div style="margin-bottom:12px"><i data-lucide="package-open" width="48" height="48"></i></div>
            <p style="font-size:14px;margin-bottom:${inCatView?'20px':'0'}">Nenhum produto nesta categoria ainda.</p>
