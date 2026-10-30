@@ -1733,7 +1733,10 @@ function renderSections(prods=null, catTitle=null){
     </div>` : '';
   box.innerHTML = offersSec + Object.keys(SEC_LABELS).filter(k=>CATALOG[k]).map(k=>`
     <div class="section" id="sec-${k}">
-      <div class="sec-hd"><span class="sec-title">${SEC_LABELS[k]}</span></div>
+      <div class="sec-hd">
+        <span class="sec-title">${SEC_LABELS[k]}</span>
+        <span class="sec-more" onclick="enterCatView('${k}','${SEC_LABELS[k].replace(/'/g,"\\'")}','${k}')">Ver mais</span>
+      </div>
       <div class="prod-row">${CATALOG[k].map(cardHTML).join('')}</div>
     </div>`).join('');
   lucide.createIcons();
