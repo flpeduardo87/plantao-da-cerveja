@@ -275,11 +275,12 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 }
 .cat-marquee-row{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-bottom:10px;}
 .cat-marquee-row::-webkit-scrollbar{display:none;}
-.cat-marquee-track{display:flex;gap:10px;padding:0 max(16px,env(safe-area-inset-left,0px));width:max-content;}
-.cat-mc{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;border-radius:var(--r-sm);overflow:hidden;width:82px;border:1.5px solid var(--border);background:var(--bg);transition:transform .12s;user-select:none;}
-.cat-mc:active{transform:scale(.93);}
-.cat-mc-img{width:82px;height:82px;display:flex;align-items:center;justify-content:center;font-size:34px;line-height:1;pointer-events:none;}
-.cat-mc-name{font-size:10.5px;font-weight:600;text-align:center;padding:5px 4px 6px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg);background:var(--bg);pointer-events:none;}
+.cat-marquee-track{display:flex;gap:12px;padding:4px max(16px,env(safe-area-inset-left,0px)) 8px;width:max-content;}
+.cat-mc{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;border-radius:12px;overflow:hidden;width:100px;background:var(--bg);box-shadow:0 1px 6px rgba(0,0,0,.10);transition:transform .12s,box-shadow .12s;user-select:none;}
+.cat-mc:active{transform:scale(.93);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.cat-mc-img{width:100%;height:100px;display:flex;align-items:center;justify-content:center;font-size:42px;line-height:1;pointer-events:none;overflow:hidden;flex-shrink:0;}
+.cat-mc-img img{width:100%;height:100%;object-fit:cover;display:block;}
+.cat-mc-name{font-size:11px;font-weight:600;text-align:center;padding:6px 5px 8px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg);background:var(--bg);pointer-events:none;letter-spacing:-.1px;}
 /* ── Category view header ── */
 .cat-view-hd{display:flex;align-items:center;gap:10px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:19;}
 .cat-view-hd-back{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:none;background:var(--bg-2);cursor:pointer;color:var(--fg);flex-shrink:0;}
@@ -827,11 +828,27 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
   .cat-pill .lb{font-size:16px;font-weight:500;font-family:'Inter',sans-serif;color:#111;}
   .cat-pill.on .lb{color:#191A12;font-weight:600;font-family:'Inter',sans-serif;}
 
+  /* Category cards: larger on desktop, aligned with 40px grid */
+  .cat-marquee-track{padding:0 40px;}
+  .cat-marquee-wrap::after{width:80px;}
+  .cat-mc{width:120px;border-radius:14px;}
+  .cat-mc-img{height:120px;font-size:52px;}
+  .cat-mc-name{font-size:13px;padding:7px 6px 10px;}
+
   /* Section */
   .section{background:var(--bg);margin-bottom:12px;}
   .sec-hd{padding:16px 40px 8px;}
   .sec-title{font-size:22px;}
   .sec-more{font-size:14px;}
+
+  /* Account screen: centered card on desktop */
+  #s-account{display:flex;align-items:flex-start;justify-content:center;background:var(--bg-2);}
+  #acct-scroll{width:100%;max-width:480px;background:var(--bg);min-height:100%;padding:32px 40px;}
+  .login-logo img{width:72px;height:72px;}
+  .login-title{font-size:26px;}
+  .acct-header{padding:28px 0 20px;}
+  .acct-body{padding:0;}
+  .acct-logout{margin-top:24px;}
 
   /* Products: CSS grid instead of horizontal scroll */
   .prod-row{
@@ -1520,7 +1537,12 @@ async function enterStore(){
       CATS = [{id:'all',lb:'Todos'},...cats.map(c=>({id:c.slug,lb:c.name,em:c.emoji||''}))];
       CATALOG={}; SEC_LABELS={};
       const catById={};
-      cats.forEach(c=>{catById[c.id]=c;CATALOG[c.slug]=[];SEC_LABELS[c.slug]=c.name;});
+      cats.forEach(c=>{
+        catById[c.id]=c;CATALOG[c.slug]=[];SEC_LABELS[c.slug]=c.name;
+        // Merge image_url from DB into IMG_CATS
+        const mc=IMG_CATS.find(m=>m.slug===c.slug||m.cat===c.slug);
+        if(mc && c.image_url) mc.image_url=c.image_url;
+      });
       prods.forEach(p=>{
         const cat=catById[p.category_id];
         if(cat&&CATALOG[cat.slug]) CATALOG[cat.slug].push({id:p.id,name:p.name,price:parseFloat(p.price),old:p.old_price?parseFloat(p.old_price):null,disc:parseInt(p.discount_pct)||0,image_url:p.image_url||null,featured:p.featured==1||p.featured===true,brand:p.brand||null,unit_type:p.unit_type||null,size:p.size||null,has_deposit:p.has_deposit==1,deposit_value:parseFloat(p.deposit_value)||0});
@@ -1579,8 +1601,11 @@ function buildCatGrid(){
   function mcHTML(c){
     const [bg]=c.color;
     const catFb=c.cat||c.slug;
+    const imgContent = c.image_url
+      ? `<img src="${esc(c.image_url)}" alt="${esc(c.name)}" loading="lazy">`
+      : c.em;
     return `<div class="cat-mc" onclick="enterCatView('${c.slug}','${c.name.replace(/'/g,"\\'")}','${catFb}')">
-      <div class="cat-mc-img" style="background:${bg}">${c.em}</div>
+      <div class="cat-mc-img" style="background:${bg}">${imgContent}</div>
       <div class="cat-mc-name">${c.name}</div>
     </div>`;
   }
