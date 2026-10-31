@@ -958,7 +958,7 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 .osp-cancelled{background:#FEE2E2;color:#991B1B;}
 
 /* Login form */
-.login-wrap{max-width:380px;margin:40px auto;padding:0 16px 100px;}
+.login-wrap{max-width:380px;margin:40px auto;padding:0 16px 100px;text-align:center;}
 .login-logo{text-align:center;margin-bottom:24px;}
 .login-logo img{width:80px;height:80px;border-radius:50%;}
 .login-title{text-align:center;font-size:20px;font-weight:700;margin-bottom:4px;}
@@ -1209,13 +1209,13 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
       <div class="login-title">Minha Conta</div>
 
       <!-- Tabs login / cadastro -->
-      <div id="acct-tab-row" style="display:flex;gap:4px;background:var(--bg-2);border-radius:12px;padding:4px;margin-bottom:24px;">
+      <div id="acct-tab-row" style="display:inline-flex;gap:4px;background:var(--bg-2);border-radius:12px;padding:4px;margin:0 auto 24px;width:fit-content;">
         <button id="tab-login" onclick="acctTab('login')" style="flex:1;padding:10px;border:none;border-radius:9px;background:#fff;color:#111;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.10);transition:background .15s,box-shadow .15s,color .15s;">Entrar</button>
         <button id="tab-register" onclick="acctTab('register')" style="flex:1;padding:10px;border:none;border-radius:9px;background:transparent;color:var(--fg-2);font-weight:500;font-size:14px;cursor:pointer;box-shadow:none;transition:background .15s,box-shadow .15s,color .15s;">Criar conta</button>
       </div>
 
       <!-- Formulário login -->
-      <div id="acct-login-form">
+      <div id="acct-login-form" style="text-align:left">
         <div class="field" style="margin-bottom:12px">
           <label class="field-label">E-mail</label>
           <input id="acct-email" type="email" inputmode="email" autocomplete="email" placeholder="seu@email.com" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;background:var(--bg);color:var(--fg)">
@@ -1234,7 +1234,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
       </div>
 
       <!-- Formulário cadastro -->
-      <div id="acct-register-form" style="display:none">
+      <div id="acct-register-form" style="display:none;text-align:left">
         <div class="field" style="margin-bottom:12px">
           <label class="field-label">Nome completo</label>
           <input id="reg-name" type="text" autocomplete="name" placeholder="Seu nome" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;background:var(--bg);color:var(--fg)">
@@ -1256,7 +1256,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
       </div>
 
       <!-- Rastreamento sem conta -->
-      <div id="acct-track-form" style="display:none">
+      <div id="acct-track-form" style="display:none;text-align:left">
         <p style="font-size:14px;color:var(--fg-2);margin-bottom:16px;text-align:center">Informe os dados do seu pedido</p>
         <div class="field" style="margin-bottom:12px">
           <label class="field-label">Número do pedido</label>
