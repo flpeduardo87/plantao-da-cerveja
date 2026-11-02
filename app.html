@@ -268,13 +268,15 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .cat-pill .lb{font-size:13px;font-weight:500;font-family:'Inter',sans-serif;color:var(--fg-2);white-space:nowrap;}
 .cat-pill.on .lb{color:#191A12;}
 /* ── Category grid ── */
-.cat-marquee-wrap{padding:12px max(16px,env(safe-area-inset-left,0px)) 16px;}
-.cat-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
-.cat-mc{display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;border-radius:12px;overflow:hidden;background:var(--bg);box-shadow:0 1px 6px rgba(0,0,0,.10);transition:transform .12s,box-shadow .12s;user-select:none;}
+.cat-marquee-wrap{padding:12px 0 16px;position:relative;overflow:hidden;}
+.cat-marquee-wrap::after{content:'';position:absolute;right:0;top:0;bottom:0;width:52px;background:linear-gradient(to right,transparent,var(--bg-2));pointer-events:none;z-index:1;}
+.cat-grid{display:grid;grid-template-rows:repeat(2,auto);grid-auto-flow:column;grid-auto-columns:clamp(84px,24vw,100px);gap:8px;overflow-x:auto;scrollbar-width:none;padding:0 max(16px,env(safe-area-inset-left,0px));}
+.cat-grid::-webkit-scrollbar{display:none;}
+.cat-mc{display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;border-radius:var(--r-sm);overflow:hidden;background:var(--bg);box-shadow:0 1px 6px rgba(0,0,0,.10);transition:transform .12s,box-shadow .12s;user-select:none;}
 .cat-mc:active{transform:scale(.93);box-shadow:0 1px 3px rgba(0,0,0,.08);}
-.cat-mc-img{width:100%;height:clamp(52px,13vw,80px);display:flex;align-items:center;justify-content:center;font-size:clamp(20px,5vw,34px);line-height:1;pointer-events:none;overflow:hidden;flex-shrink:0;}
+.cat-mc-img{width:100%;height:clamp(72px,20vw,96px);display:flex;align-items:center;justify-content:center;font-size:clamp(26px,6.5vw,40px);line-height:1;pointer-events:none;overflow:hidden;flex-shrink:0;}
 .cat-mc-img img{width:100%;height:100%;object-fit:cover;display:block;}
-.cat-mc-name{font-size:clamp(9px,2.4vw,11px);font-weight:600;text-align:center;padding:4px 3px 7px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg);background:var(--bg);pointer-events:none;letter-spacing:-.1px;}
+.cat-mc-name{font-size:clamp(10px,2.8vw,12px);font-weight:600;text-align:center;padding:5px 4px 8px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg);background:var(--bg);pointer-events:none;letter-spacing:-.1px;}
 /* ── Category view header ── */
 .cat-view-hd{display:flex;align-items:center;gap:10px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:19;}
 .cat-view-hd-back{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:none;background:var(--bg-2);cursor:pointer;color:var(--fg);flex-shrink:0;}
@@ -823,10 +825,10 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
   .cat-pill.on .lb{color:#191A12;font-weight:600;font-family:'Inter',sans-serif;}
 
   /* Category grid: larger cards on desktop */
-  .cat-marquee-wrap{padding:14px 40px 18px;}
-  .cat-grid{gap:10px;}
-  .cat-mc{border-radius:14px;}
-  .cat-mc-img{font-size:36px;}
+  .cat-marquee-wrap{padding:14px 40px 18px;overflow:visible;}
+  .cat-marquee-wrap::after{display:none;}
+  .cat-grid{display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:auto;grid-auto-flow:row;grid-auto-columns:auto;gap:10px;overflow:visible;padding:0;}
+  .cat-mc-img{font-size:40px;}
   .cat-mc-name{font-size:13px;padding:7px 6px 10px;}
 
   /* Section */
@@ -955,7 +957,7 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 .osp-cancelled{background:#FEE2E2;color:#991B1B;}
 
 /* Login form */
-.login-wrap{max-width:380px;margin:40px auto;padding:0 16px 100px;}
+.login-wrap{max-width:380px;margin:40px auto;padding:0 16px 100px;text-align:center;}
 .login-logo{text-align:center;margin-bottom:24px;}
 .login-logo img{width:80px;height:80px;border-radius:50%;}
 .login-title{text-align:center;font-size:20px;font-weight:700;margin-bottom:4px;}
@@ -1206,13 +1208,13 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
       <div class="login-title">Minha Conta</div>
 
       <!-- Tabs login / cadastro -->
-      <div id="acct-tab-row" style="display:flex;gap:4px;background:var(--bg-2);border-radius:12px;padding:4px;margin-bottom:24px;">
+      <div id="acct-tab-row" style="display:inline-flex;gap:4px;background:var(--bg-2);border-radius:12px;padding:4px;margin:0 auto 24px;width:fit-content;">
         <button id="tab-login" onclick="acctTab('login')" style="flex:1;padding:10px;border:none;border-radius:9px;background:#fff;color:#111;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.10);transition:background .15s,box-shadow .15s,color .15s;">Entrar</button>
         <button id="tab-register" onclick="acctTab('register')" style="flex:1;padding:10px;border:none;border-radius:9px;background:transparent;color:var(--fg-2);font-weight:500;font-size:14px;cursor:pointer;box-shadow:none;transition:background .15s,box-shadow .15s,color .15s;">Criar conta</button>
       </div>
 
       <!-- Formulário login -->
-      <div id="acct-login-form">
+      <div id="acct-login-form" style="text-align:left">
         <div class="field" style="margin-bottom:12px">
           <label class="field-label">E-mail</label>
           <input id="acct-email" type="email" inputmode="email" autocomplete="email" placeholder="seu@email.com" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;background:var(--bg);color:var(--fg)">
@@ -1231,7 +1233,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
       </div>
 
       <!-- Formulário cadastro -->
-      <div id="acct-register-form" style="display:none">
+      <div id="acct-register-form" style="display:none;text-align:left">
         <div class="field" style="margin-bottom:12px">
           <label class="field-label">Nome completo</label>
           <input id="reg-name" type="text" autocomplete="name" placeholder="Seu nome" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;background:var(--bg);color:var(--fg)">
@@ -1253,7 +1255,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
       </div>
 
       <!-- Rastreamento sem conta -->
-      <div id="acct-track-form" style="display:none">
+      <div id="acct-track-form" style="display:none;text-align:left">
         <p style="font-size:14px;color:var(--fg-2);margin-bottom:16px;text-align:center">Informe os dados do seu pedido</p>
         <div class="field" style="margin-bottom:12px">
           <label class="field-label">Número do pedido</label>
@@ -1531,15 +1533,24 @@ async function enterStore(){
     const cats = (Array.isArray(catsRes)?catsRes:(catsRes.data||[])).filter(c=>c.active);
     const prods = Array.isArray(prodsRes)?prodsRes:(prodsRes.data||[]);
     if(cats.length && prods.length){
-      CATS = [{id:'all',lb:'Todos'},...cats.map(c=>({id:c.slug,lb:c.name,em:c.emoji||''}))];
+      const imgCatsDB = cats.filter(c=>c.display_type==='image');
+      const iconCats  = cats.filter(c=>c.display_type!=='image');
+      CATS = [{id:'all',lb:'Todos'},...iconCats.map(c=>({id:c.slug,lb:c.name,em:c.emoji||''}))];
       CATALOG={}; SEC_LABELS={};
       const catById={};
-      cats.forEach(c=>{
-        catById[c.id]=c;CATALOG[c.slug]=[];SEC_LABELS[c.slug]=c.name;
-        // Merge image_url from DB into IMG_CATS
-        const mc=IMG_CATS.find(m=>m.slug===c.slug||m.cat===c.slug);
-        if(mc && c.image_url) mc.image_url=c.image_url;
-      });
+      cats.forEach(c=>{ catById[c.id]=c;CATALOG[c.slug]=[];SEC_LABELS[c.slug]=c.name; });
+      if(imgCatsDB.length){
+        IMG_CATS.splice(0,IMG_CATS.length,...imgCatsDB.map(c=>({
+          slug:c.slug,name:c.name,em:c.emoji||'📦',
+          color:['#F1F5F9','#334155'],cat:c.slug,
+          ...(c.image_url?{image_url:c.image_url}:{})
+        })));
+      } else {
+        cats.forEach(c=>{
+          const mc=IMG_CATS.find(m=>m.slug===c.slug||m.cat===c.slug);
+          if(mc && c.image_url) mc.image_url=c.image_url;
+        });
+      }
       prods.forEach(p=>{
         const cat=catById[p.category_id];
         if(cat&&CATALOG[cat.slug]) CATALOG[cat.slug].push({id:p.id,name:p.name,price:parseFloat(p.price),old:p.old_price?parseFloat(p.old_price):null,disc:parseInt(p.discount_pct)||0,image_url:p.image_url||null,featured:p.featured==1||p.featured===true,brand:p.brand||null,unit_type:p.unit_type||null,size:p.size||null,has_deposit:p.has_deposit==1,deposit_value:parseFloat(p.deposit_value)||0});
@@ -2357,6 +2368,10 @@ async function finalizarPedido(){
     try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, phone: coData.tel, ts: Date.now()})); }catch{}
     try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
     cart=[]; saveCart(); updateBadge();
+    // If Stone returned a payment link, open it in a new tab then show tracking
+    if(j.payment_url){
+      window.open(j.payment_url,'_blank','noopener,noreferrer');
+    }
     coStep=4;
     renderCoStep();
     document.getElementById('co-body').scrollTop=0;

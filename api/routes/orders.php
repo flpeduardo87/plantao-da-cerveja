@@ -196,6 +196,32 @@ match ($method) {
             json_err('Erro ao salvar pedido', 500);
         }
 
+        // Stone payment link (for online card payments, best-effort)
+        $paymentUrl = null;
+        if ($d['payment_method'] === 'credit_card') {
+            try {
+                require_once __DIR__ . '/../lib/stone.php';
+                $stone = new Stone();
+                if ($stone->isConfigured()) {
+                    $webhookUrl = rtrim(API_URL, '/') . '/payment/webhook';
+                    $link = $stone->createPaymentLink([
+                        'id'            => $orderId,
+                        'order_number'  => $orderNumber,
+                        'total'         => $total,
+                        'customer_name' => trim($d['customer_name']),
+                        'customer_phone'=> preg_replace('/\D/', '', $d['customer_phone']),
+                    ], $webhookUrl);
+                    $paymentUrl = $link['payment_url'];
+                    // Store the Stone link reference on the order
+                    $pdo->prepare('UPDATE orders SET stone_payment_url = ? WHERE id = ?')
+                        ->execute([$paymentUrl, $orderId]);
+                }
+            } catch (\Throwable $stoneErr) {
+                // Log but never block order creation
+                error_log('Stone payment link error: ' . $stoneErr->getMessage());
+            }
+        }
+
         // WhatsApp via Fonnte (best-effort, never blocks order creation)
         $fonnteToken = $cfg['fonnte_token'] ?? '';
         $ownerPhone  = preg_replace('/\D/', '', $cfg['store_whatsapp'] ?? '');
@@ -248,7 +274,9 @@ match ($method) {
             }
         } catch (\Throwable $e2) { /* best-effort */ }
 
-        json_ok(['success' => true, 'id' => $orderId, 'order_number' => $orderNumber, 'total' => $total], 201);
+        $resp = ['success' => true, 'id' => $orderId, 'order_number' => $orderNumber, 'total' => $total];
+        if ($paymentUrl) $resp['payment_url'] = $paymentUrl;
+        json_ok($resp, 201);
     })(),
 
     // ── Delete order ─────────────────────────────────────────────────────────

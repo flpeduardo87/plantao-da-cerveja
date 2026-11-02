@@ -35,12 +35,18 @@
             <input type="text" id="c-slug" required placeholder="cervejas" pattern="[a-z0-9\-]+" title="Apenas letras minúsculas, números e hífens">
             <span class="field-hint">Usado internamente. Não pode ser alterado depois de usado em produtos.</span>
           </div>
+          <input type="hidden" id="c-type" value="icon">
           <div class="field">
             <label>Ordem de exibição</label>
             <input type="number" id="c-sort" min="0" value="0">
           </div>
-          <div class="field">
-            <label>Imagem (opcional)</label>
+          <div class="field" id="field-emoji">
+            <label>Ícone (emoji)</label>
+            <input type="text" id="c-emoji" placeholder="🍺" maxlength="4" style="font-size:22px;width:72px;text-align:center;padding:8px">
+            <span class="field-hint">Um emoji que representa a categoria no carrossel.</span>
+          </div>
+          <div class="field" id="field-image">
+            <label>Imagem *</label>
             <div style="display:flex;gap:8px;align-items:center">
               <input type="url" id="c-image" placeholder="https://…/imagem.jpg" style="flex:1" oninput="previewCatImg()">
               <label class="btn btn-ghost btn-sm" style="cursor:pointer;white-space:nowrap;flex-shrink:0" id="upload-img-label">
@@ -52,7 +58,6 @@
               <img id="c-image-preview-img" src="" alt="" style="height:60px;border-radius:6px;object-fit:cover;border:1px solid var(--border)">
               <button type="button" class="btn btn-ghost btn-sm" style="margin-left:8px;color:var(--red)" onclick="clearCatImg()">Remover</button>
             </div>
-            <span class="field-hint">Deixe em branco para usar o emoji padrão.</span>
           </div>
           <div class="field" style="flex-direction:row;align-items:center;gap:10px">
             <label class="toggle"><input type="checkbox" id="c-active" checked><span class="toggle-slider"></span></label>
@@ -112,26 +117,49 @@
       <h1>Categorias</h1>
       <div class="topbar-right">
         <button class="store-status closed" id="store-status-btn" data-open="0"><span class="dot"></span>Carregando…</button>
-        <button class="btn btn-primary" onclick="openNew()"><i data-lucide="plus" width="15" height="15"></i> Nova categoria</button>
+        <button class="btn btn-primary btn-sm" onclick="openNew('icon')"><i data-lucide="plus" width="14" height="14"></i> Nova de ícone</button>
+        <button class="btn btn-ghost btn-sm" onclick="openNew('image')"><i data-lucide="plus" width="14" height="14"></i> Nova de imagem</button>
       </div>
     </div>
 
     <div class="page">
+      <!-- Categorias de Ícone -->
       <div class="card">
+        <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:15px;font-weight:700">Categorias de Ícone</div>
+            <div style="font-size:12px;color:var(--fg-3);margin-top:2px">Carrossel de navegação rápida no app</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openNew('icon')"><i data-lucide="plus" width="14" height="14"></i> Nova</button>
+        </div>
         <div class="tbl-wrap">
           <table>
-            <thead>
-              <tr><th>Nome</th><th>Slug</th><th>Produtos</th><th>Ordem</th><th>Status</th><th></th></tr>
-            </thead>
-            <tbody id="cats-tbody">
-              <tr><td colspan="6"><div class="empty"><i data-lucide="loader-2" width="28" height="28" class="spin"></i><p>Carregando…</p></div></td></tr>
+            <thead><tr><th>Nome</th><th>Slug</th><th>Ícone</th><th>Produtos</th><th>Ordem</th><th>Status</th><th></th></tr></thead>
+            <tbody id="icon-cats-tbody">
+              <tr><td colspan="7"><div class="empty"><i data-lucide="loader-2" width="28" height="28" class="spin"></i><p>Carregando…</p></div></td></tr>
             </tbody>
           </table>
         </div>
       </div>
-      <p style="font-size:12px;color:var(--fg-3);margin-top:12px">
-        A ordem de exibição controla a sequência das categorias no app. Valores menores aparecem primeiro.
-      </p>
+      <!-- Categorias de Imagem -->
+      <div class="card" style="margin-top:20px">
+        <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:15px;font-weight:700">Categorias de Imagem</div>
+            <div style="font-size:12px;color:var(--fg-3);margin-top:2px">Cards visuais abaixo do carrossel</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openNew('image')"><i data-lucide="plus" width="14" height="14"></i> Nova</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Nome</th><th>Slug</th><th>Imagem</th><th>Produtos</th><th>Ordem</th><th>Status</th><th></th></tr></thead>
+            <tbody id="image-cats-tbody">
+              <tr><td colspan="7"><div class="empty"><i data-lucide="loader-2" width="28" height="28" class="spin"></i><p>Carregando…</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--fg-3);margin-top:12px">Valores menores de ordem aparecem primeiro.</p>
     </div>
   </div>
 </div>
@@ -150,39 +178,47 @@ function autoSlug() {
       .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
   }
 }
+document.getElementById('c-slug').addEventListener('input', function() { this.dataset.manual = '1'; });
 
-document.getElementById('c-slug').addEventListener('input', function() {
-  this.dataset.manual = '1';
-});
+function updateModalForType(type) {
+  document.getElementById('field-emoji').style.display  = type === 'icon'  ? '' : 'none';
+  document.getElementById('field-image').style.display  = type === 'image' ? '' : 'none';
+}
+
+function renderCatRow(c) {
+  const isImage = c.display_type === 'image';
+  const thumb = isImage
+    ? (c.image_url ? `<img src="${c.image_url}" alt="" style="width:40px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0">` : '<span style="color:var(--fg-3);font-size:12px">Sem imagem</span>')
+    : `<span style="font-size:22px;line-height:1">${c.emoji||'📦'}</span>`;
+  return `<tr>
+    <td style="font-weight:600;display:flex;align-items:center;gap:10px">${thumb} ${c.name}</td>
+    <td><code style="font-size:12px;background:#F1F5F9;padding:2px 7px;border-radius:5px;color:var(--fg-2)">${c.slug}</code></td>
+    <td style="font-size:13px;color:var(--fg-2)">${c.product_count ?? '—'} produto(s)</td>
+    <td style="font-size:13px;color:var(--fg-2)">${c.sort_order ?? 0}</td>
+    <td>${c.active ? '<span class="badge badge-delivered">Ativa</span>' : '<span class="badge badge-cancelled">Inativa</span>'}</td>
+    <td style="white-space:nowrap">
+      <button class="btn btn-ghost btn-sm" onclick="editCat(${c.id})">Editar</button>
+      <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="confirmDelete(${c.id})">Excluir</button>
+    </td>
+  </tr>`;
+}
 
 async function loadCats() {
-  const tbody = document.getElementById('cats-tbody');
+  const iconTbody  = document.getElementById('icon-cats-tbody');
+  const imageTbody = document.getElementById('image-cats-tbody');
+  const emptyIcon  = '<tr><td colspan="7"><div class="empty"><i data-lucide="inbox" width="28" height="28"></i><p>Nenhuma categoria de ícone</p></div></td></tr>';
+  const emptyImage = '<tr><td colspan="7"><div class="empty"><i data-lucide="inbox" width="28" height="28"></i><p>Nenhuma categoria de imagem</p></div></td></tr>';
   try {
-    const res = await api('/categories?include_count=1');
+    const res = await api('/categories?include_count=1&all=1');
     const cats = Array.isArray(res) ? res : (res.data || []);
     catsCache = cats;
-    if (!cats.length) {
-      tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><i data-lucide="inbox" width="28" height="28"></i><p>Nenhuma categoria cadastrada</p></div></td></tr>';
-      lucide.createIcons(); return;
-    }
-    tbody.innerHTML = cats.map(c => `
-      <tr>
-        <td style="font-weight:600;display:flex;align-items:center;gap:10px">
-          ${c.image_url ? `<img src="${c.image_url}" alt="" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0">` : `<span style="font-size:22px;line-height:1;flex-shrink:0">${c.emoji||'📦'}</span>`}
-          ${c.name}
-        </td>
-        <td><code style="font-size:12px;background:#F1F5F9;padding:2px 7px;border-radius:5px;color:var(--fg-2)">${c.slug}</code></td>
-        <td style="font-size:13px;color:var(--fg-2)">${c.product_count ?? '—'} produto(s)</td>
-        <td style="font-size:13px;color:var(--fg-2)">${c.sort_order ?? 0}</td>
-        <td>${c.active ? '<span class="badge badge-delivered">Ativa</span>' : '<span class="badge badge-cancelled">Inativa</span>'}</td>
-        <td style="white-space:nowrap">
-          <button class="btn btn-ghost btn-sm" onclick="editCat(${c.id})">Editar</button>
-          <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="confirmDelete(${c.id})">Excluir</button>
-        </td>
-      </tr>`).join('');
+    const iconCats  = cats.filter(c => c.display_type !== 'image');
+    const imageCats = cats.filter(c => c.display_type === 'image');
+    iconTbody.innerHTML  = iconCats.length  ? iconCats.map(renderCatRow).join('') : emptyIcon;
+    imageTbody.innerHTML = imageCats.length ? imageCats.map(renderCatRow).join('') : emptyImage;
     lucide.createIcons();
   } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><p style="color:var(--red)">${e.message}</p></div></td></tr>`;
+    iconTbody.innerHTML = imageTbody.innerHTML = `<tr><td colspan="7"><div class="empty"><p style="color:var(--red)">${e.message}</p></div></td></tr>`;
   }
 }
 
@@ -205,54 +241,48 @@ async function uploadCatImg(input) {
   const file = input.files[0];
   if (!file) return;
   const label = document.getElementById('upload-img-label');
-  label.style.opacity = '.5';
-  label.style.pointerEvents = 'none';
+  label.style.opacity = '.5'; label.style.pointerEvents = 'none';
   try {
     const fd = new FormData();
     fd.append('image', file);
-    const res = await fetch(API + '/upload', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + getToken() },
-      body: fd
-    });
+    const res = await fetch(API + '/upload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + getToken() }, body: fd });
     const j = await res.json();
     if (!j.url) throw new Error(j.error || 'Erro no upload');
     document.getElementById('c-image').value = j.url;
     previewCatImg();
     toast('Imagem enviada!');
-  } catch (e) {
-    toast(e.message, 'error');
-  } finally {
-    label.style.opacity = '';
-    label.style.pointerEvents = '';
-    input.value = '';
-  }
+  } catch (e) { toast(e.message, 'error'); }
+  finally { label.style.opacity = ''; label.style.pointerEvents = ''; input.value = ''; }
 }
 
-function openNew() {
+function openNew(type) {
   document.getElementById('cat-form').reset();
   document.getElementById('c-id').value = '';
+  document.getElementById('c-type').value = type;
   clearCatImg();
   delete document.getElementById('c-slug').dataset.manual;
-  document.getElementById('modal-cat-title').textContent = 'Nova categoria';
+  updateModalForType(type);
+  document.getElementById('modal-cat-title').textContent = type === 'image' ? 'Nova categoria de imagem' : 'Nova categoria de ícone';
   openModal('modal-cat');
 }
 
 async function editCat(id) {
   let c = catsCache.find(x => x.id == id);
   if (!c) {
-    try {
-      const res = await api(`/categories/${id}`);
-      c = res.data || res;
-    } catch (e) { toast(e.message, 'error'); return; }
+    try { const res = await api(`/categories/${id}`); c = res.data || res; }
+    catch (e) { toast(e.message, 'error'); return; }
   }
-  document.getElementById('c-id').value = c.id;
-  document.getElementById('c-name').value = c.name;
-  document.getElementById('c-slug').value = c.slug;
-  document.getElementById('c-sort').value = c.sort_order ?? 0;
+  const type = c.display_type === 'image' ? 'image' : 'icon';
+  document.getElementById('c-id').value   = c.id;
+  document.getElementById('c-type').value = type;
+  document.getElementById('c-name').value  = c.name;
+  document.getElementById('c-slug').value  = c.slug;
+  document.getElementById('c-sort').value  = c.sort_order ?? 0;
+  document.getElementById('c-emoji').value = c.emoji ?? '';
   document.getElementById('c-image').value = c.image_url ?? '';
   document.getElementById('c-active').checked = c.active == 1;
   document.getElementById('c-slug').dataset.manual = '1';
+  updateModalForType(type);
   document.getElementById('modal-cat-title').textContent = 'Editar categoria';
   previewCatImg();
   openModal('modal-cat');
@@ -263,17 +293,19 @@ async function saveCat(e) {
   const btn = document.getElementById('btn-save-cat');
   btn.disabled = true; btn.textContent = 'Salvando…';
   try {
-    const id = document.getElementById('c-id').value;
-    const imgUrl = document.getElementById('c-image').value.trim();
+    const id   = document.getElementById('c-id').value;
+    const type = document.getElementById('c-type').value;
     const body = {
-      name: document.getElementById('c-name').value,
-      slug: document.getElementById('c-slug').value,
-      sort_order: parseInt(document.getElementById('c-sort').value) || 0,
-      active: document.getElementById('c-active').checked ? 1 : 0,
-      image_url: imgUrl || null,
+      name:         document.getElementById('c-name').value,
+      slug:         document.getElementById('c-slug').value,
+      sort_order:   parseInt(document.getElementById('c-sort').value) || 0,
+      active:       document.getElementById('c-active').checked ? 1 : 0,
+      display_type: type,
+      emoji:        type === 'icon'  ? (document.getElementById('c-emoji').value.trim() || null) : null,
+      image_url:    type === 'image' ? (document.getElementById('c-image').value.trim() || null) : null,
     };
     if (id) { await api(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('Categoria atualizada'); }
-    else { await api('/categories', { method: 'POST', body: JSON.stringify(body) }); toast('Categoria criada'); }
+    else     { await api('/categories',       { method: 'POST', body: JSON.stringify(body) }); toast('Categoria criada'); }
     closeModal('modal-cat'); loadCats();
   } catch (err) { toast(err.message, 'error'); }
   finally { btn.disabled = false; btn.textContent = 'Salvar'; }

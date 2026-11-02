@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/config/database.php';
 
-// ── CORS ────────────────────────────────────────────────────────────────────
+// ── CORS ───────────────────────────────────────────────────────────────────────────
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowed = [FRONTEND_URL, ADMIN_URL];
 if (in_array($origin, $allowed, true)) {
@@ -23,7 +23,7 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate');
 header('Pragma: no-cache');
 
-// ── Router ───────────────────────────────────────────────────────────────────
+// ── Router ──────────────────────────────────────────────────────────────────────────
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri    = trim($uri, '/');
 $method = $_SERVER['REQUEST_METHOD'];
@@ -52,7 +52,7 @@ function body(): array {
     return $raw ? (json_decode($raw, true) ?? []) : [];
 }
 
-// ── Dispatch ─────────────────────────────────────────────────────────────────
+// ── Dispatch ─────────────────────────────────────────────────────────────────────────
 match ($route) {
     'auth'       => require __DIR__ . '/routes/auth.php',
     'categories' => require __DIR__ . '/routes/categories.php',
@@ -62,5 +62,6 @@ match ($route) {
     'upload'     => require __DIR__ . '/routes/upload.php',
     'push'       => require __DIR__ . '/routes/push.php',
     'customer'   => require __DIR__ . '/routes/customer.php',
+    'payment'    => require __DIR__ . '/routes/payment.php',
     default      => json_err('Route not found', 404),
 };

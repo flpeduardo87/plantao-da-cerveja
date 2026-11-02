@@ -286,6 +286,14 @@ textarea{resize:vertical;min-height:80px}
 .empty p{font-size:13px}
 
 /* ── Status select ── */
+.btn-next-step{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:3px 10px;border-radius:6px;border:none;
+  background:var(--amber);color:#111827;
+  font:600 11.5px 'Inter',sans-serif;cursor:pointer;
+  margin-left:6px;transition:background .1s;white-space:nowrap;vertical-align:middle;
+}
+.btn-next-step:hover{background:var(--amber-dk)}
 .status-select{
   padding:5px 9px;border-radius:6px;border:1px solid var(--border);
   font:600 11.5px 'Inter',sans-serif;cursor:pointer;background:#fff;color:var(--fg)

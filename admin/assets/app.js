@@ -143,6 +143,19 @@ function statusOptions(current) {
   ].map(o => `<option value="${o.v}"${o.v===current?' selected':''}>${o.l}</option>`).join('');
 }
 
+function nextStatusBtn(id, current) {
+  const flow = {
+    new:        { next:'accepted',   label:'Aceitar pedido' },
+    accepted:   { next:'preparing',  label:'Iniciar preparo' },
+    preparing:  { next:'delivering', label:'Saiu p/ entrega' },
+    delivering: { next:'delivered',  label:'Marcar entregue' },
+  };
+  const badge = fmtStatus(current);
+  const step = flow[current];
+  if (!step) return badge;
+  return `${badge}<button class="btn-next-step" onclick="changeStatus(${id},'${step.next}')">${step.label} →</button>`;
+}
+
 /* ── Order details modal (shared) ── */
 let _viewingOrder = null;
 
@@ -198,7 +211,10 @@ async function viewOrder(id) {
       </div>`;
     footerEl.innerHTML = `
       <button class="btn btn-ghost" onclick="closeModal('modal-order')">Fechar</button>
-      <select class="status-select" style="flex:1;max-width:150px" onchange="changeStatus(${o.id},this.value);this.blur()">${statusOptions(o.status)}</select>
+      <div style="display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap">
+        ${nextStatusBtn(o.id,o.status)}
+        ${o.status!=='delivered'&&o.status!=='cancelled'?`<button class="btn btn-sm btn-danger" onclick="changeStatus(${o.id},'cancelled');closeModal('modal-order')">Cancelar pedido</button>`:''}
+      </div>
       <button class="btn btn-ghost btn-sm" onclick="printOrder(_viewingOrder)"><i data-lucide="printer" width="14" height="14"></i> Imprimir</button>
       <button class="btn btn-sm" style="background:#25D366;color:#fff;border:none;gap:5px" onclick="shareOrderWhatsapp(_viewingOrder)"><i data-lucide="message-circle" width="14" height="14"></i> WhatsApp</button>
       <button class="btn btn-sm" style="background:#ef4444;color:#fff;border:none;gap:5px;margin-left:auto" onclick="deleteOrder(${o.id})"><i data-lucide="trash-2" width="14" height="14"></i> Excluir</button>`;

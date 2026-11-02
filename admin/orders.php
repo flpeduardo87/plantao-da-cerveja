@@ -188,7 +188,7 @@ async function loadOrders() {
         </td>
         <td><strong>${fmtMoney(o.total)}</strong></td>
         <td style="font-size:12.5px;color:var(--fg-2)">${fmtPayment(o.payment_method)}</td>
-        <td><select class="status-select" onchange="changeStatus(${o.id},this.value)">${statusOptions(o.status)}</select></td>
+        <td style="white-space:nowrap">${nextStatusBtn(o.id,o.status)}</td>
         <td style="white-space:nowrap;font-size:12px;color:var(--fg-2)">${fmtDate(o.created_at)}</td>
         <td><button class="btn btn-ghost btn-sm" onclick="viewOrder(${o.id})">Detalhes</button></td>
       </tr>
