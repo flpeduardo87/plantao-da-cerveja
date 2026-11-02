@@ -185,6 +185,14 @@ async function toggleProduct(id, current) {
   } catch(e) { toast(e.message, 'error'); }
 }
 
+async function toggleFeatured(id, current) {
+  try {
+    await api(`/products/${id}`, { method: 'PUT', body: JSON.stringify({ featured: current ? 0 : 1 }) });
+    toast(current ? 'Oferta removida' : 'Marcado como oferta');
+    loadProducts();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
 async function loadCategories() {
   try {
     const res = await api('/categories');
@@ -231,7 +239,7 @@ async function loadProducts() {
       <div style="margin-bottom:20px">
         <h3 style="font-size:11px;font-weight:700;color:var(--fg-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">${cat}</h3>
         <div class="card"><div class="tbl-wrap"><table>
-          <thead><tr><th style="width:52px">Foto</th><th>Nome</th><th style="width:110px">Preço</th><th style="width:90px">Estoque</th><th style="width:90px">Status</th><th style="width:130px"></th></tr></thead>
+          <thead><tr><th style="width:52px">Foto</th><th>Nome</th><th style="width:100px">Preço</th><th style="width:80px">Estoque</th><th style="width:130px">Status</th><th style="width:110px">Oferta</th><th style="width:90px"></th></tr></thead>
           <tbody>${prods.map(p => `
             <tr>
               <td>${p.image_url
@@ -241,17 +249,32 @@ async function loadProducts() {
               <td>
                 <div style="font-weight:600">${p.name}</div>
                 ${p.description ? `<div style="font-size:11.5px;color:var(--fg-2)">${p.description.slice(0,60)}${p.description.length>60?'…':''}</div>` : ''}
-                ${p.featured ? '<span class="badge" style="background:var(--amber-lt);color:#92400E;font-size:10px;margin-top:4px">🏷 Oferta</span>' : ''}
               </td>
               <td>
                 <strong>${fmtMoney(p.price)}</strong>
                 ${p.old_price ? `<div style="font-size:11px;color:var(--fg-3);text-decoration:line-through">${fmtMoney(p.old_price)}</div>` : ''}
               </td>
               <td style="font-size:13px">${p.stock > 0 ? p.stock + ' un.' : '<span style="color:var(--fg-3)">Ilimitado</span>'}</td>
-              <td>${p.active ? '<span class="badge badge-delivered">Ativo</span>' : '<span class="badge badge-cancelled">Inativo</span>'}</td>
+              <td>
+                <div class="prod-toggle-cell" onclick="toggleProduct(${p.id},${p.active})">
+                  <label class="toggle" style="pointer-events:none">
+                    <input type="checkbox" ${p.active ? 'checked' : ''} style="pointer-events:none">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <span class="prod-toggle-label" style="color:${p.active ? 'var(--green)' : 'var(--fg-3)'}">${p.active ? 'Disponível' : 'Indisponível'}</span>
+                </div>
+              </td>
+              <td>
+                <div class="prod-toggle-cell" onclick="toggleFeatured(${p.id},${p.featured?1:0})">
+                  <label class="toggle" style="pointer-events:none">
+                    <input type="checkbox" ${p.featured ? 'checked' : ''} style="pointer-events:none">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <span class="prod-toggle-label" style="color:${p.featured ? 'var(--amber-dk)' : 'var(--fg-3)'}">${p.featured ? 'Promoção' : '—'}</span>
+                </div>
+              </td>
               <td style="white-space:nowrap">
                 <button class="btn btn-ghost btn-sm" onclick="editProduct(${p.id})">Editar</button>
-                <button class="btn btn-sm ${p.active ? 'btn-ghost' : 'btn-success'}" style="margin-left:4px" onclick="toggleProduct(${p.id},${p.active})">${p.active ? 'Desativar' : 'Ativar'}</button>
                 <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="confirmDelete(${p.id})">Excluir</button>
               </td>
             </tr>`).join('')}
