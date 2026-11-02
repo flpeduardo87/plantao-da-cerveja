@@ -1422,6 +1422,7 @@ let chosenScheduledAt = null;
 let coStep = 1;
 let coData = {};
 let payMethod = null;
+let lastPaymentUrl = null;
 
 function saveCart(){ try{ localStorage.setItem('plantao_cart', JSON.stringify(cart)); }catch{} }
 function loadCart(){
@@ -2255,7 +2256,11 @@ function renderCoStep(){
           <p>Entrega: <strong>${esc(coData.rua||'—')}, ${esc(coData.num||'')}</strong></p>
           <p>Pagamento: <strong>${{pix:'PIX',maquininha:'Maquininha',credito:'Cartão de Crédito',dinheiro:'Dinheiro'}[payMethod]||'—'}</strong></p>
         </div>
-        <button class="btn-primary" onclick="closeCheckout();goHome();refreshFeed()">Continuar comprando</button>
+        ${lastPaymentUrl ? `
+        <a href="${lastPaymentUrl}" target="_blank" rel="noopener noreferrer" class="btn-primary" style="display:block;text-align:center;text-decoration:none;margin-bottom:10px">
+          💳 Pagar com cartão agora
+        </a>` : ''}
+        <button class="btn-primary" style="${lastPaymentUrl?'background:var(--fg-3);':''}" onclick="closeCheckout();goHome();refreshFeed()">Continuar comprando</button>
       </div>`;
   }
   el.innerHTML = summaryHtml + stepperHtml + content;
@@ -2369,10 +2374,7 @@ async function finalizarPedido(){
     try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, phone: coData.tel, ts: Date.now()})); }catch{}
     try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
     cart=[]; saveCart(); updateBadge();
-    // If Stone returned a payment link, open it in a new tab then show tracking
-    if(j.payment_url){
-      window.open(j.payment_url,'_blank','noopener,noreferrer');
-    }
+    lastPaymentUrl = j.payment_url || null;
     coStep=4;
     renderCoStep();
     document.getElementById('co-body').scrollTop=0;
