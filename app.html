@@ -1197,6 +1197,25 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
   </div>
 </div>
 
+<!-- Overlay de pagamento com cartão (iframe Stone) -->
+<div id="pay-iframe-overlay" class="hidden" style="position:fixed;inset:0;z-index:9999;background:#fff;display:flex;flex-direction:column">
+  <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #e5e7eb;background:#fff">
+    <button onclick="closePay()" style="border:none;background:none;cursor:pointer;padding:4px;display:flex"><i data-lucide="arrow-left" width="20" height="20"></i></button>
+    <span style="font-weight:600;font-size:15px">Pagamento com Cartão</span>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;color:#6b7280"><i data-lucide="lock" width="12" height="12"></i> Ambiente seguro</div>
+  </div>
+  <div id="pay-iframe-loading" style="position:absolute;inset:0;top:53px;display:flex;align-items:center;justify-content:center;background:#fff;z-index:1">
+    <div style="text-align:center;color:#6b7280"><div style="width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#111;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px"></div>Carregando pagamento…</div>
+  </div>
+  <iframe id="pay-iframe" src="" style="flex:1;border:none;width:100%" onload="document.getElementById('pay-iframe-loading').style.display='none'"></iframe>
+  <div id="pay-iframe-blocked" class="hidden" style="position:absolute;inset:0;top:53px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:12px">
+    <i data-lucide="external-link" width="36" height="36" style="color:#6b7280"></i>
+    <p style="font-size:14px;color:#374151">O pagamento precisa ser concluído em uma nova janela.</p>
+    <a id="pay-iframe-link" href="#" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none;display:inline-block">Abrir pagamento →</a>
+    <button onclick="closePay()" style="border:none;background:none;color:#6b7280;cursor:pointer;font-size:13px">Cancelar</button>
+  </div>
+</div>
+
 <!-- ═══ CUSTOMER ACCOUNT SCREEN ═══ -->
 <div id="s-account" class="screen slide-right hidden">
   <div id="acct-scroll">
@@ -2257,9 +2276,9 @@ function renderCoStep(){
           <p>Pagamento: <strong>${{pix:'PIX',maquininha:'Maquininha',credito:'Cartão de Crédito',dinheiro:'Dinheiro'}[payMethod]||'—'}</strong></p>
         </div>
         ${lastPaymentUrl ? `
-        <a href="${lastPaymentUrl}" target="_blank" rel="noopener noreferrer" class="btn-primary" style="display:block;text-align:center;text-decoration:none;margin-bottom:10px">
-          💳 Pagar com cartão agora
-        </a>` : ''}
+        <button class="btn-primary" style="margin-bottom:10px" onclick="openPayIframe('${lastPaymentUrl}')">
+          💳 Concluir pagamento com cartão
+        </button>` : ''}
         <button class="btn-primary" style="${lastPaymentUrl?'background:var(--fg-3);':''}" onclick="closeCheckout();goHome();refreshFeed()">Continuar comprando</button>
       </div>`;
   }
@@ -2375,6 +2394,7 @@ async function finalizarPedido(){
     try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
     cart=[]; saveCart(); updateBadge();
     lastPaymentUrl = j.payment_url || null;
+    if(lastPaymentUrl) openPayIframe(lastPaymentUrl);
     coStep=4;
     renderCoStep();
     document.getElementById('co-body').scrollTop=0;
@@ -2385,6 +2405,41 @@ async function finalizarPedido(){
     btn.innerHTML='Confirmar Pedido <i data-lucide="check" width="16" height="16"></i>';
     lucide.createIcons();
   }
+}
+
+function openPayIframe(url){
+  const overlay = document.getElementById('pay-iframe-overlay');
+  const iframe  = document.getElementById('pay-iframe');
+  const loading = document.getElementById('pay-iframe-loading');
+  const blocked = document.getElementById('pay-iframe-blocked');
+  const link    = document.getElementById('pay-iframe-link');
+  loading.style.display = 'flex';
+  blocked.classList.add('hidden');
+  iframe.src = url;
+  link.href  = url;
+  overlay.classList.remove('hidden');
+  lucide.createIcons();
+  // Detect iframe blocked (X-Frame-Options) after 4s
+  setTimeout(()=>{
+    try {
+      // If we can't access contentDocument, it's cross-origin (loaded OK)
+      const doc = iframe.contentDocument;
+      // If contentDocument exists and is empty/about:blank, it was blocked
+      if(doc && (doc.URL==='about:blank'||doc.body?.innerHTML==='')){
+        loading.style.display='none';
+        blocked.classList.remove('hidden');
+        lucide.createIcons();
+      }
+    } catch(e){
+      // Cross-origin means it loaded successfully — hide loading
+      loading.style.display='none';
+    }
+  }, 4000);
+}
+function closePay(){
+  const overlay = document.getElementById('pay-iframe-overlay');
+  document.getElementById('pay-iframe').src = '';
+  overlay.classList.add('hidden');
 }
 
 // ── ORDER TRACKING ──────────────────────────────────────────────────────────
