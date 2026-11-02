@@ -178,19 +178,42 @@ let catFilter = '';
 let deleteId = null;
 
 async function toggleProduct(id, current) {
+  const newVal = current ? 0 : 1;
+  const cb  = document.getElementById(`cb-active-${id}`);
+  const lbl = document.getElementById(`lbl-active-${id}`);
+  if (cb)  cb.checked    = !!newVal;
+  if (lbl) { lbl.textContent = newVal ? 'Disponível' : 'Indisponível'; lbl.style.color = newVal ? 'var(--green)' : 'var(--fg-3)'; }
+  // atualiza onclick para próximo clique
+  const row = document.getElementById(`prod-row-${id}`);
+  if (row) row.querySelector('.prod-toggle-cell').setAttribute('onclick', `toggleProduct(${id},${newVal})`);
   try {
-    await api(`/products/${id}`, { method: 'PUT', body: JSON.stringify({ active: current ? 0 : 1 }) });
-    toast(current ? 'Produto desativado' : 'Produto ativado');
-    loadProducts();
-  } catch(e) { toast(e.message, 'error'); }
+    await api(`/products/${id}`, { method: 'PUT', body: JSON.stringify({ active: newVal }) });
+    toast(newVal ? 'Produto ativado' : 'Produto desativado');
+  } catch(e) {
+    if (cb)  cb.checked    = !!current;
+    if (lbl) { lbl.textContent = current ? 'Disponível' : 'Indisponível'; lbl.style.color = current ? 'var(--green)' : 'var(--fg-3)'; }
+    if (row) row.querySelector('.prod-toggle-cell').setAttribute('onclick', `toggleProduct(${id},${current})`);
+    toast(e.message, 'error');
+  }
 }
 
 async function toggleFeatured(id, current) {
+  const newVal = current ? 0 : 1;
+  const cb  = document.getElementById(`cb-featured-${id}`);
+  const lbl = document.getElementById(`lbl-featured-${id}`);
+  if (cb)  cb.checked    = !!newVal;
+  if (lbl) { lbl.textContent = newVal ? 'Promoção' : '—'; lbl.style.color = newVal ? 'var(--amber-dk)' : 'var(--fg-3)'; }
+  const row = document.getElementById(`prod-row-${id}`);
+  if (row) row.querySelectorAll('.prod-toggle-cell')[1].setAttribute('onclick', `toggleFeatured(${id},${newVal})`);
   try {
-    await api(`/products/${id}`, { method: 'PUT', body: JSON.stringify({ featured: current ? 0 : 1 }) });
-    toast(current ? 'Oferta removida' : 'Marcado como oferta');
-    loadProducts();
-  } catch(e) { toast(e.message, 'error'); }
+    await api(`/products/${id}`, { method: 'PUT', body: JSON.stringify({ featured: newVal }) });
+    toast(newVal ? 'Marcado como oferta' : 'Oferta removida');
+  } catch(e) {
+    if (cb)  cb.checked    = !!current;
+    if (lbl) { lbl.textContent = current ? 'Promoção' : '—'; lbl.style.color = current ? 'var(--amber-dk)' : 'var(--fg-3)'; }
+    if (row) row.querySelectorAll('.prod-toggle-cell')[1].setAttribute('onclick', `toggleFeatured(${id},${current})`);
+    toast(e.message, 'error');
+  }
 }
 
 async function loadCategories() {
@@ -241,7 +264,7 @@ async function loadProducts() {
         <div class="card"><div class="tbl-wrap"><table>
           <thead><tr><th style="width:52px">Foto</th><th>Nome</th><th style="width:100px">Preço</th><th style="width:80px">Estoque</th><th style="width:80px">Status</th><th style="width:70px">Oferta</th><th style="width:90px"></th></tr></thead>
           <tbody>${prods.map(p => `
-            <tr>
+            <tr id="prod-row-${p.id}">
               <td>${p.image_url
                 ? `<img src="${p.image_url}" style="width:44px;height:44px;border-radius:8px;object-fit:cover">`
                 : `<div class="prod-img-ph"><i data-lucide="image" width="18" height="18"></i></div>`
@@ -258,19 +281,19 @@ async function loadProducts() {
               <td>
                 <div class="prod-toggle-cell" onclick="toggleProduct(${p.id},${p.active})">
                   <label class="toggle" style="pointer-events:none">
-                    <input type="checkbox" ${p.active ? 'checked' : ''} style="pointer-events:none">
+                    <input type="checkbox" id="cb-active-${p.id}" ${p.active ? 'checked' : ''} style="pointer-events:none">
                     <span class="toggle-slider"></span>
                   </label>
-                  <span class="prod-toggle-label" style="color:${p.active ? 'var(--green)' : 'var(--fg-3)'}">${p.active ? 'Disponível' : 'Indisponível'}</span>
+                  <span id="lbl-active-${p.id}" class="prod-toggle-label" style="color:${p.active ? 'var(--green)' : 'var(--fg-3)'}">${p.active ? 'Disponível' : 'Indisponível'}</span>
                 </div>
               </td>
               <td>
                 <div class="prod-toggle-cell" onclick="toggleFeatured(${p.id},${p.featured?1:0})">
                   <label class="toggle" style="pointer-events:none">
-                    <input type="checkbox" ${p.featured ? 'checked' : ''} style="pointer-events:none">
+                    <input type="checkbox" id="cb-featured-${p.id}" ${p.featured ? 'checked' : ''} style="pointer-events:none">
                     <span class="toggle-slider"></span>
                   </label>
-                  <span class="prod-toggle-label" style="color:${p.featured ? 'var(--amber-dk)' : 'var(--fg-3)'}">${p.featured ? 'Promoção' : '—'}</span>
+                  <span id="lbl-featured-${p.id}" class="prod-toggle-label" style="color:${p.featured ? 'var(--amber-dk)' : 'var(--fg-3)'}">${p.featured ? 'Promoção' : '—'}</span>
                 </div>
               </td>
               <td style="white-space:nowrap">
