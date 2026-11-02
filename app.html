@@ -1534,7 +1534,8 @@ async function enterStore(){
     const prods = Array.isArray(prodsRes)?prodsRes:(prodsRes.data||[]);
     if(cats.length && prods.length){
       const imgCatsDB = cats.filter(c=>c.display_type==='image');
-      const iconCats  = cats.filter(c=>c.display_type!=='image');
+      const _seen = new Set();
+      const iconCats  = cats.filter(c=>c.display_type!=='image' && !_seen.has(c.slug) && _seen.add(c.slug));
       CATS = [{id:'all',lb:'Todos'},...iconCats.map(c=>({id:c.slug,lb:c.name,em:c.emoji||''}))];
       CATALOG={}; SEC_LABELS={};
       const catById={};
