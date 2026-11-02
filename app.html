@@ -2394,11 +2394,11 @@ async function finalizarPedido(){
     try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
     cart=[]; saveCart(); updateBadge();
     lastPaymentUrl = j.payment_url || null;
-    if(lastPaymentUrl) openPayIframe(lastPaymentUrl);
     coStep=4;
     renderCoStep();
     document.getElementById('co-body').scrollTop=0;
     startOrderTracking();
+    if(lastPaymentUrl) try{ openPayIframe(lastPaymentUrl); }catch(e){ console.error('iframe err',e); }
   } catch(e) {
     toast(e.message);
     btn.disabled=false;
@@ -2414,10 +2414,11 @@ function openPayIframe(url){
   const blocked = document.getElementById('pay-iframe-blocked');
   const link    = document.getElementById('pay-iframe-link');
   loading.style.display = 'flex';
-  blocked.classList.add('hidden');
+  blocked.style.display = 'none';
   iframe.src = url;
   link.href  = url;
   overlay.classList.remove('hidden');
+  overlay.style.display = 'flex'; // força sobre o !important
   lucide.createIcons();
   // Detect iframe blocked (X-Frame-Options) after 4s
   setTimeout(()=>{
@@ -2427,7 +2428,7 @@ function openPayIframe(url){
       // If contentDocument exists and is empty/about:blank, it was blocked
       if(doc && (doc.URL==='about:blank'||doc.body?.innerHTML==='')){
         loading.style.display='none';
-        blocked.classList.remove('hidden');
+        blocked.style.display='flex';
         lucide.createIcons();
       }
     } catch(e){
