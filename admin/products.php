@@ -177,6 +177,14 @@ let categories = [];
 let catFilter = '';
 let deleteId = null;
 
+async function toggleProduct(id, current) {
+  try {
+    await api(`/products/${id}`, { method: 'PUT', body: JSON.stringify({ active: current ? 0 : 1 }) });
+    toast(current ? 'Produto desativado' : 'Produto ativado');
+    loadProducts();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
 async function loadCategories() {
   try {
     const res = await api('/categories');
@@ -243,6 +251,7 @@ async function loadProducts() {
               <td>${p.active ? '<span class="badge badge-delivered">Ativo</span>' : '<span class="badge badge-cancelled">Inativo</span>'}</td>
               <td style="white-space:nowrap">
                 <button class="btn btn-ghost btn-sm" onclick="editProduct(${p.id})">Editar</button>
+                <button class="btn btn-sm ${p.active ? 'btn-ghost' : 'btn-success'}" style="margin-left:4px" onclick="toggleProduct(${p.id},${p.active})">${p.active ? 'Desativar' : 'Ativar'}</button>
                 <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="confirmDelete(${p.id})">Excluir</button>
               </td>
             </tr>`).join('')}
