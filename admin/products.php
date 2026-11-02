@@ -242,7 +242,7 @@ function setCatFilter(slug, btn) {
 }
 
 async function loadProducts() {
-  const qs = catFilter ? `?category=${catFilter}` : '';
+  const qs = catFilter ? `?all=1&category=${catFilter}` : '?all=1';
   const list = document.getElementById('products-list');
   list.innerHTML = '<p style="padding:24px;color:var(--fg-3)">Carregando…</p>';
   try {

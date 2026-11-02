@@ -16,7 +16,7 @@ match ($method) {
             $row = $s->fetch();
             $row ? json_ok($row) : json_err('Not found', 404);
         } else {
-            $where = 'p.active = 1';
+            $where = empty($_GET['all']) ? 'p.active = 1' : '1=1';
             $vals  = [];
             if (!empty($_GET['category_id'])) {
                 $where .= ' AND p.category_id = ?';
