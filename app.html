@@ -1673,7 +1673,8 @@ function exitCatView(){
   document.getElementById('cat-grid-wrap').hidden=false;
   document.getElementById('cat-view-hd').hidden=true;
   renderSections();
-  document.getElementById('feed').scrollTo({top:0,behavior:'smooth'});
+  const catGrid=document.getElementById('cat-grid-wrap');
+  if(catGrid) setTimeout(()=>catGrid.scrollIntoView({behavior:'smooth',block:'start'}),50);
 }
 const CAT_ICONS = {
   'all':'layout-grid','todos':'layout-grid',
@@ -1922,6 +1923,8 @@ function goBack(to){
     document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
     document.getElementById('nb-home').classList.add('on');
     showScreen('s-home');
+    const catGrid=document.getElementById('cat-grid-wrap');
+    if(catGrid) setTimeout(()=>catGrid.scrollIntoView({behavior:'smooth',block:'start'}),50);
   }
 }
 function goToCart(){
