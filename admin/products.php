@@ -222,12 +222,24 @@ async function loadCategories() {
     categories = Array.isArray(res) ? res : (res.data || []);
     const sel = document.getElementById('p-category');
     const wrap = document.getElementById('cat-filters');
+    // Deduplicate by name, keep icon type preferred; sort: Ofertas first, rest alphabetically
+    const seen = new Map();
     categories.forEach(c => {
+      const key = c.name.toLowerCase();
+      if (!seen.has(key) || c.display_type === 'icon') seen.set(key, c);
+    });
+    const deduped = [...seen.values()].sort((a, b) => {
+      const aO = a.slug === 'ofertas', bO = b.slug === 'ofertas';
+      if (aO !== bO) return aO ? -1 : 1;
+      return a.name.localeCompare(b.name, 'pt');
+    });
+    deduped.forEach(c => {
       sel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
       const btn = document.createElement('button');
       btn.className = 'btn btn-ghost btn-sm';
       btn.dataset.cat = c.slug;
       btn.textContent = c.name;
+      if (c.slug === 'ofertas') btn.style.cssText = 'color:var(--amber);border-color:var(--amber)';
       btn.addEventListener('click', () => setCatFilter(c.slug, btn));
       wrap.appendChild(btn);
     });
