@@ -1736,12 +1736,9 @@ function setCat(id){
       const top = feed.scrollTop + sec.getBoundingClientRect().top - feed.getBoundingClientRect().top - offset;
       feed.scrollTo({top: Math.max(0, top), behavior:'smooth'});
     } else {
-      // No direct section — scroll to first matching image category card
-      const card = document.querySelector(`.cat-mc[data-slug^="${id}-"]`) || document.querySelector(`.cat-mc[data-slug="${id}"]`);
-      if(card && feed){
-        const top = feed.scrollTop + card.getBoundingClientRect().top - feed.getBoundingClientRect().top - offset - 8;
-        feed.scrollTo({top: Math.max(0, top), behavior:'smooth'});
-      }
+      // No direct section — open first matching image sub-category
+      const match = IMG_CATS.find(c=>c.slug.startsWith(id+'-')) || IMG_CATS.find(c=>c.slug===id);
+      if(match) enterCatView(match.slug, match.name, match.cat||match.slug);
     }
   }
   setActivePill(id);
