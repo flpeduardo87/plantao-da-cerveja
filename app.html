@@ -1736,9 +1736,15 @@ function setCat(id){
       const top = feed.scrollTop + sec.getBoundingClientRect().top - feed.getBoundingClientRect().top - offset;
       feed.scrollTo({top: Math.max(0, top), behavior:'smooth'});
     } else {
-      // No direct section — open first matching image sub-category
-      const match = IMG_CATS.find(c=>c.slug.startsWith(id+'-')) || IMG_CATS.find(c=>c.slug===id);
-      if(match) enterCatView(match.slug, match.name, match.cat||match.slug);
+      // No direct section — scroll to first active section whose slug starts with this id
+      const firstMatch = Object.keys(CATALOG).find(k=>k.startsWith(id+'-')||k===id);
+      if(firstMatch){
+        const secEl=document.getElementById('sec-'+firstMatch);
+        if(secEl&&feed){
+          const top=feed.scrollTop+secEl.getBoundingClientRect().top-feed.getBoundingClientRect().top-offset;
+          feed.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+        }
+      }
     }
   }
   setActivePill(id);
