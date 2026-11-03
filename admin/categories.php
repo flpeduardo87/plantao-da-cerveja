@@ -164,7 +164,7 @@
   </div>
 </div>
 
-<script src="assets/app.js?v=2"></script>
+<script src="assets/app.js?v=3"></script>
 <script>
 let deleteId = null;
 let catsCache = [];
