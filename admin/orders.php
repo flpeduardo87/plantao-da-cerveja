@@ -160,6 +160,7 @@ async function loadOrders() {
   if (currentFilter) qs.set('status', currentFilter);
   try {
     const data = await api(`/orders?${qs}`);
+    if (!data) return;
     const orders = data.data || [];
     const total  = data.total || 0;
 
@@ -204,7 +205,11 @@ async function loadOrders() {
     html += `<button ${currentPage>=pages?'disabled':''} onclick="goPage(${currentPage+1})">&#8250;</button>`;
     html += `<span class="info">${total} pedido(s)</span>`;
     pg.innerHTML = html;
-  } catch (e) { console.error(e); }
+  } catch (e) {
+    console.error(e);
+    const tbody = document.getElementById('orders-tbody');
+    if (tbody) tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><p style="color:var(--red)">Erro ao carregar: ${e.message}</p><button class="btn btn-primary btn-sm" onclick="loadOrders()">Tentar novamente</button></div></td></tr>`;
+  }
 }
 
 function goPage(p) { currentPage = p; loadOrders(); }
