@@ -1674,7 +1674,12 @@ function exitCatView(){
   renderSections();
   const catGrid=document.getElementById('cat-grid-wrap');
   const feed=document.getElementById('feed');
-  if(catGrid&&feed) setTimeout(()=>{const strip=feed.querySelector('.cat-strip');const off=(strip?strip.offsetHeight:0)+32;feed.scrollTo({top:Math.max(0,catGrid.offsetTop-off),behavior:'smooth'});},100);
+  if(catGrid&&feed) setTimeout(()=>{
+    const strip=feed.querySelector('.cat-strip');
+    const stripH=strip?strip.offsetHeight:0;
+    const top=feed.scrollTop+catGrid.getBoundingClientRect().top-feed.getBoundingClientRect().top-stripH-8;
+    feed.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+  },100);
 }
 const CAT_ICONS = {
   'all':'layout-grid','todos':'layout-grid',
@@ -1932,7 +1937,12 @@ function goBack(to){
     showScreen('s-home');
     const catGrid=document.getElementById('cat-grid-wrap');
     const feed=document.getElementById('feed');
-    if(catGrid&&feed) setTimeout(()=>{const strip=feed.querySelector('.cat-strip');const off=(strip?strip.offsetHeight:0)+32;feed.scrollTo({top:Math.max(0,catGrid.offsetTop-off),behavior:'smooth'});},100);
+    if(catGrid&&feed) setTimeout(()=>{
+      const strip=feed.querySelector('.cat-strip');
+      const stripH=strip?strip.offsetHeight:0;
+      const top=feed.scrollTop+catGrid.getBoundingClientRect().top-feed.getBoundingClientRect().top-stripH-8;
+      feed.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+    },100);
   }
 }
 function goToCart(){
