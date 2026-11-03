@@ -193,7 +193,7 @@ match ($method) {
             $pdo->commit();
         } catch (\Throwable $e) {
             $pdo->rollBack();
-            json_err('Erro ao salvar pedido', 500);
+            json_err('Erro ao salvar pedido: ' . $e->getMessage(), 500);
         }
 
         // Stone payment link (for online card payments, best-effort)
@@ -219,8 +219,11 @@ match ($method) {
                 }
             } catch (\Throwable $stoneErr) {
                 error_log('Stone payment link error: ' . $stoneErr->getMessage());
-                $stoneDebugErr = $stoneErr->getMessage();
+                $stoneDebugErr = 'EXCEPTION: ' . $stoneErr->getMessage();
             }
+        }
+        if (empty($stoneDebugErr) && $d['payment_method'] === 'credit_card' && !$paymentUrl) {
+            $stoneDebugErr = 'NO_URL_NO_EXCEPTION';
         }
 
         // WhatsApp via Fonnte (best-effort, never blocks order creation)
