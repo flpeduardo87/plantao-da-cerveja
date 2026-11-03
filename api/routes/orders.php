@@ -202,7 +202,9 @@ match ($method) {
             try {
                 require_once __DIR__ . '/../lib/stone.php';
                 $stone = new Stone();
-                if ($stone->isConfigured()) {
+                if (!$stone->isConfigured()) {
+                    $stoneDebugErr = 'NOT_CONFIGURED: STONE_API_KEY=' . (defined('STONE_API_KEY') ? 'defined' : 'MISSING') . ' STONE_CODE=' . (defined('STONE_CODE') ? 'defined' : 'MISSING');
+                } else {
                     $webhookUrl = rtrim(API_URL, '/') . '/payment/webhook';
                     $link = $stone->createPaymentLink([
                         'id'            => $orderId,
@@ -212,13 +214,12 @@ match ($method) {
                         'customer_phone'=> preg_replace('/\D/', '', $d['customer_phone']),
                     ], $webhookUrl);
                     $paymentUrl = $link['payment_url'];
-                    // Store the Stone link reference on the order
                     $pdo->prepare('UPDATE orders SET stone_payment_url = ? WHERE id = ?')
                         ->execute([$paymentUrl, $orderId]);
                 }
             } catch (\Throwable $stoneErr) {
                 error_log('Stone payment link error: ' . $stoneErr->getMessage());
-                $stoneDebugErr = $stoneErr->getMessage(); // temp debug
+                $stoneDebugErr = $stoneErr->getMessage();
             }
         }
 
