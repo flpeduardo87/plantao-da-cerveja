@@ -1442,6 +1442,8 @@ let coStep = 1;
 let coData = {};
 let payMethod = null;
 let lastPaymentUrl = null;
+let confirmedTotal = 0;
+let confirmedItems = 0;
 
 function saveCart(){ try{ localStorage.setItem('plantao_cart', JSON.stringify(cart)); }catch{} }
 function loadCart(){
@@ -2116,10 +2118,12 @@ function renderCoStep(){
   const el = document.getElementById('co-body');
   const subtotal = cartTotal();
   const grandTotal = subtotal + DELIVERY_FEE;
+  const _summaryItems = coStep===4 ? confirmedItems : cart.reduce((s,i)=>s+i.qty,0);
+  const _summaryTotal = coStep===4 ? confirmedTotal : grandTotal;
   const summaryHtml = `
     <div class="order-summary">
       <button class="os-toggle" id="os-toggle" onclick="toggleSummary()">
-        <span><i data-lucide="package" width="14" height="14"></i> ${cart.reduce((s,i)=>s+i.qty,0)} item(s) · <span class="os-val">R$ ${fmt(grandTotal)}</span></span>
+        <span><i data-lucide="package" width="14" height="14"></i> ${_summaryItems} item(s) · <span class="os-val">R$ ${fmt(_summaryTotal)}</span></span>
         <span class="os-arrow"><i data-lucide="chevron-down" width="16" height="16"></i></span>
       </button>
       <div class="os-details" id="os-details">
@@ -2392,6 +2396,8 @@ async function finalizarPedido(){
     if(!r.ok||!j.success) throw new Error(j.message||'Erro ao registrar pedido.');
     try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, phone: coData.tel, ts: Date.now()})); }catch{}
     try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
+    confirmedItems = cart.reduce((s,i)=>s+i.qty,0);
+    confirmedTotal = j.total ?? cartTotal() + DELIVERY_FEE;
     cart=[]; saveCart(); updateBadge();
     lastPaymentUrl = j.payment_url || null;
     coStep=4;
