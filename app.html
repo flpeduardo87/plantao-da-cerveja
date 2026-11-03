@@ -1442,6 +1442,7 @@ let coStep = 1;
 let coData = {};
 let payMethod = null;
 let lastPaymentUrl = null;
+let lastStoneDebug = null;
 let confirmedTotal = 0;
 let confirmedItems = 0;
 
@@ -2277,6 +2278,7 @@ function renderCoStep(){
           <p>Entrega: <strong>${esc(coData.rua||'—')}, ${esc(coData.num||'')}</strong></p>
           <p>Pagamento: <strong>${{pix:'PIX',maquininha:'Maquininha',credito:'Cartão de Crédito',dinheiro:'Dinheiro'}[payMethod]||'—'}</strong></p>
         </div>
+        ${lastStoneDebug ? `<p style="background:#fee2e2;color:#991b1b;padding:10px;border-radius:8px;font-size:12px;word-break:break-all;margin-bottom:10px"><strong>Stone erro:</strong> ${esc(lastStoneDebug)}</p>` : ''}
         ${lastPaymentUrl ? `
         <button class="btn-primary" style="margin-bottom:10px" onclick="openPayIframe('${lastPaymentUrl}')">
           💳 Concluir pagamento com cartão
@@ -2395,7 +2397,7 @@ async function finalizarPedido(){
     try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, phone: coData.tel, ts: Date.now()})); }catch{}
     try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
     lastPaymentUrl = j.payment_url || null;
-    if(j.stone_debug) toast('Stone debug: '+j.stone_debug,'error');
+    lastStoneDebug = j.stone_debug || null;
     coStep=4;
     renderCoStep();
     document.getElementById('co-body').scrollTop=0;
