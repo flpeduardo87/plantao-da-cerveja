@@ -217,8 +217,8 @@ match ($method) {
                         ->execute([$paymentUrl, $orderId]);
                 }
             } catch (\Throwable $stoneErr) {
-                // Log but never block order creation
                 error_log('Stone payment link error: ' . $stoneErr->getMessage());
+                $stoneDebugErr = $stoneErr->getMessage(); // temp debug
             }
         }
 
@@ -276,6 +276,7 @@ match ($method) {
 
         $resp = ['success' => true, 'id' => $orderId, 'order_number' => $orderNumber, 'total' => $total];
         if ($paymentUrl) $resp['payment_url'] = $paymentUrl;
+        if (!empty($stoneDebugErr)) $resp['stone_debug'] = $stoneDebugErr;
         json_ok($resp, 201);
     })(),
 
