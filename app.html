@@ -1653,7 +1653,6 @@ function enterCatView(slug,name,catFallback=''){
   // Show category page header
   const hd=document.getElementById('cat-view-hd');
   hd.hidden=false;
-  document.getElementById('cat-view-title').textContent=name;
   // Resolve products
   let prods=[];
   if(slug==='ofertas'||catFallback==='ofertas') prods=allProds.filter(p=>p.featured);
