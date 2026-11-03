@@ -64,7 +64,7 @@ match ($method) {
                     'INSERT INTO customer_sessions (customer_id, token, expires_at) VALUES (?,?, DATE_ADD(NOW(), INTERVAL 30 DAY))'
                 )->execute([$userId, $token]);
 
-                json_ok(['token' => $token, 'name' => trim($d['name']), 'email' => $email], 201);
+                json_ok(['success' => true, 'token' => $token, 'name' => trim($d['name']), 'email' => $email], 201);
             })(),
 
             'login' => (function () use ($pdo) {
@@ -81,7 +81,7 @@ match ($method) {
                 $pdo->prepare(
                     'INSERT INTO customer_sessions (customer_id, token, expires_at) VALUES (?,?, DATE_ADD(NOW(), INTERVAL 30 DAY))'
                 )->execute([$user['id'], $token]);
-                json_ok(['token' => $token, 'name' => $user['name'], 'email' => $user['email'], 'phone' => $user['phone']]);
+                json_ok(['success' => true, 'token' => $token, 'name' => $user['name'], 'email' => $user['email'], 'phone' => $user['phone']]);
             })(),
 
             'logout' => (function () use ($pdo) {
