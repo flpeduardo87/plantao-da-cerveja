@@ -1729,21 +1729,16 @@ function setCat(id){
   if(id==='all'){
     feed.scrollTo({top:0,behavior:'smooth'});
   } else {
-    const sec = document.getElementById('sec-'+id);
     const strip = document.querySelector('.cat-strip');
     const offset = strip ? strip.offsetHeight : 0;
-    if(sec && feed){
-      const top = feed.scrollTop + sec.getBoundingClientRect().top - feed.getBoundingClientRect().top - offset;
-      feed.scrollTo({top: Math.max(0, top), behavior:'smooth'});
-    } else {
-      // No direct section — scroll to first active section whose slug starts with this id
-      const firstMatch = Object.keys(CATALOG).find(k=>k.startsWith(id+'-')||k===id);
-      if(firstMatch){
-        const secEl=document.getElementById('sec-'+firstMatch);
-        if(secEl&&feed){
-          const top=feed.scrollTop+secEl.getBoundingClientRect().top-feed.getBoundingClientRect().top-offset;
-          feed.scrollTo({top:Math.max(0,top),behavior:'smooth'});
-        }
+    // Sub-category takes priority (cervejas-lata > cervejas), fallback to exact
+    const subMatch = Object.keys(CATALOG).find(k=>k.startsWith(id+'-'));
+    const targetKey = subMatch || (CATALOG[id]!==undefined ? id : null);
+    if(targetKey){
+      const secEl = document.getElementById('sec-'+targetKey);
+      if(secEl && feed){
+        const top = feed.scrollTop + secEl.getBoundingClientRect().top - feed.getBoundingClientRect().top - offset;
+        feed.scrollTo({top: Math.max(0, top), behavior:'smooth'});
       }
     }
   }
