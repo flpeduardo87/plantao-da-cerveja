@@ -1919,12 +1919,14 @@ function goHome(){
   document.getElementById('nb-home').classList.add('on');
   hideScreen('s-cart');
   hideScreen('s-account');
+  if(window.innerWidth>=900) document.getElementById('desktop-header').classList.add('dh-shown');
   showScreen('s-home');
   refreshFeed();
 }
 function goBack(to){
   hideScreen('s-cart');
   hideScreen('s-account');
+  if(window.innerWidth>=900) document.getElementById('desktop-header').classList.add('dh-shown');
   if(to==='s-home'){
     document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
     document.getElementById('nb-home').classList.add('on');
@@ -2588,6 +2590,7 @@ function goToAccount(){
   setNavActive('nb-acct');
   hideScreen('s-cart');
   hideScreen('s-home');
+  document.getElementById('desktop-header').classList.remove('dh-shown');
   showScreen('s-account');
   if(acctToken) acctShowDashboard();
   else acctShowLogin();
