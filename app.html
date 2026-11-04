@@ -372,6 +372,65 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .pvariant{font-size:11px;color:var(--fg-3);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .pdeposit{display:inline-block;margin-top:4px;font-size:10.5px;background:var(--bg-2);border:1px solid var(--border);border-radius:999px;padding:1px 7px;color:var(--fg-3);}
 
+/* ── PRODUCT MODAL ── */
+#prod-modal-overlay{
+  position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);
+  display:flex;align-items:flex-end;justify-content:center;
+  animation:fadeIn .18s ease;
+}
+@media(min-width:520px){#prod-modal-overlay{align-items:center;padding:16px;}}
+.prod-modal{
+  background:#fff;width:100%;max-width:480px;
+  border-radius:20px 20px 0 0;padding:20px 20px 32px;
+  position:relative;animation:slideUp .22s ease;
+  max-height:92vh;overflow-y:auto;
+}
+@media(min-width:520px){.prod-modal{border-radius:20px;padding:24px;}}
+.pm-close{
+  position:absolute;top:14px;right:16px;
+  background:var(--bg-2);border:none;cursor:pointer;
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:var(--fg-2);
+}
+.pm-offer{
+  display:inline-block;background:#EF4444;color:#fff;
+  font-size:12px;font-weight:700;padding:3px 10px;
+  border-radius:999px;margin-bottom:12px;letter-spacing:.3px;
+}
+.pm-img{
+  width:160px;height:160px;object-fit:contain;
+  display:block;margin:0 auto 16px;
+}
+.pm-name{font-size:20px;font-weight:700;color:var(--fg);margin-bottom:4px;}
+.pm-variant{font-size:13px;color:var(--fg-2);margin-bottom:12px;}
+.pm-price-row{margin-bottom:4px;}
+.pm-old{font-size:13px;color:var(--fg-3);text-decoration:line-through;margin-bottom:2px;}
+.pm-price{font-size:28px;font-weight:700;color:var(--fg);}
+.pm-unit{font-size:12px;color:var(--fg-2);margin-bottom:16px;}
+.pm-qty-row{
+  display:flex;align-items:center;justify-content:center;gap:0;
+  background:var(--bg-2);border-radius:999px;
+  padding:6px;margin-bottom:16px;
+}
+.pm-qty-btn{
+  width:44px;height:44px;border-radius:50%;border:none;
+  background:#fff;cursor:pointer;font-size:22px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 1px 4px rgba(0,0,0,.12);color:var(--fg);
+  transition:background .12s;flex-shrink:0;
+}
+.pm-qty-btn:hover{background:var(--border);}
+.pm-qty-num{min-width:60px;text-align:center;font-size:20px;font-weight:700;color:var(--fg);}
+.pm-add-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:16px;border-radius:999px;border:none;
+  background:var(--amber);color:#111;font:700 16px 'Inter',sans-serif;
+  cursor:pointer;transition:background .15s;
+}
+.pm-add-btn:hover{background:var(--amber-dk);}
+.pm-deposit{font-size:12px;color:var(--fg-2);text-align:center;margin-top:8px;}
+
 
 /* ── CART DRAWER (desktop sidebar) ── */
 #cart-drawer-overlay{
@@ -1088,6 +1147,32 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
       <div class="conf-addr" id="conf-addr">—</div>
       <div class="conf-badge"><i data-lucide="bike" width="13" height="13"></i> Entrega rápida · Frete grátis</div>
     </div>
+  </div>
+</div>
+
+<!-- ═══ PRODUCT MODAL ═══ -->
+<div id="prod-modal-overlay" class="hidden" onclick="if(event.target===this)closeProdModal()">
+  <div class="prod-modal">
+    <button class="pm-close" onclick="closeProdModal()">×</button>
+    <div id="pm-offer-wrap"></div>
+    <img class="pm-img" id="pm-img" src="" alt="">
+    <div class="pm-name" id="pm-name"></div>
+    <div class="pm-variant" id="pm-variant"></div>
+    <div class="pm-price-row">
+      <div class="pm-old hidden" id="pm-old"></div>
+      <div class="pm-price" id="pm-price"></div>
+    </div>
+    <div class="pm-unit">por unidade</div>
+    <div class="pm-qty-row">
+      <button class="pm-qty-btn" onclick="setProdQty(-1)">−</button>
+      <span class="pm-qty-num" id="pm-qty">1</span>
+      <button class="pm-qty-btn" onclick="setProdQty(1)">+</button>
+    </div>
+    <button class="pm-add-btn" id="pm-add-btn" onclick="addFromModal()">
+      <i data-lucide="shopping-bag" width="18" height="18"></i>
+      <span id="pm-add-txt">Adicionar à sacola • R$ 0,00</span>
+    </button>
+    <div class="pm-deposit hidden" id="pm-deposit"></div>
   </div>
 </div>
 
@@ -1936,17 +2021,60 @@ function search(q){
   renderSections(allProds.filter(p=>p.name.toLowerCase().includes(q.toLowerCase())));
 }
 
-function addToCart(id, e){
+let _modalProd = null;
+let _modalQty = 1;
+function openProdModal(id, e){
   e&&e.stopPropagation();
   const p = allProds.find(x=>x.id===id);
   if(!p) return;
-  const ex = cart.find(x=>x.id===id);
-  if(ex) ex.qty++;
-  else cart.push({...p,qty:1});
-  saveCart();
-  updateBadge();
-  refreshFeed();
-  toast(`${p.name.substring(0,26)}… adicionado!`);
+  _modalProd = p;
+  const inCart = cart.find(x=>x.id===id);
+  _modalQty = inCart ? inCart.qty : 1;
+  const discPct = p.disc ? Number(p.disc) : (p.old && p.price < p.old ? Math.round((1-p.price/p.old)*100) : 0);
+  document.getElementById('pm-img').src = p.image_url || prodImg(p.id,160,160);
+  document.getElementById('pm-img').alt = p.name;
+  document.getElementById('pm-name').textContent = p.name;
+  const variant = [p.brand,p.unit_type,p.size].filter(Boolean).join(' · ');
+  document.getElementById('pm-variant').textContent = variant;
+  document.getElementById('pm-variant').classList.toggle('hidden', !variant);
+  const oldEl = document.getElementById('pm-old');
+  if(p.old){ oldEl.textContent='R$ '+fmt(p.old); oldEl.classList.remove('hidden'); }
+  else oldEl.classList.add('hidden');
+  document.getElementById('pm-price').textContent = 'R$ '+fmt(p.price);
+  document.getElementById('pm-offer-wrap').innerHTML = discPct ? `<span class="pm-offer">Oferta</span>` : '';
+  const dep = document.getElementById('pm-deposit');
+  if(p.has_deposit&&p.deposit_value>0){ dep.textContent='+ R$ '+fmt(p.deposit_value)+' casco incluído'; dep.classList.remove('hidden'); }
+  else dep.classList.add('hidden');
+  _updateModalQty();
+  document.getElementById('prod-modal-overlay').classList.remove('hidden');
+  lucide.createIcons();
+}
+function closeProdModal(){
+  document.getElementById('prod-modal-overlay').classList.add('hidden');
+  _modalProd=null;
+}
+function _updateModalQty(){
+  document.getElementById('pm-qty').textContent=_modalQty;
+  const total = fmt(_modalProd.price * _modalQty);
+  document.getElementById('pm-add-txt').textContent=`Adicionar à sacola · R$ ${total}`;
+  lucide.createIcons();
+}
+function setProdQty(delta){
+  _modalQty = Math.max(1, _modalQty+delta);
+  _updateModalQty();
+}
+function addFromModal(){
+  if(!_modalProd) return;
+  const ex = cart.find(x=>x.id===_modalProd.id);
+  if(ex) ex.qty=_modalQty;
+  else cart.push({..._modalProd,qty:_modalQty});
+  saveCart(); updateBadge(); refreshFeed();
+  toast(`${_modalProd.name.substring(0,26)}… adicionado!`);
+  closeProdModal();
+}
+function addToCart(id, e){
+  e&&e.stopPropagation();
+  openProdModal(id, e);
 }
 function refreshFeed(){
   const q = document.getElementById('s-in').value;
@@ -2855,6 +2983,9 @@ try {
     });
   }
 } catch {}
+
+// Close product modal on ESC
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&_modalProd) closeProdModal(); });
 
 // Drag-to-scroll on category bar
 (function(){
