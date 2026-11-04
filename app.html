@@ -95,51 +95,50 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 
 /* ── LOCATION MODAL ── */
 #loc-overlay{
-  position:fixed;inset:0;z-index:80;background:#000;
+  position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.65);
   display:flex;align-items:center;justify-content:center;padding:16px;
   animation:fadeIn .2s ease;
 }
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{transform:translateY(28px);opacity:0}to{transform:translateY(0);opacity:1}}
 .loc-card{
-  background:transparent;
-  padding:26px 22px;width:100%;max-width:360px;
-  text-align:center;
+  background:#fff;border-radius:16px;
+  padding:28px 24px 24px;width:100%;max-width:440px;
+  text-align:center;position:relative;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);
   animation:slideUp .22s ease;
 }
-.loc-logo{
-  width:88px;height:88px;border-radius:50%;
-  margin:0 auto 16px;overflow:hidden;
-  filter:drop-shadow(0 4px 12px rgba(0,0,0,.15));
+.loc-close-btn{
+  position:absolute;top:14px;right:16px;
+  background:none;border:none;cursor:pointer;
+  color:var(--fg-2);font-size:20px;line-height:1;padding:4px;
 }
-.loc-logo img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
-.loc-brand{font-size:40px;font-weight:500;font-style:italic;letter-spacing:0.04em;margin-bottom:3px;font-family:'Rockids Softed',sans-serif;color:#fff;}
-.loc-tagline{font-size:16px;color:rgba(255,255,255,.75);margin-bottom:18px;}
-.loc-ask{font-size:14px;font-weight:500;margin-bottom:12px;color:#fff;}
-.divider{display:flex;align-items:center;gap:8px;margin:10px 0;color:rgba(255,255,255,.45);font-size:12px;font-weight:600;}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.2);}
+.loc-ask{font-size:17px;font-weight:700;margin-bottom:4px;color:var(--fg);}
+.loc-sub{font-size:13px;color:var(--fg-2);margin-bottom:18px;}
+.divider{display:flex;align-items:center;gap:8px;margin:10px 0;color:var(--fg-3,#9CA3AF);font-size:12px;font-weight:600;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
 .cep-field{
   width:100%;padding:12px 16px;border-radius:999px;
-  border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);
-  font:15px 'Inter',sans-serif;color:#fff;
+  border:2px solid var(--border);background:var(--bg-2);
+  font:15px 'Inter',sans-serif;color:var(--fg);
   text-align:center;outline:none;margin-bottom:8px;transition:border-color .15s;
 }
-.cep-field::placeholder{color:rgba(255,255,255,.4);}
-.cep-field:focus{border-color:var(--amber);background:rgba(255,255,255,.12);}
+.cep-field::placeholder{color:var(--fg-3,#9CA3AF);}
+.cep-field:focus{border-color:var(--amber);background:#fff;}
 .cep-field.err{border-color:var(--red);}
-.btn-skip{background:none;border:none;color:rgba(255,255,255,.5);font:400 13px 'Inter',sans-serif;cursor:pointer;margin-top:6px;padding:6px 12px;}
+.btn-loc-skip{background:none;border:none;color:var(--fg-2);font:400 13px 'Inter',sans-serif;cursor:pointer;margin-top:8px;padding:6px 12px;text-decoration:underline;}
 #loc-confirmed{display:none;flex-direction:column;align-items:center;gap:12px;}
 .conf-check-wrap{
-  width:88px;height:88px;border-radius:50%;background:var(--amber);
+  width:72px;height:72px;border-radius:50%;background:var(--amber);
   display:flex;align-items:center;justify-content:center;
   margin:0 auto 4px;
 }
-.conf-title{font-size:20px;font-weight:700;color:#fff;margin:0;}
-.conf-addr{font-size:13px;color:rgba(255,255,255,.6);line-height:1.5;margin:0;}
+.conf-title{font-size:20px;font-weight:700;color:var(--fg);margin:0;}
+.conf-addr{font-size:13px;color:var(--fg-2);line-height:1.5;margin:0;}
 .conf-badge{
   display:inline-flex;align-items:center;gap:6px;
-  font-size:12px;font-weight:600;color:var(--amber);
-  background:rgba(252,218,36,.12);border-radius:999px;
+  font-size:12px;font-weight:600;color:#166534;
+  background:#DCFCE7;border-radius:999px;
   padding:5px 12px;
 }
 
@@ -170,10 +169,10 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .banner-deco{display:none;}
 .store-avatar-wrap{
   display:flex;justify-content:center;
-  margin-top:-72px;position:relative;z-index:5;
+  margin-top:-60px;position:relative;z-index:5;
 }
 .store-avatar{
-  width:144px;height:144px;border-radius:50%;
+  width:122px;height:122px;border-radius:50%;
   border:5px solid var(--bg);
   box-shadow:0 6px 24px rgba(0,0,0,.22);
   overflow:hidden;background:var(--amber);
@@ -182,19 +181,28 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   width:100%;height:100%;object-fit:cover;
 }
 .store-info-card{
-  background:var(--bg);
-  padding:10px max(16px,env(safe-area-inset-right,0px)) 16px;
-  text-align:center;border-bottom:8px solid var(--bg-2);
+  background:var(--bg-2);
+  padding:8px max(16px,env(safe-area-inset-right,0px)) 14px;
+  text-align:center;border-bottom:8px solid var(--border);
 }
-.store-name{font-size:40px;font-weight:500;font-style:italic;letter-spacing:0.04em;margin-bottom:4px;font-family:'Rockids Softed',sans-serif;}
-.store-tagline{font-size:15px;color:var(--fg-2);margin-bottom:14px;}
-.store-meta{text-align:left;display:inline-flex;flex-direction:column;gap:7px;margin-bottom:14px;}
-.meta-row{display:flex;align-items:center;gap:8px;font-size:15px;}
-.meta-ic{flex-shrink:0;width:16px;height:16px;display:flex;align-items:center;justify-content:center;}
-.meta-green{color:var(--green-dk);font-weight:500;}
-.store-chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;}
-.store-chip{font-size:15px;font-weight:500;color:var(--fg-2);border:1.5px solid var(--border);border-radius:999px;padding:4px 12px;}
-.online-badge{display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:var(--fg);letter-spacing:.5px;}
+.store-name{font-size:40px;font-weight:500;font-style:italic;letter-spacing:0.04em;margin-bottom:8px;font-family:'Rockids Softed',sans-serif;}
+.store-benefits{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:10px;flex-wrap:wrap;}
+.benefit-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--fg-2);padding:0 10px;}
+.benefit-item+.benefit-item{border-left:1px solid var(--border);}
+.benefit-ic{flex-shrink:0;display:flex;align-items:center;}
+.meta-green{color:var(--green-dk);font-weight:600;}
+.loc-field-btn{
+  display:flex;align-items:center;gap:8px;
+  background:#fff;border:1.5px solid var(--border);border-radius:999px;
+  padding:9px 16px;cursor:pointer;width:100%;max-width:320px;
+  margin:0 auto;font:14px 'Inter',sans-serif;color:var(--fg);
+  transition:border-color .15s;
+}
+.loc-field-btn:hover{border-color:var(--amber);}
+.loc-field-btn .loc-pin{color:var(--amber);flex-shrink:0;}
+.loc-field-btn .loc-txt{flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.loc-field-btn .loc-chevron{color:var(--fg-3,#9CA3AF);flex-shrink:0;}
+.online-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--fg);letter-spacing:.5px;}
 .online-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse 1.8s ease-in-out infinite;}
 .online-dot.closed{background:#DC2626;animation:none;}
 .online-badge.closed{color:#DC2626;}
@@ -789,21 +797,18 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
   .store-banner::before{background:none;}
 
   /* Store info: centered, rounded top card like reference */
-  .store-avatar-wrap{justify-content:center;padding-left:0;margin-top:-96px;}
-  .store-avatar{width:192px;height:192px;border:6px solid var(--bg);}
+  .store-avatar-wrap{justify-content:center;padding-left:0;margin-top:-80px;}
+  .store-avatar{width:163px;height:163px;border:6px solid var(--bg);}
   .store-info-card{
-    text-align:center;padding:14px 40px 20px;
+    text-align:center;padding:10px 40px 18px;
     border-radius:0;
-    border-bottom:8px solid var(--bg-2);
+    border-bottom:8px solid var(--border);
   }
+  .loc-field-btn{max-width:380px;}
   .store-name{font-size:52px;}
-  .store-tagline{font-size:19px;}
-  .store-meta{display:inline-flex;flex-direction:column;gap:7px;margin-bottom:14px;text-align:left;}
-  .meta-row{font-size:19px;}
-  .meta-ic{font-size:19px;}
-  .store-chips{justify-content:center;}
-  .online-badge{font-size:19px;}
-  .store-chip{font-size:19px;}
+  .store-benefits{gap:4px;}
+  .benefit-item{font-size:14px;padding:0 14px;}
+  .online-badge{font-size:14px;}
 
   /* Hide in-feed search (desktop header has it) */
   .search-section{display:none;}
@@ -1044,24 +1049,21 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
 <!-- ═══ LOCATION OVERLAY ═══ -->
 <div id="loc-overlay" class="hidden" role="dialog" aria-modal="true" aria-label="Informar endereço de entrega">
   <div class="loc-card">
+    <button class="loc-close-btn" onclick="locSkip()" aria-label="Fechar">×</button>
     <div id="loc-form">
-      <div class="loc-logo"><img src="favicon-icone.webp" alt="Plantão da Cerveja"></div>
-      <div class="loc-brand">Plantão da Cerveja</div>
-      <div class="loc-tagline">Bebida gelada onde você estiver!</div>
-      <div class="loc-ask">Vamos encontrar sua região?</div>
+      <div class="loc-ask">Onde você está?</div>
+      <div class="loc-sub">Para calcular o frete e prazo de entrega</div>
       <button class="btn-primary" id="geo-btn" onclick="useGeo()"><i data-lucide="map-pin" width="16" height="16"></i> Usar minha localização</button>
       <div class="divider">ou informe o CEP</div>
-      <input class="cep-field" id="cep-in" type="text" inputmode="numeric" maxlength="9" placeholder="00000-000">
-      <button class="btn-primary" onclick="confirmCep()">Confirmar localização</button>
-      <button class="btn-skip" onclick="enterStore()">Pular</button>
+      <input class="cep-field" id="cep-in" type="text" inputmode="numeric" maxlength="9" placeholder="00000-000" oninput="onCepInput(this)">
+      <button class="btn-primary" id="cep-confirm-btn" onclick="confirmCep()" disabled style="opacity:.45;cursor:not-allowed">Confirmar localização</button>
+      <button class="btn-loc-skip" onclick="locSkip()">Ver produtos sem informar localização</button>
     </div>
     <div id="loc-confirmed">
-      <div class="conf-check-wrap"><i data-lucide="check" width="36" height="36" style="color:#000"></i></div>
-      <div class="loc-brand" style="font-size:28px">Plantão da Cerveja</div>
+      <div class="conf-check-wrap"><i data-lucide="check" width="32" height="32" style="color:#000"></i></div>
       <div class="conf-title">Entregamos na sua região!</div>
       <div class="conf-addr" id="conf-addr">—</div>
       <div class="conf-badge"><i data-lucide="bike" width="13" height="13"></i> Entrega rápida · Frete grátis</div>
-      <button class="btn-primary" style="margin-top:4px" onclick="enterStore()">Ver produtos →</button>
     </div>
   </div>
 </div>
@@ -1101,17 +1103,16 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
     </div>
     <div class="store-info-card">
       <h1 class="store-name">Plantão da Cerveja</h1>
-      <p class="store-tagline">BEBIDA GELADA ONDE VOCÊ ESTIVER!</p>
-      <div class="store-meta">
-        <div class="meta-row"><span class="meta-ic"><i data-lucide="clock" width="14" height="14"></i></span><span>Entrega em até <strong>20 min</strong></span></div>
-        <div class="meta-row"><span class="meta-ic"><i data-lucide="map-pin" width="14" height="14"></i></span><span>Bem-vindo! · <strong>Sua região, informe sua localização</strong></span></div>
-        <div class="meta-row"><span class="meta-ic"><i data-lucide="star" width="14" height="14"></i></span><span>Pedido mínimo: <strong>R$ 20,00</strong></span></div>
+      <div class="store-benefits">
+        <div class="benefit-item"><span class="benefit-ic"><i data-lucide="clock" width="13" height="13"></i></span><span>Até <strong>20 min</strong></span></div>
+        <div class="benefit-item"><span class="benefit-ic"><i data-lucide="package" width="13" height="13"></i></span><span>Mín. <strong>R$ 20</strong></span></div>
+        <div class="benefit-item"><div class="online-badge" id="store-badge"><span class="online-dot" id="store-dot"></span><span id="store-badge-txt">Online</span></div></div>
       </div>
-      <div class="store-chips">
-        <span class="store-chip">Bebida Gelada</span>
-        <span class="store-chip">Entrega Rápida</span>
-      </div>
-      <div class="online-badge" id="store-badge"><span class="online-dot" id="store-dot"></span><span id="store-badge-txt">PEDIDOS ONLINE</span></div>
+      <button class="loc-field-btn" onclick="document.getElementById('loc-form').style.display='';document.getElementById('loc-confirmed').style.display='none';show('loc-overlay')" id="loc-field-btn">
+        <span class="loc-pin"><i data-lucide="map-pin" width="15" height="15"></i></span>
+        <span class="loc-txt" id="loc-field-txt">Informe sua localização</span>
+        <span class="loc-chevron"><i data-lucide="chevron-right" width="14" height="14"></i></span>
+      </button>
     </div>
     <div class="cat-strip"><div class="cat-scroll" id="cats"></div></div>
     <div id="cat-grid-wrap"></div>
@@ -1482,7 +1483,13 @@ function passAge(){
   try { localStorage.setItem('age_ok','1'); } catch {}
   const g = document.getElementById('s-age');
   g.classList.add('exit');
-  setTimeout(()=>{ g.classList.add('hidden'); show('loc-overlay'); }, 280);
+  setTimeout(async ()=>{
+    g.classList.add('hidden');
+    // Enter store immediately, then show location popup if not set
+    await enterStore();
+    const locOk = localStorage.getItem('loc_ok')==='1';
+    if(!locOk) show('loc-overlay');
+  }, 280);
 }
 function denyAge(){
   document.getElementById('s-age').innerHTML = `
@@ -1494,12 +1501,25 @@ function denyAge(){
   lucide.createIcons();
 }
 
-document.getElementById('cep-in').addEventListener('input',function(){
-  this.classList.remove('err');
-  let v = this.value.replace(/\D/g,'');
+function onCepInput(el){
+  el.classList.remove('err');
+  let v = el.value.replace(/\D/g,'');
   if(v.length>5) v=v.slice(0,5)+'-'+v.slice(5,8);
-  this.value = v;
-});
+  el.value = v;
+  const btn = document.getElementById('cep-confirm-btn');
+  if(btn){
+    const valid = v.replace(/\D/g,'').length>=8;
+    btn.disabled=!valid;
+    btn.style.opacity=valid?'1':'.45';
+    btn.style.cursor=valid?'pointer':'not-allowed';
+  }
+}
+function locSkip(){
+  hide('loc-overlay');
+  document.getElementById('loc-form').style.display='';
+  document.getElementById('loc-confirmed').style.display='none';
+}
+document.getElementById('cep-in').addEventListener('input',function(){ onCepInput(this); });
 function useGeo(){
   const b = document.getElementById('geo-btn');
   if(!navigator.geolocation){ toast('GPS não disponível neste dispositivo.','error'); return; }
@@ -1536,9 +1556,20 @@ function showConfirmed(addr){
   const c = document.getElementById('loc-confirmed');
   c.style.display='flex';
   document.getElementById('conf-addr').textContent = addr;
+  // Update loc-field-btn with address snippet
+  const fieldTxt = document.getElementById('loc-field-txt');
+  if(fieldTxt) fieldTxt.textContent = addr.split(' — ')[1] || addr.split(' — ')[0] || addr;
+  // Auto-dismiss after 1.2s
+  const addrSnippet = addr.split(' — ')[1] || addr.split(' — ')[0] || addr;
+  setTimeout(()=>{
+    try { localStorage.setItem('loc_ok','1'); localStorage.setItem('loc_addr',addrSnippet); } catch {}
+    hide('loc-overlay');
+    document.getElementById('loc-form').style.display='';
+    c.style.display='none';
+    lucide.createIcons();
+  }, 1200);
 }
 async function enterStore(){
-  try { localStorage.setItem('loc_ok','1'); } catch {}
   hide('loc-overlay');
   document.getElementById('bnav').style.display='flex';
   if(window.innerWidth>=900) document.getElementById('desktop-header').classList.add('dh-shown');
@@ -2790,16 +2821,20 @@ function setNavActive(id){
   document.getElementById(id)?.classList.add('on');
 }
 
-// Restore session: skip age gate and/or location overlay if already confirmed
+// Restore session: skip age gate and show store; popup if loc not set
 try {
   const ageOk = localStorage.getItem('age_ok') === '1';
   const locOk = localStorage.getItem('loc_ok') === '1';
-  if (ageOk && locOk) {
+  if (ageOk) {
     document.getElementById('s-age')?.classList.add('hidden');
-    enterStore();
-  } else if (ageOk) {
-    document.getElementById('s-age')?.classList.add('hidden');
-    show('loc-overlay');
+    enterStore().then(()=>{
+      if(!locOk) show('loc-overlay');
+      else {
+        // Restore saved address in loc-field-btn
+        const saved = localStorage.getItem('loc_addr');
+        if(saved){ const el=document.getElementById('loc-field-txt'); if(el) el.textContent=saved; }
+      }
+    });
   }
 } catch {}
 
