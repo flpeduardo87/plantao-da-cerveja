@@ -393,12 +393,12 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   display:flex;align-items:center;justify-content:center;
   font-size:17px;color:var(--fg-2);z-index:2;
 }
-.pm-top{display:flex;gap:16px;align-items:flex-start;margin-bottom:20px;}
+.pm-top{display:flex;gap:16px;align-items:stretch;margin-bottom:16px;}
 .pm-img{
-  width:130px;height:130px;object-fit:contain;
-  flex-shrink:0;border-radius:12px;background:var(--bg-2);
+  width:140px;height:auto;min-height:140px;object-fit:contain;
+  flex-shrink:0;border-radius:12px;background:transparent;align-self:center;
 }
-.pm-info{flex:1;min-width:0;padding-top:4px;}
+.pm-info{flex:1;min-width:0;display:flex;flex-direction:column;}
 .pm-offer{
   display:inline-block;background:#EF4444;color:#fff;
   font-size:11px;font-weight:700;padding:3px 9px;
@@ -410,9 +410,9 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .pm-price{font-size:26px;font-weight:700;color:var(--fg);line-height:1.1;}
 .pm-unit{font-size:11px;color:var(--fg-2);margin-top:2px;}
 .pm-qty-row{
-  display:flex;align-items:center;justify-content:center;gap:0;
+  display:inline-flex;align-items:center;gap:0;
   background:var(--bg-2);border-radius:999px;
-  padding:5px;margin-bottom:16px;
+  padding:5px;margin-top:12px;
 }
 .pm-qty-btn{
   width:42px;height:42px;border-radius:50%;border:none;
@@ -1164,12 +1164,12 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
         <div class="pm-old hidden" id="pm-old"></div>
         <div class="pm-price" id="pm-price"></div>
         <div class="pm-unit">por unidade</div>
+        <div class="pm-qty-row">
+          <button class="pm-qty-btn" onclick="setProdQty(-1)">−</button>
+          <span class="pm-qty-num" id="pm-qty">1</span>
+          <button class="pm-qty-btn" onclick="setProdQty(1)">+</button>
+        </div>
       </div>
-    </div>
-    <div class="pm-qty-row">
-      <button class="pm-qty-btn" onclick="setProdQty(-1)">−</button>
-      <span class="pm-qty-num" id="pm-qty">1</span>
-      <button class="pm-qty-btn" onclick="setProdQty(1)">+</button>
     </div>
     <button class="pm-add-btn" id="pm-add-btn" onclick="addFromModal()">
       <i data-lucide="shopping-bag" width="18" height="18"></i>
