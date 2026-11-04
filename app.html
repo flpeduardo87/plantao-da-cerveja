@@ -115,20 +115,37 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   background:none;border:none;cursor:pointer;
   color:var(--fg-2);font-size:20px;line-height:1;padding:4px;
 }
-.loc-ask{font-size:17px;font-weight:700;margin-bottom:4px;color:var(--fg);}
-.loc-sub{font-size:13px;color:var(--fg-2);margin-bottom:18px;}
-.divider{display:flex;align-items:center;gap:8px;margin:10px 0;color:var(--fg-3,#9CA3AF);font-size:12px;font-weight:600;}
+.loc-pin-icon{
+  width:60px;height:60px;border-radius:50%;background:#FEF9C3;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 14px;color:#1a1a1a;
+}
+.loc-ask{font-size:20px;font-weight:700;margin-bottom:6px;color:var(--fg);}
+.loc-sub{font-size:13px;color:var(--fg-2);margin-bottom:20px;line-height:1.5;}
+.divider{display:flex;align-items:center;gap:8px;margin:12px 0;color:var(--fg-3,#9CA3AF);font-size:12px;font-weight:500;}
 .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.cep-wrap{position:relative;margin-bottom:10px;}
+.cep-search-ic{
+  position:absolute;left:16px;top:50%;transform:translateY(-50%);
+  color:var(--fg-3,#9CA3AF);display:flex;align-items:center;pointer-events:none;
+}
 .cep-field{
-  width:100%;padding:12px 16px;border-radius:999px;
-  border:2px solid var(--border);background:var(--bg-2);
+  width:100%;padding:13px 16px 13px 44px;border-radius:999px;
+  border:1.5px solid var(--border);background:var(--bg-2);
   font:15px 'Inter',sans-serif;color:var(--fg);
-  text-align:center;outline:none;margin-bottom:8px;transition:border-color .15s;
+  outline:none;transition:border-color .15s;box-sizing:border-box;
 }
 .cep-field::placeholder{color:var(--fg-3,#9CA3AF);}
 .cep-field:focus{border-color:var(--amber);background:#fff;}
 .cep-field.err{border-color:var(--red);}
-.btn-loc-skip{background:none;border:none;color:var(--fg-2);font:400 13px 'Inter',sans-serif;cursor:pointer;margin-top:8px;padding:6px 12px;text-decoration:underline;}
+.btn-cep-confirm{
+  display:block;width:100%;padding:14px;border-radius:999px;border:none;
+  background:#E5E7EB;color:#9CA3AF;font:600 14px 'Inter',sans-serif;
+  cursor:default;transition:background .15s,color .15s;margin-bottom:4px;
+}
+.btn-cep-confirm:not(:disabled){background:var(--amber);color:#111;cursor:pointer;}
+.btn-cep-confirm:not(:disabled):hover{background:var(--amber-dk);}
+.btn-loc-skip{background:none;border:none;color:var(--fg-2);font:400 13px 'Inter',sans-serif;cursor:pointer;margin-top:4px;padding:6px 12px;text-decoration:underline;}
 #loc-confirmed{display:none;flex-direction:column;align-items:center;gap:12px;}
 .conf-check-wrap{
   width:72px;height:72px;border-radius:50%;background:var(--amber);
@@ -1053,12 +1070,16 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
   <div class="loc-card">
     <button class="loc-close-btn" onclick="locSkip()" aria-label="Fechar">×</button>
     <div id="loc-form">
-      <div class="loc-ask">Onde você está?</div>
-      <div class="loc-sub">Para calcular o frete e prazo de entrega</div>
+      <div class="loc-pin-icon"><i data-lucide="map-pin" width="26" height="26"></i></div>
+      <div class="loc-ask">Onde vamos entregar?</div>
+      <div class="loc-sub">Informe sua localização para calcular o frete e o prazo de entrega.</div>
       <button class="btn-primary" id="geo-btn" onclick="useGeo()"><i data-lucide="map-pin" width="16" height="16"></i> Usar minha localização</button>
       <div class="divider">ou informe o CEP</div>
-      <input class="cep-field" id="cep-in" type="text" inputmode="numeric" maxlength="9" placeholder="00000-000" oninput="onCepInput(this)">
-      <button class="btn-primary" id="cep-confirm-btn" onclick="confirmCep()" disabled style="opacity:.45;cursor:not-allowed">Confirmar localização</button>
+      <div class="cep-wrap">
+        <span class="cep-search-ic"><i data-lucide="search" width="16" height="16"></i></span>
+        <input class="cep-field" id="cep-in" type="text" inputmode="numeric" maxlength="9" placeholder="Digite seu CEP" oninput="onCepInput(this)">
+      </div>
+      <button class="btn-cep-confirm" id="cep-confirm-btn" onclick="confirmCep()" disabled>Confirmar localização</button>
       <button class="btn-loc-skip" onclick="locSkip()">Ver produtos sem informar localização</button>
     </div>
     <div id="loc-confirmed">
@@ -1509,12 +1530,7 @@ function onCepInput(el){
   if(v.length>5) v=v.slice(0,5)+'-'+v.slice(5,8);
   el.value = v;
   const btn = document.getElementById('cep-confirm-btn');
-  if(btn){
-    const valid = v.replace(/\D/g,'').length>=8;
-    btn.disabled=!valid;
-    btn.style.opacity=valid?'1':'.45';
-    btn.style.cursor=valid?'pointer':'not-allowed';
-  }
+  if(btn){ btn.disabled = v.replace(/\D/g,'').length < 8; }
 }
 function locSkip(){
   hide('loc-overlay');
