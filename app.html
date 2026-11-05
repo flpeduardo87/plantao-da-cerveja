@@ -504,14 +504,29 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   flex-shrink:0;
 }
 
-/* ── CART PAGE ── */
-#s-cart{z-index:20;}
+/* ── CART BOTTOM SHEET ── */
+#s-cart{
+  z-index:50;background:rgba(0,0,0,.55);
+  justify-content:flex-end;
+}
+#s-cart.slide-right{transform:none;opacity:0;}
+.cart-sheet{
+  background:#fff;border-radius:20px 20px 0 0;
+  max-height:92vh;display:flex;flex-direction:column;
+  width:100%;overflow:hidden;
+  animation:slideUp .25s ease;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media(min-width:520px){
+  #s-cart{align-items:center;justify-content:center;padding:16px;}
+  .cart-sheet{border-radius:20px;max-width:480px;max-height:88vh;}
+}
 .page-header{
   background:#fff;z-index:50;flex-shrink:0;
-  padding:env(safe-area-inset-top,0px) max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));
+  padding:0 16px;
   border-bottom:1px solid var(--border);
 }
-.ph-inner{display:flex;align-items:center;gap:12px;padding:14px 0;}
+.ph-inner{display:flex;align-items:center;gap:12px;padding:16px 0;}
 .back-btn{
   width:36px;height:36px;border-radius:50%;border:none;
   background:var(--bg-2);cursor:pointer;
@@ -528,7 +543,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .cart-body{
   flex:1;overflow-y:auto;min-height:0;background:var(--bg-2);
   -webkit-overflow-scrolling:touch;
-  padding:16px max(16px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  padding:16px 16px 24px;
 }
 .cart-body>*+*{margin-top:12px;}
 .cart-items-card{
@@ -1270,20 +1285,22 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
   </div>
 </div>
 
-<!-- ═══ CART PAGE ═══ -->
-<div id="s-cart" class="screen slide-right hidden">
-  <div class="page-header">
-    <div class="ph-inner">
-      <div class="ph-center">
-        <div class="ph-cart-hd">
-          <span class="ph-cart-hd-ic"><i data-lucide="shopping-bag" width="22" height="22"></i></span>
-          <span class="ph-title">Minha sacola</span>
+<!-- ═══ CART BOTTOM SHEET ═══ -->
+<div id="s-cart" class="screen slide-right hidden" onclick="if(event.target===this)hideScreen('s-cart')">
+  <div class="cart-sheet">
+    <div class="page-header">
+      <div class="ph-inner">
+        <div class="ph-center">
+          <div class="ph-cart-hd">
+            <span class="ph-cart-hd-ic"><i data-lucide="shopping-bag" width="22" height="22"></i></span>
+            <span class="ph-title">Minha sacola</span>
+          </div>
         </div>
+        <button class="back-btn" onclick="hideScreen('s-cart')" aria-label="Fechar"><i data-lucide="x" width="18" height="18"></i></button>
       </div>
-      <button class="back-btn" onclick="goBack('s-home')" aria-label="Fechar"><i data-lucide="x" width="18" height="18"></i></button>
     </div>
+    <div class="cart-body" id="cart-body"></div>
   </div>
-  <div class="cart-body" id="cart-body"></div>
 </div>
 
 <!-- ═══ TRACKING BANNER ═══ -->
