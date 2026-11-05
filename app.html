@@ -1288,6 +1288,29 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
   background:none;border:none;cursor:pointer;color:var(--red);font-size:14px;font-weight:500;
   margin-top:8px;
 }
+/* Account dashboard menu */
+.acct-back-btn{width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.12);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#111;flex-shrink:0;}
+.acct-profile-row{display:flex;align-items:center;gap:14px;padding:15px;margin:12px 16px 4px;border:1.5px solid var(--border);border-radius:14px;}
+.acct-profile-av{width:50px;height:50px;border-radius:50%;background:var(--bg-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--fg-2);}
+.acct-profile-info{flex:1;min-width:0;}
+.acct-profile-name{font-size:16px;font-weight:700;color:var(--fg);display:block;}
+.acct-profile-phone{font-size:13px;color:var(--fg-2);display:block;margin-top:2px;}
+.acct-edit-btn{display:flex;align-items:center;gap:5px;padding:7px 13px;border:1.5px solid var(--border);border-radius:999px;background:#fff;font:600 13px 'Inter',sans-serif;cursor:pointer;color:var(--fg);flex-shrink:0;}
+.acct-menu{display:flex;flex-direction:column;gap:10px;padding:12px 16px 4px;}
+.acct-menu-btn{display:flex;align-items:center;gap:14px;padding:15px;background:#fff;border:1.5px solid var(--border);border-radius:14px;cursor:pointer;text-align:left;width:100%;transition:background .15s;}
+.acct-menu-btn:hover,.acct-menu-btn:active{background:var(--bg-2);}
+.acct-menu-btn.hl{background:#FEF9C3;border-color:#FDE68A;}
+.acct-menu-ic{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--fg);}
+.acct-menu-texts{flex:1;min-width:0;}
+.acct-menu-title{font-size:15px;font-weight:700;color:var(--fg);display:block;}
+.acct-menu-sub{font-size:12px;color:var(--fg-2);display:block;margin-top:2px;}
+.acct-menu-chev{color:var(--fg-3);flex-shrink:0;}
+.acct-signout-btn{display:flex;align-items:center;gap:10px;padding:16px;margin:4px 16px 20px;color:#EF4444;font:600 15px 'Inter',sans-serif;background:none;border:none;cursor:pointer;}
+.acct-subscreen{padding-bottom:20px;}
+.acct-empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center;color:var(--fg-3);}
+.acct-empty-state .es-title{font-size:15px;font-weight:600;color:var(--fg);margin-top:14px;}
+.acct-empty-state .es-sub{font-size:13px;margin-top:4px;line-height:1.5;}
+.acct-favs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
 </head>
@@ -1614,12 +1637,13 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
   <div class="acct-sheet">
     <div class="acct-modal-head">
       <div class="acct-head-row">
-        <i data-lucide="user" width="20" height="20"></i>
-        <span class="acct-head-title-txt">Minha conta</span>
+        <button id="acct-back-btn" class="acct-back-btn hidden" onclick="acctGoBack()" aria-label="Voltar"><i data-lucide="chevron-left" width="20" height="20"></i></button>
+        <i id="acct-head-icon" data-lucide="user" width="20" height="20"></i>
+        <span class="acct-head-title-txt" id="acct-head-title">Minha conta</span>
         <button class="acct-close-btn" onclick="hideScreen('s-account')" aria-label="Fechar"><i data-lucide="x" width="18" height="18"></i></button>
       </div>
     </div>
-    <div class="acct-logo-wrap">
+    <div class="acct-logo-wrap" id="acct-logo-wrap">
       <img src="logo-plantao-da-cerveja.jpg" alt="Plantão da Cerveja" class="acct-logo-img">
     </div>
   <div id="acct-scroll">
@@ -1717,16 +1741,61 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
 
     <!-- ── Dashboard (logado) ── -->
     <div id="acct-dashboard" style="display:none">
-      <div class="acct-header">
-        <div class="acct-avatar"><i data-lucide="user" width="32" height="32" color="#fff"></i></div>
-        <div class="acct-name" id="acct-dname">—</div>
-        <div class="acct-phone" id="acct-dphone" style="font-size:13px;text-align:center;color:rgba(0,0,0,.55);margin-top:2px">—</div>
+      <div class="acct-profile-row">
+        <div class="acct-profile-av"><i data-lucide="user" width="24" height="24"></i></div>
+        <div class="acct-profile-info">
+          <span class="acct-profile-name" id="acct-dname">—</span>
+          <span class="acct-profile-phone" id="acct-dphone">—</span>
+        </div>
+        <button class="acct-edit-btn"><i data-lucide="pencil" width="13" height="13"></i> Editar</button>
       </div>
-      <div class="acct-body">
-        <div class="acct-section-title">Meus Pedidos</div>
-        <div id="acct-orders-list"><div style="text-align:center;padding:32px;color:var(--fg-3)">Carregando…</div></div>
-        <button class="acct-logout" onclick="acctLogout()"><i data-lucide="log-out" width="16" height="16"></i> Sair da conta</button>
+      <div class="acct-menu">
+        <button class="acct-menu-btn hl" onclick="acctOpenScreen('orders','Meus pedidos')">
+          <div class="acct-menu-ic"><i data-lucide="shopping-bag" width="20" height="20"></i></div>
+          <div class="acct-menu-texts"><span class="acct-menu-title">Meus pedidos</span><span class="acct-menu-sub">Acompanhe seus pedidos</span></div>
+          <div class="acct-menu-chev"><i data-lucide="chevron-right" width="18" height="18"></i></div>
+        </button>
+        <button class="acct-menu-btn" onclick="acctOpenScreen('addresses','Meus endereços')">
+          <div class="acct-menu-ic"><i data-lucide="map-pin" width="20" height="20"></i></div>
+          <div class="acct-menu-texts"><span class="acct-menu-title">Meus endereços</span><span class="acct-menu-sub">Cadastre e gerencie seus endereços</span></div>
+          <div class="acct-menu-chev"><i data-lucide="chevron-right" width="18" height="18"></i></div>
+        </button>
+        <button class="acct-menu-btn" onclick="acctOpenScreen('favs','Favoritos')">
+          <div class="acct-menu-ic"><i data-lucide="heart" width="20" height="20"></i></div>
+          <div class="acct-menu-texts"><span class="acct-menu-title">Favoritos</span><span class="acct-menu-sub">Veja suas bebidas favoritas</span></div>
+          <div class="acct-menu-chev"><i data-lucide="chevron-right" width="18" height="18"></i></div>
+        </button>
+        <button class="acct-menu-btn" onclick="acctOpenScreen('payment','Formas de pagamento')">
+          <div class="acct-menu-ic"><i data-lucide="credit-card" width="20" height="20"></i></div>
+          <div class="acct-menu-texts"><span class="acct-menu-title">Formas de pagamento</span><span class="acct-menu-sub">Gerencie seus cartões e chaves PIX</span></div>
+          <div class="acct-menu-chev"><i data-lucide="chevron-right" width="18" height="18"></i></div>
+        </button>
+        <button class="acct-menu-btn" onclick="acctOpenScreen('notifications','Notificações')">
+          <div class="acct-menu-ic"><i data-lucide="bell" width="20" height="20"></i></div>
+          <div class="acct-menu-texts"><span class="acct-menu-title">Notificações</span><span class="acct-menu-sub">Escolha quais avisos você quer receber</span></div>
+          <div class="acct-menu-chev"><i data-lucide="chevron-right" width="18" height="18"></i></div>
+        </button>
       </div>
+      <button class="acct-signout-btn" onclick="acctLogout()">
+        <i data-lucide="log-out" width="18" height="18"></i> Sair da conta
+      </button>
+    </div>
+
+    <!-- ── Sub-telas ── -->
+    <div id="acct-screen-orders" class="acct-subscreen" style="display:none">
+      <div id="acct-orders-list" style="padding:16px"><div style="text-align:center;padding:32px;color:var(--fg-3)">Carregando…</div></div>
+    </div>
+    <div id="acct-screen-addresses" class="acct-subscreen" style="display:none">
+      <div class="acct-empty-state"><i data-lucide="map-pin" width="40" height="40"></i><div class="es-title">Nenhum endereço cadastrado</div><div class="es-sub">Adicione um endereço para facilitar seus pedidos</div></div>
+    </div>
+    <div id="acct-screen-favs" class="acct-subscreen" style="display:none">
+      <div id="acct-favs-grid" class="acct-favs-grid"></div>
+    </div>
+    <div id="acct-screen-payment" class="acct-subscreen" style="display:none">
+      <div class="acct-empty-state"><i data-lucide="credit-card" width="40" height="40"></i><div class="es-title">Nenhuma forma de pagamento</div><div class="es-sub">Adicione um cartão ou chave PIX</div></div>
+    </div>
+    <div id="acct-screen-notifications" class="acct-subscreen" style="display:none">
+      <div class="acct-empty-state"><i data-lucide="bell" width="40" height="40"></i><div class="es-title">Notificações</div><div class="es-sub">Em breve</div></div>
     </div>
 
   </div>
@@ -3215,17 +3284,73 @@ function goToAccount(){
 function acctShowLogin(){
   document.getElementById('acct-login').style.display='';
   document.getElementById('acct-dashboard').style.display='none';
+  document.querySelectorAll('.acct-subscreen').forEach(s=>s.style.display='none');
+  const lw = document.getElementById('acct-logo-wrap');
+  if(lw) lw.style.display='';
+  acctResetHeader();
   acctTab('login');
+}
+function acctResetHeader(){
+  const back = document.getElementById('acct-back-btn');
+  const icon = document.getElementById('acct-head-icon');
+  const title = document.getElementById('acct-head-title');
+  if(back) back.classList.add('hidden');
+  if(icon) icon.style.display='';
+  if(title) title.textContent='Minha conta';
+  lucide.createIcons();
 }
 function acctShowDashboard(){
   document.getElementById('acct-login').style.display='none';
   document.getElementById('acct-dashboard').style.display='';
-  const name  = (() => { try{ return localStorage.getItem('acct_name')||''; }catch{ return ''; } })();
-  const email = (() => { try{ return localStorage.getItem('acct_email')||''; }catch{ return ''; } })();
-  if(name) document.getElementById('acct-dname').textContent = name;
-  const ph = document.getElementById('acct-dphone');
-  if(ph) ph.textContent = email || '';
-  acctLoadOrders();
+  document.querySelectorAll('.acct-subscreen').forEach(s=>s.style.display='none');
+  const lw = document.getElementById('acct-logo-wrap');
+  if(lw) lw.style.display='none';
+  acctResetHeader();
+  const name = (()=>{try{return localStorage.getItem('acct_name')||'';}catch{return '';}})();
+  const phone = (()=>{try{return localStorage.getItem('acct_phone')||localStorage.getItem('acct_email')||'';}catch{return '';}})();
+  const dn = document.getElementById('acct-dname');
+  const dp = document.getElementById('acct-dphone');
+  if(dn) dn.textContent = name||'—';
+  if(dp) dp.textContent = phone||'—';
+  lucide.createIcons();
+}
+function acctOpenScreen(id, title){
+  document.getElementById('acct-dashboard').style.display='none';
+  document.querySelectorAll('.acct-subscreen').forEach(s=>s.style.display='none');
+  const screen = document.getElementById('acct-screen-'+id);
+  if(screen) screen.style.display='';
+  const back = document.getElementById('acct-back-btn');
+  const icon = document.getElementById('acct-head-icon');
+  const ttl = document.getElementById('acct-head-title');
+  if(back) back.classList.remove('hidden');
+  if(icon) icon.style.display='none';
+  if(ttl) ttl.textContent=title;
+  if(id==='favs') acctLoadFavs();
+  if(id==='orders') acctLoadOrders();
+  lucide.createIcons();
+}
+function acctGoBack(){
+  document.querySelectorAll('.acct-subscreen').forEach(s=>s.style.display='none');
+  document.getElementById('acct-dashboard').style.display='';
+  acctResetHeader();
+  lucide.createIcons();
+}
+function acctLoadFavs(){
+  const grid = document.getElementById('acct-favs-grid');
+  if(!grid) return;
+  const favIds = getFavs();
+  const favProds = allProds.filter(p=>favIds.includes(String(p.id)));
+  if(!favProds.length){
+    grid.style.display='block';
+    grid.innerHTML='<div class="acct-empty-state"><i data-lucide="heart" width="40" height="40"></i><div class="es-title">Nenhum favorito ainda</div><div class="es-sub">Toque no ♡ em qualquer produto para favoritar</div></div>';
+    lucide.createIcons(); return;
+  }
+  grid.style.display='grid';
+  grid.innerHTML=favProds.map(p=>`
+    <div class="prod-card" onclick="hideScreen('s-account');openProdModal(${p.id})" style="cursor:pointer">
+      <div class="pc-img-wrap"><img src="${esc(p.image_url||prodImg(p.id,160,160))}" class="pc-img" alt="${esc(p.name)}" loading="lazy"></div>
+      <div class="pc-body"><div class="pc-name">${esc(p.name)}</div><div class="pc-price">R$ ${fmt(p.price)}</div></div>
+    </div>`).join('');
   lucide.createIcons();
 }
 function fmtPhoneDisplay(p){
