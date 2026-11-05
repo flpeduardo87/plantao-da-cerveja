@@ -2985,8 +2985,6 @@ try { acctToken = localStorage.getItem('cust_token') || localStorage.getItem('ac
 
 function goToAccount(){
   setNavActive('nb-acct');
-  hideScreen('s-cart');
-  hideScreen('s-home');
   document.getElementById('desktop-header').classList.remove('dh-shown');
   showScreen('s-account');
   if(acctToken) acctShowDashboard();
