@@ -356,7 +356,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   border-radius:999px;
 }
 .pcard-body{padding:8px 8px 10px;display:flex;flex-direction:column;flex:1;}
-.pname{font-size:15px;font-weight:500;color:var(--fg);line-height:1.35;}
+.pname{font-size:15px;font-weight:700;color:var(--fg);line-height:1.35;}
 .pold{font-size:12px;color:var(--fg-3);text-decoration:line-through;margin-top:4px;}
 .prow{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:6px;}
 .pnew{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;}
@@ -504,93 +504,109 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   flex-shrink:0;
 }
 
-/* ── CART PAGE (mobile full-screen) ── */
+/* ── CART PAGE ── */
 #s-cart{z-index:20;}
 .page-header{
-  background:var(--amber);z-index:50;flex-shrink:0;
+  background:#fff;z-index:50;flex-shrink:0;
   padding:env(safe-area-inset-top,0px) max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));
-  padding-block:env(safe-area-inset-top,0px) 0;
+  border-bottom:1px solid var(--border);
 }
-.ph-inner{
-  display:flex;align-items:center;gap:12px;padding:12px 0;
-}
+.ph-inner{display:flex;align-items:center;gap:12px;padding:14px 0;}
 .back-btn{
   width:36px;height:36px;border-radius:50%;border:none;
-  background:rgba(0,0,0,.12);cursor:pointer;
+  background:var(--bg-2);cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  color:#111;flex-shrink:0;
+  color:var(--fg);flex-shrink:0;
 }
-.ph-center{flex:1;text-align:center;}
-.ph-logo{
-  display:inline-flex;align-items:center;gap:8px;
-}
-.ph-logo-icon{
-  width:34px;height:34px;border-radius:50%;background:var(--amber);
-  overflow:hidden;display:flex;align-items:center;justify-content:center;
-}
-.ph-logo-icon img{width:100%;height:100%;object-fit:cover;}
-.ph-title{font-size:15px;font-weight:600;}
-.ph-sub{font-size:11px;color:rgba(0,0,0,.55);font-weight:400;}
+.ph-center{flex:1;}
+.ph-cart-hd{display:flex;align-items:center;gap:10px;}
+.ph-cart-hd-ic{color:var(--fg);display:flex;align-items:center;}
+.ph-title{font-size:18px;font-weight:700;color:var(--fg);}
+.ph-sub{font-size:11px;color:var(--fg-2);font-weight:400;}
 .ph-spacer{width:36px;flex-shrink:0;}
 
 .cart-body{
   flex:1;overflow-y:auto;min-height:0;background:var(--bg-2);
   -webkit-overflow-scrolling:touch;
-  padding:16px max(16px,env(safe-area-inset-right,0px)) calc(80px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
-  padding-block:16px calc(80px + env(safe-area-inset-bottom,0px));
+  padding:16px max(16px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
 }
-.cart-page-title{font-size:22px;font-weight:600;padding:4px 0 8px;}
 .cart-body>*+*{margin-top:12px;}
 .cart-items-card{
-  background:var(--bg);border-radius:var(--r);
-  border:1.5px solid var(--border);overflow:hidden;box-shadow:var(--sh-sm);
+  background:#fff;border-radius:16px;overflow:hidden;
 }
 .ci-row{
   display:flex;gap:12px;align-items:center;
-  padding:14px 14px;border-bottom:1px solid var(--border);
+  padding:16px;border-bottom:1px solid var(--border);
 }
 .ci-row:last-child{border-bottom:none;}
 .ci-thumb{
-  width:56px;height:56px;border-radius:var(--r-sm);
+  width:68px;height:68px;border-radius:10px;
   overflow:hidden;flex-shrink:0;background:var(--bg-2);
 }
-.ci-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.ci-thumb img{width:100%;height:100%;object-fit:contain;display:block;}
 .ci-info{flex:1;min-width:0;}
-.ci-name{font-size:13px;font-weight:500;line-height:1.3;}
-.ci-price{font-size:14px;font-weight:600;margin-top:3px;font-variant-numeric:tabular-nums;}
-.ci-qty{font-size:12px;color:var(--fg-3);margin-top:1px;}
-.ci-qty-ctrl{display:flex;align-items:center;gap:6px;margin-top:4px;}
-.qty-btn{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg);color:var(--fg);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s;}
-.qty-btn:hover{background:var(--bg-2);}
-.qty-num{font-size:13px;font-weight:600;min-width:18px;text-align:center;}
+.ci-name{font-size:14px;font-weight:700;line-height:1.3;margin-bottom:2px;}
+.ci-variant{font-size:12px;color:var(--fg-2);margin-bottom:4px;}
+.ci-unit-price{font-size:14px;font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums;}
+.ci-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;}
+.ci-qty-pill{
+  display:flex;align-items:center;gap:0;
+  background:var(--bg-2);border-radius:999px;padding:3px;
+}
+.qty-btn{
+  width:28px;height:28px;border-radius:50%;border:none;
+  background:#fff;color:var(--fg);font-size:16px;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 1px 3px rgba(0,0,0,.1);transition:background .12s;
+}
+.qty-btn.qplus{background:var(--green);color:#fff;box-shadow:none;}
+.qty-btn.qplus:hover{background:var(--green-dk);}
+.qty-btn:not(.qplus):hover{background:var(--border);}
+.qty-num{font-size:13px;font-weight:700;min-width:28px;text-align:center;color:var(--fg);}
+.ci-total{font-size:14px;font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums;}
+.ci-del{
+  background:none;border:none;cursor:pointer;
+  color:var(--fg-3);padding:4px;
+  display:flex;align-items:center;
+  transition:color .15s;
+}
+.ci-del:hover{color:var(--red);}
+.cart-subtotal-row{
+  display:flex;justify-content:space-between;align-items:center;
+  background:#fff;border-radius:16px;padding:16px;
+  font-size:15px;
+}
+.cart-subtotal-label{color:var(--fg-2);}
+.cart-subtotal-label strong{color:var(--fg);}
+.cart-subtotal-val{font-size:22px;font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums;}
+.cart-addr-row{
+  display:flex;align-items:center;gap:10px;
+  background:#fff;border-radius:999px;padding:14px 18px;
+  border:1.5px solid var(--border);cursor:pointer;
+}
+.cart-addr-row:hover{border-color:var(--amber);}
+.cart-addr-ic{color:var(--fg-2);display:flex;align-items:center;flex-shrink:0;}
+.cart-addr-txt{flex:1;font-size:14px;color:var(--fg-2);}
+.cart-addr-chev{color:var(--fg-3);display:flex;align-items:center;flex-shrink:0;}
+.btn-finalizar{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:17px;border-radius:999px;border:none;
+  background:var(--amber);color:#111;font:800 16px 'Inter',sans-serif;
+  cursor:pointer;transition:background .15s;
+}
+.btn-finalizar:hover{background:var(--amber-dk);}
+.btn-continuar{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:15px;border-radius:999px;
+  border:1.5px solid var(--border);background:#fff;
+  color:var(--fg);font:600 14px 'Inter',sans-serif;cursor:pointer;
+  transition:border-color .15s;
+}
+.btn-continuar:hover{border-color:var(--fg-2);}
+.cart-ctas{display:flex;flex-direction:column;gap:10px;}
 .when-dt{margin-top:10px;padding:12px 14px;background:var(--bg-2);border-radius:var(--r-sm);}
 .when-dt label{font-size:11.5px;font-weight:700;color:var(--fg-2);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;}
 .when-dt input[type=datetime-local]{width:100%;padding:9px 12px;border:2px solid var(--border);border-radius:8px;font:14px 'Inter',sans-serif;color:var(--fg);background:var(--bg);}
-.ci-del{
-  background:none;border:none;cursor:pointer;
-  color:var(--fg-3);padding:6px;
-  display:flex;align-items:center;justify-content:center;
-  transition:color .15s;flex-shrink:0;
-}
-.ci-del:hover{color:var(--red);}
-.summary-card{
-  background:var(--bg);border-radius:var(--r);
-  border:1.5px solid var(--border);box-shadow:var(--sh-sm);
-  overflow:hidden;
-}
-.sum-row{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:12px 16px;border-bottom:1px solid var(--border);
-  font-size:14px;
-}
-.sum-row:last-child{border-bottom:none;}
-.sum-label{color:var(--fg-2);}
-.sum-val{font-weight:600;font-variant-numeric:tabular-nums;}
-.sum-val.gratis{color:var(--green-dk);font-weight:500;}
-.sum-row.total-row{background:var(--amber-bg);}
-.sum-row.total-row .sum-label{font-size:16px;font-weight:600;color:var(--fg);}
-.sum-row.total-row .sum-val{font-size:18px;font-weight:600;color:var(--fg);}
-.cart-ctas{display:flex;flex-direction:column;gap:10px;}
 
 /* ── WHEN MODAL ── */
 #when-overlay{
@@ -1259,17 +1275,13 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
 <div id="s-cart" class="screen slide-right hidden">
   <div class="page-header">
     <div class="ph-inner">
-      <button class="back-btn" onclick="goBack('s-home')"><i data-lucide="arrow-left" width="18" height="18"></i></button>
       <div class="ph-center">
-        <div class="ph-logo">
-          <div class="ph-logo-icon"><img src="logo-icone.png" alt="" style="padding:4px;object-fit:contain;background:#111;"></div>
-          <div>
-            <div class="ph-title">Minha Sacola</div>
-            <div class="ph-sub">Plantão da Cerveja</div>
-          </div>
+        <div class="ph-cart-hd">
+          <span class="ph-cart-hd-ic"><i data-lucide="shopping-bag" width="22" height="22"></i></span>
+          <span class="ph-title">Minha sacola</span>
         </div>
       </div>
-      <div class="ph-spacer"></div>
+      <button class="back-btn" onclick="goBack('s-home')" aria-label="Fechar"><i data-lucide="x" width="18" height="18"></i></button>
     </div>
   </div>
   <div class="cart-body" id="cart-body"></div>
@@ -2238,32 +2250,48 @@ function renderCartPage(){
   const grandTotal = subtotal + DELIVERY_FEE;
   const freteTxt2 = DELIVERY_FEE > 0 ? `R$ ${fmt(DELIVERY_FEE)}` : 'Grátis';
   const freteClass2 = DELIVERY_FEE > 0 ? '' : ' gratis';
+  const totalItems = cart.reduce((s,i)=>s+i.qty,0);
   el.innerHTML = `
-    <div class="cart-page-title">Minha Sacola</div>
     <div class="cart-items-card">
-      ${cart.map(i=>`
-        <div class="ci-row">
-          <div class="ci-thumb"><img src="${i.image_url||prodImg(i.id,56,56)}" alt="${esc(i.name)}"></div>
+      ${cart.map(i=>{
+        const variant=[i.unit_type,i.size].filter(Boolean).join(' · ');
+        const lineTotal=fmt(i.price*i.qty);
+        return `<div class="ci-row">
+          <div class="ci-thumb"><img src="${i.image_url||prodImg(i.id,68,68)}" alt="${esc(i.name)}"></div>
           <div class="ci-info">
             <div class="ci-name">${esc(i.name)}</div>
-            <div class="ci-price">R$ ${fmt(i.price)}</div>
-            <div class="ci-qty-ctrl">
-              <button class="qty-btn" onclick="changeQty(${Number(i.id)},-1)">−</button>
-              <span class="qty-num">${Number(i.qty)}</span>
-              <button class="qty-btn" onclick="changeQty(${Number(i.id)},1)">+</button>
-            </div>
+            ${variant?`<div class="ci-variant">${esc(variant)}</div>`:''}
+            <div class="ci-unit-price">R$ ${fmt(i.price)}</div>
           </div>
-          <button class="ci-del" onclick="removeFromCart(${Number(i.id)})"><i data-lucide="trash-2" width="18" height="18"></i></button>
-        </div>`).join('')}
+          <div class="ci-right">
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="ci-qty-pill">
+                <button class="qty-btn" onclick="changeQty(${Number(i.id)},-1)">−</button>
+                <span class="qty-num">${Number(i.qty)}</span>
+                <button class="qty-btn qplus" onclick="changeQty(${Number(i.id)},1)">+</button>
+              </div>
+              <button class="ci-del" onclick="removeFromCart(${Number(i.id)})"><i data-lucide="trash-2" width="16" height="16"></i></button>
+            </div>
+            <div class="ci-total">R$ ${lineTotal}</div>
+          </div>
+        </div>`;}).join('')}
     </div>
-    <div class="summary-card">
-      <div class="sum-row"><span class="sum-label">Subtotal</span><span class="sum-val">R$ ${fmt(subtotal)}</span></div>
-      <div class="sum-row"><span class="sum-label"><i data-lucide="truck" width="14" height="14"></i> Entrega</span><span class="sum-val${freteClass2}">${freteTxt2}</span></div>
-      <div class="sum-row total-row"><span class="sum-label">Total</span><span class="sum-val">R$ ${fmt(grandTotal)}</span></div>
+    <div class="cart-subtotal-row">
+      <span class="cart-subtotal-label">Subtotal <strong>(${totalItems} ${totalItems===1?'item':'itens'})</strong></span>
+      <span class="cart-subtotal-val">R$ ${fmt(subtotal)}</span>
+    </div>
+    <div class="cart-addr-row" onclick="show('loc-overlay')">
+      <span class="cart-addr-ic"><i data-lucide="map-pin" width="18" height="18"></i></span>
+      <span class="cart-addr-txt" id="cart-addr-txt">${localStorage.getItem('loc_addr')||'Informe seu endereço'}</span>
+      <span class="cart-addr-chev"><i data-lucide="chevron-right" width="16" height="16"></i></span>
     </div>
     <div class="cart-ctas">
-      <button class="btn-primary" onclick="openWhen()">Finalizar Pedido</button>
-      <button class="btn-outline" onclick="goHome()">Quero comprar mais</button>
+      <button class="btn-finalizar" onclick="openWhen()">
+        <i data-lucide="bike" width="20" height="20"></i> Finalizar pedido
+      </button>
+      <button class="btn-continuar" onclick="goHome()">
+        <i data-lucide="plus" width="16" height="16"></i> Continuar comprando
+      </button>
     </div>`;
   lucide.createIcons();
 }
