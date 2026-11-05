@@ -991,7 +991,7 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 
   /* Top bar replaces bottom nav */
   .bottom-nav{display:none!important;}
-  #s-home,#s-cart,#s-account{padding-top:64px;}
+  #s-home,#s-cart{padding-top:64px;}
 
   /* Banner: image fills naturally */
   .store-banner{background:#191A12;}
@@ -3102,7 +3102,6 @@ try { acctToken = localStorage.getItem('cust_token') || localStorage.getItem('ac
 
 function goToAccount(){
   setNavActive('nb-acct');
-  document.getElementById('desktop-header').classList.remove('dh-shown');
   showScreen('s-account');
   if(acctToken) acctShowDashboard();
   else acctShowLogin();
