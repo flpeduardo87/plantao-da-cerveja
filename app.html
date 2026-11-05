@@ -557,7 +557,7 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 .cart-body{
   flex:1;overflow-y:auto;min-height:0;background:var(--bg-2);
   -webkit-overflow-scrolling:touch;
-  padding:16px 16px 24px;
+  padding:16px 16px calc(80px + env(safe-area-inset-bottom,0px));
 }
 .cart-body>*+*{margin-top:12px;}
 .cart-items-card{
