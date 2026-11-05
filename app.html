@@ -38,6 +38,8 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;font-family:'Inter',system-ui,sans-serif;}
 body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-direction:column;}
+/* prevent double-tap zoom on interactive elements */
+button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 
 /* ── SHARED UTILS ── */
 .hidden{display:none!important;}
@@ -244,7 +246,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
   flex-shrink:0;position:relative;
 }
 .mob-logo-horiz{
-  flex:1;height:28px;width:auto;object-fit:contain;
+  flex:1;height:40px;width:auto;object-fit:contain;
   object-position:center;display:block;cursor:pointer;
 }
 .mob-cart-fab-cnt{
@@ -269,9 +271,10 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 }
 .search-wrap input{
   flex:1;border:none;background:transparent;outline:none;
-  font:14px 'Inter',sans-serif;color:var(--fg);min-width:0;
+  font:16px 'Inter',sans-serif;color:var(--fg);min-width:0;
 }
 .search-wrap input::placeholder{color:var(--fg-3);}
+.search-clear{background:none;border:none;cursor:pointer;color:var(--fg-3);padding:2px;display:flex;align-items:center;flex-shrink:0;}
 .feed{
   flex:1;overflow-y:scroll;background:var(--bg-2);
   -webkit-overflow-scrolling:touch;
@@ -663,31 +666,50 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 .when-opt-txt span{font-size:12px;color:var(--fg-2);}
 .when-continue{margin-top:6px;}
 
-/* ── CHECKOUT MODAL ── */
+/* ── CHECKOUT FULL SCREEN ── */
 #checkout-overlay{
-  position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);
-  display:flex;align-items:flex-end;
-  animation:fadeIn .2s ease;
+  position:fixed;inset:0;z-index:300;background:var(--bg-2);
+  display:flex;flex-direction:column;
+  animation:fadeIn .18s ease;
 }
 .checkout-sheet{
-  width:100%;background:var(--bg);
-  border-radius:var(--r) var(--r) 0 0;
-  max-height:92vh;display:flex;flex-direction:column;
-  animation:slideUp .22s ease;box-shadow:0 -4px 24px rgba(0,0,0,.15);
+  width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;
 }
-.co-knob{width:40px;height:4px;border-radius:999px;background:var(--border);margin:10px auto 0;flex-shrink:0;}
-.co-hd{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:14px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));
-  border-bottom:1.5px solid var(--border);flex-shrink:0;
+/* yellow topbar reused inside checkout */
+.co-topbar{
+  background:var(--amber);flex-shrink:0;
+  display:flex;align-items:center;gap:4px;
+  padding:env(safe-area-inset-top,0px) 12px 0;
+  height:calc(54px + env(safe-area-inset-top,0px));
 }
+.co-topbar .mob-logo-horiz{object-position:center;}
+/* breadcrumb stepper */
+.co-stepper{
+  background:#fff;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  gap:0;padding:14px 16px 0;border-bottom:1px solid var(--border);
+}
+.co-step-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;padding-bottom:12px;position:relative;}
+.co-step-item::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:transparent;border-radius:999px;}
+.co-step-item.cs-active::after{background:var(--amber);}
+.co-step-item.cs-done::after{background:var(--amber);opacity:.45;}
+.co-step-top{display:flex;align-items:center;gap:5px;}
+.co-step-ic{color:var(--fg-3);display:flex;align-items:center;}
+.co-step-item.cs-active .co-step-ic,.co-step-item.cs-done .co-step-ic{color:var(--fg);}
+.co-step-lbl{font-size:12px;font-weight:500;color:var(--fg-3);}
+.co-step-item.cs-active .co-step-lbl{color:var(--fg);font-weight:700;}
+.co-step-item.cs-done .co-step-lbl{color:var(--fg-2);}
+.co-sep{font-size:11px;color:var(--border);padding-bottom:12px;flex-shrink:0;align-self:flex-start;margin-top:6px;}
+.co-knob{display:none;}
+.co-hd{display:none;}
 .co-title{font-size:18px;font-weight:600;}
 .co-close{
   width:30px;height:30px;border-radius:50%;border:none;
   background:var(--bg-2);color:var(--fg-2);cursor:pointer;
   display:flex;align-items:center;justify-content:center;
 }
-.co-body{overflow-y:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch;padding:16px max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));}
+.co-body{overflow-y:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch;}
+.co-scroll{padding:16px 16px max(16px,env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px;}
 
 .order-summary{
   border-radius:var(--r-sm);border:1.5px solid var(--border);
@@ -1256,7 +1278,8 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
     <div class="mob-search-row">
       <div class="search-wrap">
         <i data-lucide="search" width="15" height="15" style="color:var(--fg-3)"></i>
-        <input type="text" id="s-in" placeholder="Pesquise sua bebida favorita" oninput="search(this.value)">
+        <input type="text" id="s-in" placeholder="Pesquise sua bebida favorita" oninput="onSearchInput(this)">
+        <button class="search-clear hidden" id="search-clear" onclick="clearSearch()" aria-label="Limpar busca"><i data-lucide="x" width="16" height="16"></i></button>
       </div>
     </div>
   </div>
@@ -1364,10 +1387,26 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
 <!-- ═══ CHECKOUT MODAL ═══ -->
 <div id="checkout-overlay" class="hidden" role="dialog" aria-modal="true" aria-label="Finalizar pedido">
   <div class="checkout-sheet">
-    <div class="co-knob"></div>
-    <div class="co-hd">
-      <span class="co-title">Finalizar Pedido</span>
-      <button class="co-close" onclick="closeCheckout()" aria-label="Fechar checkout"><i data-lucide="x" width="14" height="14"></i></button>
+    <!-- yellow topbar -->
+    <div class="co-topbar">
+      <button class="mob-menu-btn" aria-label="Fechar" onclick="closeCheckout()"><i data-lucide="x" width="22" height="22"></i></button>
+      <img class="mob-logo-horiz" src="logo-horizontal.webp" alt="Plantão da Cerveja">
+      <button class="mob-icon-btn" onclick="closeCheckout();goToAccount()" aria-label="Minha conta"><i data-lucide="user" width="22" height="22"></i></button>
+      <button class="mob-icon-btn" aria-label="Sacola"><i data-lucide="shopping-bag" width="22" height="22"></i></button>
+    </div>
+    <!-- breadcrumb stepper -->
+    <div class="co-stepper" id="co-stepper">
+      <div class="co-step-item" id="cs-1">
+        <div class="co-step-top"><span class="co-step-ic"><i data-lucide="shopping-cart" width="14" height="14"></i></span><span class="co-step-lbl">Meu pedido</span></div>
+      </div>
+      <span class="co-sep">›</span>
+      <div class="co-step-item" id="cs-2">
+        <div class="co-step-top"><span class="co-step-ic"><i data-lucide="map-pin" width="14" height="14"></i></span><span class="co-step-lbl">Entrega</span></div>
+      </div>
+      <span class="co-sep">›</span>
+      <div class="co-step-item" id="cs-3">
+        <div class="co-step-top"><span class="co-step-ic"><i data-lucide="credit-card" width="14" height="14"></i></span><span class="co-step-lbl">Pagamento</span></div>
+      </div>
     </div>
     <div class="co-body" id="co-body"></div>
   </div>
@@ -2077,6 +2116,8 @@ function cardHTML(p){
   </div>`;
 }
 function search(q){
+  const clr = document.getElementById('search-clear');
+  if(clr) clr.classList.toggle('hidden', !q.trim());
   if(!q.trim()){
     document.getElementById('cat-grid-wrap').hidden=false;
     document.getElementById('cat-view-hd').hidden=true;
@@ -2085,6 +2126,11 @@ function search(q){
   document.getElementById('cat-grid-wrap').hidden=true;
   document.getElementById('cat-view-hd').hidden=true;
   renderSections(allProds.filter(p=>p.name.toLowerCase().includes(q.toLowerCase())));
+}
+function onSearchInput(el){ search(el.value); }
+function clearSearch(){
+  const el = document.getElementById('s-in');
+  if(el){ el.value=''; search(''); el.focus(); }
 }
 
 let _modalProd = null;
@@ -2336,12 +2382,13 @@ function removeFromCart(id){
 function openWhen(){
   const total = cartTotal();
   if(MIN_ORDER > 0 && total < MIN_ORDER){ toast(`Pedido mínimo R$ ${fmt(MIN_ORDER)}. Adicione mais R$ ${fmt(MIN_ORDER - total)} para continuar.`); return; }
-  chosenWhen = null;
-  document.getElementById('when-imediata').classList.remove('selected');
-  document.getElementById('when-agendar').classList.remove('selected');
-  document.getElementById('when-continue-btn').disabled = true;
-  hide('when-schedule-box');
-  show('when-overlay');
+  chosenWhen = 'imediata';
+  hide('s-cart');
+  coStep = 0; coData = {}; payMethod = null;
+  try{const a=JSON.parse(localStorage.getItem('plantao_addr')||'{}');if(a.cep)coData.cep=a.cep;if(a.rua)coData.rua=a.rua;if(a.num)coData.num=a.num;if(a.comp)coData.comp=a.comp;if(a.bairro)coData.bairro=a.bairro;if(a.ref)coData.ref=a.ref;if(a.tel)coData.tel=a.tel;}catch{}
+  try{if(acctToken){const n=localStorage.getItem('acct_name')||'';const e=localStorage.getItem('acct_email')||'';if(n)coData.nome=n;if(e)coData.email=e;}}catch{}
+  show('checkout-overlay');
+  renderCoStep();
 }
 function closeWhen(){ hide('when-overlay'); }
 function selectWhen(v){
@@ -2371,7 +2418,7 @@ function openCheckout(){
     chosenScheduledAt = null;
   }
   hide('when-overlay');
-  coStep = 1; coData = {}; payMethod = null;
+  coStep = 0; coData = {}; payMethod = null;
   // Prefill from logged-in account
   if(acctToken){
     try{
@@ -2396,10 +2443,64 @@ function openCheckout(){
 }
 function closeCheckout(){ stopOrderTracking(); hide('checkout-overlay'); updateTrackingBanner(); }
 
+function _updateCoStepper(){
+  // step 0 = "Meu pedido" (cs-1), steps 1-2 = "Entrega" (cs-2), step 3 = "Pagamento" (cs-3)
+  const s1=document.getElementById('cs-1'), s2=document.getElementById('cs-2'), s3=document.getElementById('cs-3');
+  if(!s1) return;
+  const cls=(el,active,done)=>{el.classList.toggle('cs-active',active);el.classList.toggle('cs-done',done);};
+  if(coStep===0){cls(s1,true,false);cls(s2,false,false);cls(s3,false,false);}
+  else if(coStep<=2){cls(s1,false,true);cls(s2,true,false);cls(s3,false,false);}
+  else if(coStep===3){cls(s1,false,true);cls(s2,false,true);cls(s3,true,false);}
+  else{cls(s1,false,true);cls(s2,false,true);cls(s3,false,true);}
+  const st=document.getElementById('co-stepper');
+  if(st) st.style.display=coStep===4?'none':'flex';
+}
 function renderCoStep(){
   const el = document.getElementById('co-body');
+  _updateCoStepper();
   const subtotal = cartTotal();
   const grandTotal = subtotal + DELIVERY_FEE;
+  /* ── step 0: Meu pedido ── */
+  if(coStep===0){
+    const totalItems=cart.reduce((s,i)=>s+i.qty,0);
+    el.innerHTML=`
+      <div class="co-scroll">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px">
+          <span style="font-size:16px;font-weight:700">Itens do pedido (${totalItems})</span>
+          <button onclick="cart=[];saveCart();updateBadge();renderCoStep()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:var(--fg-2);font-size:13px"><i data-lucide="trash-2" width="14" height="14"></i> Limpar</button>
+        </div>
+        <div class="cart-items-card" style="margin:0 16px;border-radius:16px;overflow:hidden;background:#fff">
+          ${cart.map(i=>{const variant=[i.unit_type,i.size].filter(Boolean).join(' · ');return`<div class="ci-row">
+            <div class="ci-thumb"><img src="${i.image_url||prodImg(i.id,88,88)}" alt="${esc(i.name)}"></div>
+            <div class="ci-info"><div class="ci-name">${esc(i.name)}</div>${variant?`<div class="ci-variant">${esc(variant)}</div>`:''}<div class="ci-unit-price">R$ ${fmt(i.price)}</div></div>
+            <div class="ci-right">
+              <div style="display:flex;align-items:center;gap:6px">
+                <div class="ci-qty-pill">
+                  <button class="qty-btn" onclick="changeQty(${Number(i.id)},-1);renderCoStep()">−</button>
+                  <span class="qty-num">${Number(i.qty)}</span>
+                  <button class="qty-btn qplus" onclick="changeQty(${Number(i.id)},1);renderCoStep()">+</button>
+                </div>
+                <button class="ci-del" onclick="removeFromCart(${Number(i.id)});renderCoStep()"><i data-lucide="trash-2" width="16" height="16"></i></button>
+              </div>
+              <div class="ci-total">R$ ${fmt(i.price*i.qty)}</div>
+            </div>
+          </div>`}).join('')}
+        </div>
+        <div class="cart-subtotal-row" style="margin:12px 16px;border-radius:16px;background:#FEF9C3;">
+          <span class="cart-subtotal-label">Subtotal <strong>(${totalItems} ${totalItems===1?'item':'itens'})</strong></span>
+          <span class="cart-subtotal-val">R$ ${fmt(subtotal)}</span>
+        </div>
+        <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:10px">
+          <button class="btn-finalizar" onclick="coStep=1;renderCoStep()">
+            <i data-lucide="map-pin" width="20" height="20"></i> Continuar para entrega
+          </button>
+          <button class="btn-continuar" onclick="closeCheckout()">
+            <i data-lucide="plus" width="16" height="16"></i> Continuar comprando
+          </button>
+        </div>
+      </div>`;
+    lucide.createIcons(); return;
+  }
   const summaryHtml = `
     <div class="order-summary">
       <button class="os-toggle" id="os-toggle" onclick="toggleSummary()">
@@ -2410,11 +2511,12 @@ function renderCoStep(){
         ${cart.map(i=>`<div class="os-item"><span>${i.name} ×${i.qty}</span><span>R$ ${fmt(i.price*i.qty)}</span></div>`).join('')}
         <div class="os-meta"><span>Subtotal</span><span>R$ ${fmt(subtotal)}</span></div>
         <div class="os-meta"><span><i data-lucide="truck" width="13" height="13"></i> Frete</span><span${DELIVERY_FEE>0?'':' class="gratis"'}>${DELIVERY_FEE>0?'R$ '+fmt(DELIVERY_FEE):'GRÁTIS'}</span></div>
-        <div class="os-meta"><span><i data-lucide="clock" width="13" height="13"></i> Entrega</span><span>${chosenWhen==='imediata'?'15–20 min':'Agendada'}</span></div>
       </div>
       <div class="os-total"><span class="label">Total</span><span class="val">R$ ${fmt(grandTotal)}</span></div>
     </div>`;
-  const stepperHtml = `
+  const stepperHtml = ``;
+  /* legacy inline stepper hidden – using co-stepper header instead */
+  const _unused = `
     <div class="stepper">
       <div class="step${coStep===1?' active':''}${coStep>1?' done':''}">
         <div class="step-num">${coStep>1?'<i data-lucide="check" width="14" height="14"></i>':'1'}</div>
@@ -2456,6 +2558,7 @@ function renderCoStep(){
         <input class="form-input" id="co-ref" placeholder="Ponto de referência" value="${coData.ref||''}">
       </div>
       <div class="step-btns">
+        <button class="btn-back" onclick="coStep=0;renderCoStep()" aria-label="Voltar"><i data-lucide="arrow-left" width="18" height="18"></i></button>
         <button class="btn-primary btn-next" onclick="nextStep(1)">Próximo →</button>
       </div>`;
   } else if(coStep===2){
@@ -2567,7 +2670,7 @@ function renderCoStep(){
         <button class="btn-primary" style="${lastPaymentUrl?'background:var(--fg-3);':''}" onclick="closeCheckout();goHome();refreshFeed()">Continuar comprando</button>
       </div>`;
   }
-  el.innerHTML = summaryHtml + stepperHtml + content;
+  el.innerHTML = `<div class="co-scroll">${summaryHtml}${content}</div>`;
   const cepEl = document.getElementById('co-cep');
   if(cepEl) {
     cepEl.addEventListener('input',function(){
