@@ -452,8 +452,8 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
   display:flex;align-items:center;justify-content:center;
   transition:border-color .15s,color .15s;
 }
-.pm-heart-btn:hover{border-color:#EF4444;color:#EF4444;}
-.pm-heart-btn.active{border-color:#EF4444;color:#EF4444;background:#FFF1F1;}
+.pm-heart-btn:hover{border-color:var(--fg-2);}
+.pm-heart-btn.active svg{fill:currentColor;}
 .pm-deposit{font-size:12px;color:var(--fg-2);text-align:center;margin-bottom:10px;}
 /* Desktop: wider modal */
 @media(min-width:520px){
@@ -2394,12 +2394,20 @@ function openProdModal(id, e){
   if(p.has_deposit&&p.deposit_value>0){ dep.textContent='+ R$ '+fmt(p.deposit_value)+' casco incluído'; dep.classList.remove('hidden'); }
   else dep.classList.add('hidden');
   _updateModalQty();
+  const hBtn = document.getElementById('pm-heart-btn');
+  if(hBtn){ const isFav = getFavs().includes(String(p.id)); hBtn.classList.toggle('active', isFav); }
   document.getElementById('prod-modal-overlay').classList.remove('hidden');
   lucide.createIcons();
 }
+function getFavs(){try{return JSON.parse(localStorage.getItem('favs')||'[]');}catch{return[];}}
 function toggleFav(btn){
-  btn.classList.toggle('active');
-  lucide.createIcons();
+  if(!_modalProd) return;
+  const id = String(_modalProd.id);
+  let favs = getFavs();
+  const idx = favs.indexOf(id);
+  if(idx===-1){ favs.push(id); btn.classList.add('active'); }
+  else{ favs.splice(idx,1); btn.classList.remove('active'); }
+  localStorage.setItem('favs', JSON.stringify(favs));
 }
 function closeProdModal(){
   document.getElementById('prod-modal-overlay').classList.add('hidden');
