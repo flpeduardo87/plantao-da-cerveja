@@ -545,7 +545,7 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 .drawer-item{
   display:flex;align-items:center;gap:14px;
   padding:14px 20px;cursor:pointer;
-  font-size:15px;font-weight:500;color:var(--fg);
+  font-size:15px;font-weight:600;color:var(--fg);
   border:none;background:none;width:100%;text-align:left;
   transition:background .12s;
 }
@@ -1852,14 +1852,33 @@ function useGeo(){
   if(!navigator.geolocation){ toast('GPS não disponível neste dispositivo.','error'); return; }
   b.innerHTML='<i data-lucide="loader-2" width="16" height="16" class="spin"></i> Localizando...'; b.disabled=true; lucide.createIcons();
   navigator.geolocation.getCurrentPosition(
-    ()=>{
-      b.style.display='none';
-      const inp = document.getElementById('cep-in');
-      if(inp){ inp.placeholder='Digite seu CEP para confirmar'; inp.focus(); }
-      const sub = document.querySelector('.loc-card p');
-      if(sub) sub.textContent='GPS ativo! Informe seu CEP para confirmarmos seu endereço:';
+    async (pos)=>{
+      const {latitude:lat,longitude:lon} = pos.coords;
+      try {
+        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1`,{signal:AbortSignal.timeout(6000)});
+        const d = await r.json();
+        const a = d.address||{};
+        const rua = a.road||a.pedestrian||a.footway||'';
+        const bairro = a.suburb||a.neighbourhood||a.city_district||'';
+        const cidade = a.city||a.town||a.village||a.county||'';
+        const uf = a.state_code||(a.state||'').slice(0,2).toUpperCase();
+        const parts = [rua,bairro,cidade+(uf?'/'+uf:'')].filter(Boolean);
+        const addr = parts.join(' — ') || d.display_name || 'Localização confirmada';
+        const cep = (a.postcode||'').replace(/\D/g,'');
+        if(cep.length>=8){
+          try{
+            const cv = await fetch(`https://viacep.com.br/ws/${cep}/json/`,{signal:AbortSignal.timeout(4000)});
+            const cd = await cv.json();
+            if(!cd.erro) window._viaCepData = cd;
+          }catch{}
+        }
+        showConfirmed(addr);
+      } catch {
+        showConfirmed('Localização GPS confirmada');
+      }
     },
-    ()=>{ b.innerHTML='<i data-lucide="map-pin" width="16" height="16"></i> Usar minha localização'; b.disabled=false; lucide.createIcons(); toast('GPS não pôde ser obtido. Digite seu CEP.','error'); }
+    ()=>{ b.innerHTML='<i data-lucide="map-pin" width="16" height="16"></i> Usar minha localização'; b.disabled=false; lucide.createIcons(); toast('GPS não pôde ser obtido. Digite seu CEP.','error'); },
+    {timeout:10000,maximumAge:60000}
   );
 }
 async function confirmCep(){
