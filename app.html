@@ -409,9 +409,9 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 }
 /* Side-by-side: fixed image box left, info right */
 .pm-top{display:flex;flex-direction:row;align-items:center;gap:16px;margin-bottom:16px;}
-.pm-img-col{width:130px;height:190px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.pm-img-col{width:105px;height:175px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .pm-img{max-width:100%;max-height:100%;object-fit:contain;display:block;}
-.pm-info{flex:1;min-width:0;}
+.pm-info{flex:1;min-width:0;padding-right:36px;}
 .pm-offer{
   display:inline-block;background:#EF4444;color:#fff;
   font-size:12px;font-weight:700;padding:4px 10px;
@@ -422,10 +422,11 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 .pm-old{font-size:13px;color:var(--fg-3);text-decoration:line-through;margin-bottom:2px;}
 .pm-price{font-size:30px;font-weight:700;color:var(--fg);line-height:1.1;}
 .pm-unit{font-size:12px;color:var(--fg-2);margin-top:2px;margin-bottom:14px;}
+.pm-ctrl-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
 .pm-qty-row{
   display:flex;align-items:center;gap:0;
   background:var(--bg-2);border-radius:999px;
-  padding:5px;margin-bottom:16px;width:fit-content;
+  padding:5px;width:fit-content;
 }
 .pm-qty-btn{
   width:38px;height:38px;border-radius:50%;border:none;
@@ -438,16 +439,15 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 .pm-qty-btn.plus:hover{background:var(--green-dk);}
 .pm-qty-btn:not(.plus):hover{background:var(--border);}
 .pm-qty-num{min-width:44px;text-align:center;font-size:18px;font-weight:700;color:var(--fg);}
-.pm-actions{display:flex;align-items:center;gap:10px;}
 .pm-add-btn{
-  flex:1;display:flex;align-items:center;justify-content:center;gap:10px;
-  padding:16px;border-radius:999px;border:none;
+  width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:16px;border-radius:999px;border:none;white-space:nowrap;
   background:var(--amber);color:#111;font:700 15px 'Inter',sans-serif;
   cursor:pointer;transition:background .15s;
 }
 .pm-add-btn:hover{background:var(--amber-dk);}
 .pm-heart-btn{
-  width:52px;height:52px;border-radius:50%;border:1.5px solid var(--border);
+  width:48px;height:48px;border-radius:50%;border:1.5px solid var(--border);
   background:#fff;color:var(--fg);cursor:pointer;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
   transition:border-color .15s,color .15s;
@@ -1420,23 +1420,23 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
         <div class="pm-old hidden" id="pm-old"></div>
         <div class="pm-price" id="pm-price"></div>
         <div class="pm-unit">por unidade</div>
-        <div class="pm-qty-row">
-          <button class="pm-qty-btn" onclick="setProdQty(-1)">−</button>
-          <span class="pm-qty-num" id="pm-qty">1</span>
-          <button class="pm-qty-btn plus" onclick="setProdQty(1)">+</button>
+        <div class="pm-ctrl-row">
+          <div class="pm-qty-row">
+            <button class="pm-qty-btn" onclick="setProdQty(-1)">−</button>
+            <span class="pm-qty-num" id="pm-qty">1</span>
+            <button class="pm-qty-btn plus" onclick="setProdQty(1)">+</button>
+          </div>
+          <button class="pm-heart-btn" id="pm-heart-btn" onclick="toggleFav(this)" aria-label="Favoritar">
+            <i data-lucide="heart" width="18" height="18"></i>
+          </button>
         </div>
       </div>
     </div>
     <div class="pm-deposit hidden" id="pm-deposit"></div>
-    <div class="pm-actions">
-      <button class="pm-add-btn" id="pm-add-btn" onclick="addFromModal()">
-        <i data-lucide="shopping-bag" width="18" height="18"></i>
-        <span id="pm-add-txt">Adicionar à sacola • R$ 0,00</span>
-      </button>
-      <button class="pm-heart-btn" id="pm-heart-btn" onclick="toggleFav(this)" aria-label="Favoritar">
-        <i data-lucide="heart" width="20" height="20"></i>
-      </button>
-    </div>
+    <button class="pm-add-btn" id="pm-add-btn" onclick="addFromModal()">
+      <i data-lucide="shopping-bag" width="18" height="18"></i>
+      <span id="pm-add-txt">Adicionar à sacola • R$ 0,00</span>
+    </button>
   </div>
 </div>
 
