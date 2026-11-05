@@ -228,34 +228,44 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;display:flex;flex-dire
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .search-section{
   background:var(--amber);
-  padding:10px max(16px,env(safe-area-inset-right,0px));
-  border-bottom:none;
   flex-shrink:0;
+  padding:0;
 }
-.search-bar-row{display:flex;align-items:center;gap:8px;}
-.search-bar-row .search-wrap{flex:1;min-width:0;}
-.mob-logo{width:44px;height:44px;border-radius:50%;object-fit:contain;flex-shrink:0;background:#111;box-shadow:0 2px 8px rgba(0,0,0,.25);padding:6px;}
-.mob-cart-fab{
-  flex-shrink:0;width:44px;height:44px;border-radius:50%;border:none;
-  background:#111;color:#fff;font-size:19px;cursor:pointer;
+/* ── top bar: hamburger · logo · account · cart ── */
+.mob-topbar{
+  display:flex;align-items:center;gap:4px;
+  padding:env(safe-area-inset-top,0px) 12px 0;
+  height:calc(54px + env(safe-area-inset-top,0px));
+}
+.mob-menu-btn,.mob-icon-btn{
+  width:40px;height:40px;border-radius:50%;border:none;
+  background:transparent;color:#111;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  position:relative;box-shadow:0 2px 8px rgba(0,0,0,.25);
-  transition:transform .12s;
+  flex-shrink:0;position:relative;
 }
-.mob-cart-fab:active{transform:scale(.9);}
+.mob-logo-horiz{
+  flex:1;height:28px;width:auto;object-fit:contain;
+  object-position:center;display:block;cursor:pointer;
+}
 .mob-cart-fab-cnt{
-  position:absolute;top:-3px;right:-3px;
-  background:var(--green);color:#fff;font:700 9px 'Inter',sans-serif;
+  position:absolute;top:1px;right:1px;
+  background:#EF4444;color:#fff;font:700 9px 'Inter',sans-serif;
   min-width:16px;height:16px;border-radius:999px;padding:0 3px;
   display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+/* ── search bar row (white) ── */
+.mob-search-row{
+  background:#fff;
+  padding:10px 16px 12px;
 }
 
 /* ── MAIN STORE ── */
 #s-home{z-index:11;}
 .search-wrap{
   display:flex;align-items:center;gap:8px;
-  background:rgba(255,255,255,.95);border-radius:999px;
-  padding:10px 14px;box-shadow:0 2px 8px rgba(0,0,0,.08);
+  background:var(--bg-2);border-radius:999px;
+  padding:10px 14px;border:1.5px solid var(--border);
 }
 .search-wrap input{
   flex:1;border:none;background:transparent;outline:none;
@@ -1232,18 +1242,22 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
 
 <!-- ═══ MAIN STORE ═══ -->
 <div id="s-home" class="screen slide-right hidden">
-  <!-- Search bar sits OUTSIDE feed so it never scrolls away -->
+  <!-- Mobile header: hamburger · logo · account · cart -->
   <div class="search-section">
-    <div class="search-bar-row">
-      <img class="mob-logo" src="logo-icone.png" alt="Plantão da Cerveja" onclick="goHome()" style="cursor:pointer">
+    <div class="mob-topbar">
+      <button class="mob-menu-btn" aria-label="Menu"><i data-lucide="menu" width="22" height="22"></i></button>
+      <img class="mob-logo-horiz" src="logo-horizontal.webp" alt="Plantão da Cerveja" onclick="goHome()">
+      <button class="mob-icon-btn" onclick="goToAccount()" aria-label="Minha conta"><i data-lucide="user" width="22" height="22"></i></button>
+      <button class="mob-icon-btn" id="mob-cart-fab" onclick="goToCart()" aria-label="Sacola">
+        <i data-lucide="shopping-bag" width="22" height="22"></i>
+        <span class="mob-cart-fab-cnt hidden" id="mob-cart-fab-cnt">0</span>
+      </button>
+    </div>
+    <div class="mob-search-row">
       <div class="search-wrap">
         <i data-lucide="search" width="15" height="15" style="color:var(--fg-3)"></i>
         <input type="text" id="s-in" placeholder="Pesquise sua bebida favorita" oninput="search(this.value)">
       </div>
-      <button class="mob-cart-fab" id="mob-cart-fab" onclick="goToCart()">
-        <i data-lucide="shopping-bag" width="20" height="20"></i>
-        <span class="mob-cart-fab-cnt" id="mob-cart-fab-cnt">0</span>
-      </button>
     </div>
   </div>
   <div class="feed" id="feed">
