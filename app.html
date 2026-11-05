@@ -518,6 +518,51 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
   flex-shrink:0;
 }
 
+/* ── HAMBURGER DRAWER ── */
+#drawer-overlay{
+  position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);
+  opacity:0;pointer-events:none;transition:opacity .25s ease;
+}
+#drawer-overlay.open{opacity:1;pointer-events:all;}
+#nav-drawer{
+  position:absolute;top:0;left:0;bottom:0;
+  width:min(320px,88vw);background:#fff;
+  display:flex;flex-direction:column;
+  transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+}
+#drawer-overlay.open #nav-drawer{transform:translateX(0);}
+.drawer-head{
+  background:var(--amber);flex-shrink:0;
+  display:flex;align-items:center;
+  padding:env(safe-area-inset-top,0px) 16px 0;
+  height:calc(54px + env(safe-area-inset-top,0px));
+  gap:8px;
+}
+.drawer-head img{flex:1;height:36px;object-fit:contain;object-position:left;}
+.drawer-close{background:none;border:none;cursor:pointer;color:#111;padding:8px;display:flex;align-items:center;justify-content:center;border-radius:50%;}
+.drawer-nav{flex:1;padding:8px 0;}
+.drawer-item{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 20px;cursor:pointer;
+  font-size:15px;font-weight:500;color:var(--fg);
+  border:none;background:none;width:100%;text-align:left;
+  transition:background .12s;
+}
+.drawer-item:hover,.drawer-item:active{background:var(--bg-2);}
+.drawer-item.active{background:#FEF9C3;font-weight:700;}
+.drawer-item .di-ic{width:24px;display:flex;align-items:center;justify-content:center;color:var(--fg-2);flex-shrink:0;}
+.drawer-item.active .di-ic{color:#111;}
+.drawer-item .di-chev{margin-left:auto;color:var(--fg-3);}
+.drawer-sep{height:1px;background:var(--border);margin:6px 20px;}
+.drawer-promo{
+  margin:12px 16px 20px;
+  background:#FEF9C3;border-radius:14px;
+  display:flex;align-items:center;gap:12px;
+  padding:16px;cursor:pointer;border:none;width:calc(100% - 32px);text-align:left;
+}
+.drawer-promo-txt{font-size:15px;font-weight:700;color:var(--fg);line-height:1.3;flex:1;}
+.drawer-promo-chev{color:var(--fg-2);flex-shrink:0;}
 /* ── CART BOTTOM SHEET ── */
 #s-cart{
   z-index:50;background:rgba(0,0,0,.55);
@@ -1207,6 +1252,54 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
   </div>
 </header>
 
+<!-- ═══ HAMBURGER DRAWER ═══ -->
+<div id="drawer-overlay" onclick="if(event.target===this)closeDrawer()">
+  <div id="nav-drawer" role="navigation" aria-label="Menu principal">
+    <div class="drawer-head">
+      <img src="logo-horizontal.webp" alt="Plantão da Cerveja" onclick="closeDrawer();goHome()">
+      <button class="drawer-close" onclick="closeDrawer()" aria-label="Fechar menu"><i data-lucide="x" width="22" height="22"></i></button>
+    </div>
+    <div class="drawer-nav">
+      <button class="drawer-item active" id="di-home" onclick="closeDrawer();goHome()">
+        <span class="di-ic"><i data-lucide="home" width="18" height="18"></i></span> Início
+      </button>
+      <button class="drawer-item" onclick="closeDrawer();goHome()">
+        <span class="di-ic"><i data-lucide="layout-grid" width="18" height="18"></i></span> Todas as categorias
+        <span class="di-chev"><i data-lucide="chevron-right" width="16" height="16"></i></span>
+      </button>
+      <button class="drawer-item" onclick="closeDrawer()">
+        <span class="di-ic"><i data-lucide="percent-circle" width="18" height="18"></i></span> Ofertas
+      </button>
+      <button class="drawer-item" onclick="closeDrawer()">
+        <span class="di-ic"><i data-lucide="star" width="18" height="18"></i></span> Novidades
+      </button>
+      <button class="drawer-item" onclick="closeDrawer()">
+        <span class="di-ic"><i data-lucide="heart" width="18" height="18"></i></span> Favoritos
+      </button>
+      <button class="drawer-item" onclick="closeDrawer();goToCart()">
+        <span class="di-ic"><i data-lucide="clipboard-list" width="18" height="18"></i></span> Meus pedidos
+      </button>
+      <button class="drawer-item" onclick="closeDrawer();goToAccount()">
+        <span class="di-ic"><i data-lucide="user" width="18" height="18"></i></span> Minha conta
+      </button>
+      <div class="drawer-sep"></div>
+      <button class="drawer-item" onclick="closeDrawer();show('loc-overlay')">
+        <span class="di-ic"><i data-lucide="map-pin" width="18" height="18"></i></span> Informe seu endereço
+        <span class="di-chev"><i data-lucide="chevron-right" width="16" height="16"></i></span>
+      </button>
+      <button class="drawer-item" onclick="closeDrawer()">
+        <span class="di-ic"><i data-lucide="message-circle" width="18" height="18"></i></span> Fale conosco
+        <span class="di-chev"><i data-lucide="chevron-right" width="16" height="16"></i></span>
+      </button>
+    </div>
+    <button class="drawer-promo" onclick="closeDrawer()">
+      <span style="font-size:28px">🍺</span>
+      <span class="drawer-promo-txt">Confira nossas ofertas!</span>
+      <span class="drawer-promo-chev"><i data-lucide="chevron-right" width="18" height="18"></i></span>
+    </button>
+  </div>
+</div>
+
 <!-- ═══ AGE GATE ═══ -->
 <div id="s-age" class="screen" style="z-index:100">
   <div class="gate-icon"><img src="favicon-icone.webp" alt="Plantão da Cerveja" style="width:88px;height:88px;border-radius:50%;display:block;"></div>
@@ -1282,7 +1375,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
   <!-- Mobile header: hamburger · logo · account · cart -->
   <div class="search-section">
     <div class="mob-topbar">
-      <button class="mob-menu-btn" aria-label="Menu"><i data-lucide="menu" width="22" height="22"></i></button>
+      <button class="mob-menu-btn" aria-label="Menu" onclick="openDrawer()"><i data-lucide="menu" width="22" height="22"></i></button>
       <img class="mob-logo-horiz" src="logo-horizontal.webp" alt="Plantão da Cerveja" onclick="goHome()">
       <button class="mob-icon-btn" onclick="goToAccount()" aria-label="Minha conta"><i data-lucide="user" width="22" height="22"></i></button>
       <button class="mob-icon-btn" id="mob-cart-fab" onclick="goToCart()" aria-label="Sacola">
@@ -2158,6 +2251,14 @@ function clearSearch(){
   const el = document.getElementById('s-in');
   if(el){ el.value=''; search(''); el.focus(); }
 }
+function openDrawer(){
+  document.getElementById('drawer-overlay').classList.add('open');
+  lucide.createIcons();
+}
+function closeDrawer(){
+  document.getElementById('drawer-overlay').classList.remove('open');
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeDrawer(); });
 
 let _modalProd = null;
 let _modalQty = 1;
