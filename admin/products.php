@@ -185,7 +185,30 @@
           <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i data-lucide="download" width="14" height="14"></i> Exportar</button>
         </div>
       </div>
-      <div class="card"><div class="prod-list" id="products-list"></div></div>
+      <!-- Desktop table -->
+      <div class="card prod-desktop-tbl">
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36px"><input type="checkbox" id="chk-all" class="row-chk" onclick="toggleAllChk(this)"></th>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+                <th>Estoque</th>
+                <th>Status</th>
+                <th>Oferta</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="products-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Mobile cards -->
+      <div class="prod-mobile-cards">
+        <div class="prod-list" id="products-list"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -197,44 +220,41 @@ let allProds = [];
 let searchVal = '', catFilter = '', statusFilter = '';
 let deleteId = null;
 
+function _setToggleUI(prefix, id, newVal, offLabel, onLabel, onCls) {
+  ['d','m'].forEach(s => {
+    const cb  = document.getElementById(`${prefix}-${s}-${id}`);
+    const div = document.getElementById(`tog-${prefix}-${s}-${id}`);
+    const lbl = document.getElementById(`lbl-${prefix}-${s}-${id}`);
+    if (cb)  cb.checked = !!newVal;
+    if (div) div.setAttribute('onclick', `toggle${prefix==='active'?'Product':'Featured'}(${id},${newVal})`);
+    if (lbl) { lbl.textContent = newVal ? onLabel : offLabel; lbl.className = `prod-toggle-lbl${newVal?' '+onCls:''}`; }
+  });
+}
+
 async function toggleProduct(id, current) {
   const newVal = current ? 0 : 1;
-  const cb  = document.getElementById(`cb-active-${id}`);
-  const div = document.getElementById(`toggle-active-${id}`);
-  const lbl = document.getElementById(`lbl-active-${id}`);
-  if (cb)  cb.checked = !!newVal;
-  if (div) div.setAttribute('onclick', `toggleProduct(${id},${newVal})`);
-  if (lbl) { lbl.textContent = newVal ? 'Disponível' : 'Inativo'; lbl.className = `prod-toggle-lbl${newVal?' active-lbl':''}`; }
+  _setToggleUI('active', id, newVal, 'Inativo', 'Disponível', 'active-lbl');
   try {
     await api(`/products/${id}`, { method: 'PUT', body: JSON.stringify({ active: newVal }) });
     toast(newVal ? 'Produto ativado' : 'Produto desativado');
     const p = allProds.find(x => x.id === id);
     if (p) { p.active = newVal; updateStats(); }
   } catch(e) {
-    if (cb)  cb.checked = !!current;
-    if (div) div.setAttribute('onclick', `toggleProduct(${id},${current})`);
-    if (lbl) { lbl.textContent = current ? 'Disponível' : 'Indisponível'; lbl.className = `prod-toggle-lbl${current?' active-lbl':''}`; }
+    _setToggleUI('active', id, current, 'Inativo', 'Disponível', 'active-lbl');
     toast(e.message, 'error');
   }
 }
 
 async function toggleFeatured(id, current) {
   const newVal = current ? 0 : 1;
-  const cb  = document.getElementById(`cb-featured-${id}`);
-  const div = document.getElementById(`toggle-featured-${id}`);
-  const lbl = document.getElementById(`lbl-featured-${id}`);
-  if (cb)  cb.checked = !!newVal;
-  if (div) div.setAttribute('onclick', `toggleFeatured(${id},${newVal})`);
-  if (lbl) { lbl.textContent = newVal ? 'Promoção' : '—'; lbl.className = `prod-toggle-lbl${newVal?' promo-lbl':''}`; }
+  _setToggleUI('featured', id, newVal, '—', 'Promoção', 'promo-lbl');
   try {
     await api(`/products/${id}`, { method: 'PUT', body: JSON.stringify({ featured: newVal }) });
     toast(newVal ? 'Marcado como oferta' : 'Oferta removida');
     const p = allProds.find(x => x.id === id);
     if (p) { p.featured = newVal; updateStats(); }
   } catch(e) {
-    if (cb)  cb.checked = !!current;
-    if (div) div.setAttribute('onclick', `toggleFeatured(${id},${current})`);
-    if (lbl) { lbl.textContent = current ? 'Promoção' : '—'; lbl.className = `prod-toggle-lbl${current?' promo-lbl':''}`; }
+    _setToggleUI('featured', id, current, '—', 'Promoção', 'promo-lbl');
     toast(e.message, 'error');
   }
 }
@@ -263,14 +283,14 @@ async function loadCategories() {
 }
 
 async function loadProducts() {
-  const tbody = document.getElementById('products-list');
-  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--fg-3)">Carregando…</td></tr>';
+  document.getElementById('products-tbody').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--fg-3)">Carregando…</td></tr>';
+  document.getElementById('products-list').innerHTML = '';
   try {
     const res = await api('/products?all=1');
     allProds = Array.isArray(res) ? res : (res.data || []);
     renderProds();
   } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><p style="color:var(--red)">${e.message}</p></div></td></tr>`;
+    document.getElementById('products-tbody').innerHTML = `<tr><td colspan="8"><div class="empty"><p style="color:var(--red)">${e.message}</p></div></td></tr>`;
   }
 }
 
@@ -296,17 +316,61 @@ function renderProds() {
     return true;
   });
 
-  const list = document.getElementById('products-list');
+  const tbody = document.getElementById('products-tbody');
+  const list  = document.getElementById('products-list');
+
   if (!prods.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><i data-lucide="inbox" width="28" height="28"></i><p>Nenhum produto encontrado</p></div></td></tr>';
     list.innerHTML = '<div class="empty"><i data-lucide="inbox" width="28" height="28"></i><p>Nenhum produto encontrado</p></div>';
     lucide.createIcons(); return;
   }
-  list.innerHTML = prods.map(p => {
+
+  const rows = [], cards = [];
+  prods.forEach(p => {
     const isUnlimited = p.stock <= 0;
     const stockTxt = isUnlimited ? '∞ ilimitado' : `${p.stock} un.`;
-    return `
-    <div class="prod-card" id="prod-row-${p.id}">
-      <input type="checkbox" class="row-chk" value="${p.id}">
+    const img = p.image_url
+      ? `<img src="${p.image_url}" class="prod-card-img" style="width:40px;height:48px" alt="">`
+      : `<div class="prod-card-ph" style="width:40px;height:48px"><i data-lucide="image" width="16" height="16"></i></div>`;
+
+    /* ── Desktop table row ── */
+    rows.push(`<tr id="prod-row-${p.id}">
+      <td><input type="checkbox" class="row-chk" value="${p.id}"></td>
+      <td>
+        <div class="prod-tbl-cell">
+          ${img}
+          <div>
+            <div class="prod-tbl-name">${p.name}</div>
+            <div class="prod-tbl-sku">SKU: ${p.id}</div>
+          </div>
+        </div>
+      </td>
+      <td>${p.category_name ? `<span class="cat-badge">${p.category_name}</span>` : '<span style="color:var(--fg-3)">—</span>'}</td>
+      <td style="font-weight:600">${fmtMoney(p.price)}${p.old_price?`<br><s style="font-size:11px;color:var(--fg-3);font-weight:400">${fmtMoney(p.old_price)}</s>`:''}</td>
+      <td class="${isUnlimited?'':''}"><span style="font-weight:700;color:${isUnlimited?'var(--fg-3)':'var(--green)'}">${stockTxt}</span></td>
+      <td>
+        <div class="prod-toggle-col" id="tog-active-d-${p.id}" onclick="toggleProduct(${p.id},${p.active?1:0})">
+          <label class="toggle" style="pointer-events:none"><input type="checkbox" id="active-d-${p.id}" ${p.active?'checked':''}><span class="toggle-slider"></span></label>
+          <span id="lbl-active-d-${p.id}" class="prod-toggle-lbl${p.active?' active-lbl':''}">${p.active?'Disponível':'Inativo'}</span>
+        </div>
+      </td>
+      <td>
+        <div class="prod-toggle-col" id="tog-featured-d-${p.id}" onclick="toggleFeatured(${p.id},${p.featured?1:0})">
+          <label class="toggle" style="pointer-events:none"><input type="checkbox" id="featured-d-${p.id}" ${p.featured?'checked':''}><span class="toggle-slider"></span></label>
+          <span id="lbl-featured-d-${p.id}" class="prod-toggle-lbl${p.featured?' promo-lbl':''}">${p.featured?'Promoção':'—'}</span>
+        </div>
+      </td>
+      <td>
+        <div class="prod-tbl-actions">
+          <button class="btn-icon" onclick="editProduct(${p.id})" title="Editar"><i data-lucide="pencil" width="14" height="14"></i></button>
+          <button class="btn-icon" onclick="duplicateProduct(${p.id})" title="Duplicar"><i data-lucide="copy" width="14" height="14"></i></button>
+          <button class="btn-icon" style="color:var(--red)" onclick="confirmDelete(${p.id})" title="Excluir"><i data-lucide="trash-2" width="14" height="14"></i></button>
+        </div>
+      </td>
+    </tr>`);
+
+    /* ── Mobile card ── */
+    cards.push(`<div class="prod-card" id="prod-card-${p.id}">
       ${p.image_url
         ? `<img src="${p.image_url}" class="prod-card-img" alt="">`
         : `<div class="prod-card-ph"><i data-lucide="image" width="20" height="20"></i></div>`}
@@ -319,19 +383,13 @@ function renderProds() {
       <div class="prod-card-right">
         <div class="prod-card-stock${isUnlimited?' unlimited':''}">${stockTxt}</div>
         <div class="prod-toggles">
-          <div class="prod-toggle-col" id="toggle-active-${p.id}" onclick="toggleProduct(${p.id},${p.active?1:0})">
-            <label class="toggle" style="pointer-events:none">
-              <input type="checkbox" id="cb-active-${p.id}" ${p.active?'checked':''}>
-              <span class="toggle-slider"></span>
-            </label>
-            <span id="lbl-active-${p.id}" class="prod-toggle-lbl${p.active?' active-lbl':''}">${p.active?'Disponível':'Inativo'}</span>
+          <div class="prod-toggle-col" id="tog-active-m-${p.id}" onclick="toggleProduct(${p.id},${p.active?1:0})">
+            <label class="toggle" style="pointer-events:none"><input type="checkbox" id="active-m-${p.id}" ${p.active?'checked':''}><span class="toggle-slider"></span></label>
+            <span id="lbl-active-m-${p.id}" class="prod-toggle-lbl${p.active?' active-lbl':''}">${p.active?'Disponível':'Inativo'}</span>
           </div>
-          <div class="prod-toggle-col" id="toggle-featured-${p.id}" onclick="toggleFeatured(${p.id},${p.featured?1:0})">
-            <label class="toggle" style="pointer-events:none">
-              <input type="checkbox" id="cb-featured-${p.id}" ${p.featured?'checked':''}>
-              <span class="toggle-slider"></span>
-            </label>
-            <span id="lbl-featured-${p.id}" class="prod-toggle-lbl${p.featured?' promo-lbl':''}">${p.featured?'Promoção':'—'}</span>
+          <div class="prod-toggle-col" id="tog-featured-m-${p.id}" onclick="toggleFeatured(${p.id},${p.featured?1:0})">
+            <label class="toggle" style="pointer-events:none"><input type="checkbox" id="featured-m-${p.id}" ${p.featured?'checked':''}><span class="toggle-slider"></span></label>
+            <span id="lbl-featured-m-${p.id}" class="prod-toggle-lbl${p.featured?' promo-lbl':''}">${p.featured?'Promoção':'—'}</span>
           </div>
         </div>
       </div>
@@ -345,8 +403,11 @@ function renderProds() {
           <button onclick="confirmDelete(${p.id});closeProdMenus()" style="color:var(--red)"><i data-lucide="trash-2" width="13" height="13"></i> Excluir</button>
         </div>
       </div>
-    </div>`;
-  }).join('');
+    </div>`);
+  });
+
+  tbody.innerHTML = rows.join('');
+  list.innerHTML  = cards.join('');
   lucide.createIcons();
 }
 

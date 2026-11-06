@@ -414,6 +414,19 @@ textarea{resize:vertical;min-height:80px}
   .filter-bar .spacer{display:none}
 }
 
+/* ── Produtos desktop/mobile layout ── */
+.prod-desktop-tbl{display:block}
+.prod-mobile-cards{display:none;background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden}
+@media(max-width:768px){
+  .prod-desktop-tbl{display:none}
+  .prod-mobile-cards{display:block}
+}
+/* Desktop table cells */
+.prod-tbl-cell{display:flex;align-items:center;gap:10px}
+.prod-tbl-name{font-size:13px;font-weight:700;color:var(--fg);line-height:1.2}
+.prod-tbl-sku{font-size:11px;color:var(--fg-3);margin-top:2px}
+.prod-tbl-actions{display:flex;gap:2px;align-items:center}
+
 /* ── Produto cards ── */
 .prod-list{display:flex;flex-direction:column}
 .prod-card{
