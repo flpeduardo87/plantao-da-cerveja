@@ -400,13 +400,12 @@ textarea{resize:vertical;min-height:80px}
   transition:border-color .1s;cursor:pointer;min-width:0
 }
 .filter-select:focus{border-color:var(--amber);background:#fff;box-shadow:0 0 0 3px rgba(252,218,36,.12)}
-.filter-selects-row{display:flex;gap:8px;flex:1;min-width:0}
+.filter-selects-row{display:flex;gap:8px;width:100%}
 .filter-selects-row .filter-select{flex:1;min-width:0}
+.filter-bar{flex-wrap:wrap}
+.filter-input{width:100%;flex:none}
+.filter-bar .spacer{display:none}
 @media(max-width:768px){
-  .filter-bar{flex-wrap:wrap}
-  .filter-input{width:100%;flex:none}
-  .filter-selects-row{width:100%;flex:none}
-  .filter-bar .spacer{display:none}
   .filter-bar .btn{width:100%}
 }
 
