@@ -375,22 +375,92 @@ textarea{resize:vertical;min-height:80px}
   .info-grid{grid-template-columns:1fr}
 }
 
-/* ── Product table redesign ── */
+/* ── Produtos: stats grid 3+2 mobile ── */
+.prod-stats-grid{grid-template-columns:repeat(5,1fr)}
+@media(max-width:768px){
+  .prod-stats-grid{grid-template-columns:repeat(6,1fr)}
+  .prod-stats-grid .stat-tile{grid-column:span 2;padding:12px}
+  .prod-stats-grid .stat-tile:nth-child(4),
+  .prod-stats-grid .stat-tile:nth-child(5){grid-column:span 3}
+  .prod-stats-grid .stat-tile .st-icon{width:28px;height:28px;margin-bottom:6px}
+  .prod-stats-grid .stat-tile .value{font-size:20px}
+  .prod-stats-grid .stat-tile .label{font-size:10px}
+}
+
+/* ── Filtros ── */
 .filter-input{
   padding:8px 12px;border-radius:8px;border:1px solid var(--border);
   background:#F8FAFC;font:13px 'Inter',sans-serif;color:var(--fg);outline:none;
-  transition:border-color .1s;width:200px
+  transition:border-color .1s;min-width:0;flex:1
 }
 .filter-input:focus{border-color:var(--amber);background:#fff;box-shadow:0 0 0 3px rgba(252,218,36,.12)}
 .filter-select{
   padding:8px 12px;border-radius:8px;border:1px solid var(--border);
   background:#F8FAFC;font:13px 'Inter',sans-serif;color:var(--fg);outline:none;
-  transition:border-color .1s;cursor:pointer
+  transition:border-color .1s;cursor:pointer;min-width:0
 }
 .filter-select:focus{border-color:var(--amber);background:#fff;box-shadow:0 0 0 3px rgba(252,218,36,.12)}
+@media(max-width:768px){
+  .filter-bar{flex-wrap:wrap}
+  .filter-input,.filter-select{width:100%;flex:none}
+  .filter-bar .spacer{display:none}
+  .filter-bar .btn{width:100%}
+}
+
+/* ── Produto cards ── */
+.prod-list{display:flex;flex-direction:column}
+.prod-card{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 16px;border-bottom:1px solid #F1F5F9;position:relative;
+}
+.prod-card:last-child{border-bottom:none}
+.prod-card:hover{background:#FAFCFF}
+.prod-card-img{
+  width:52px;height:64px;border-radius:8px;object-fit:cover;flex-shrink:0;
+}
+.prod-card-ph{
+  width:52px;height:64px;border-radius:8px;background:#F1F5F9;
+  display:flex;align-items:center;justify-content:center;color:var(--fg-3);flex-shrink:0;
+}
+.prod-card-info{flex:1;min-width:0}
+.prod-card-name{font-size:13.5px;font-weight:700;line-height:1.2;color:var(--fg)}
+.prod-card-sku{font-size:11px;color:var(--fg-3);margin-top:2px}
+.prod-card-info .cat-badge{margin-top:5px}
+.prod-card-price{font-size:13px;font-weight:600;color:var(--fg);margin-top:5px}
+.prod-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.prod-card-stock{font-size:12.5px;font-weight:700;color:var(--green);white-space:nowrap}
+.prod-card-stock.unlimited{color:var(--fg-3)}
+.prod-toggles{display:flex;gap:12px}
+.prod-toggle-col{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.prod-toggle-lbl{font-size:9px;font-weight:600;white-space:nowrap;color:var(--fg-3)}
+.prod-toggle-lbl.active-lbl{color:var(--green)}
+.prod-toggle-lbl.promo-lbl{color:var(--amber-dk)}
+
+/* ── Menu ⋮ ── */
+.prod-card-menu-wrap{position:relative;flex-shrink:0}
+.prod-card-menu-btn{
+  width:32px;height:32px;border-radius:8px;border:none;background:transparent;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--fg-3);
+}
+.prod-card-menu-btn:hover{background:#F1F5F9;color:var(--fg)}
+.prod-menu-dropdown{
+  position:absolute;right:0;top:36px;z-index:60;
+  background:#fff;border:1px solid var(--border);border-radius:10px;
+  box-shadow:0 4px 20px rgba(0,0,0,.12);min-width:140px;
+  flex-direction:column;padding:4px
+}
+.prod-menu-dropdown button{
+  display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;
+  border:none;background:transparent;font:500 13px 'Inter',sans-serif;
+  cursor:pointer;border-radius:7px;color:var(--fg);text-align:left;
+}
+.prod-menu-dropdown button:hover{background:#F8FAFC}
+
+/* ── Checkbox (cards) ── */
+.row-chk{width:16px;height:16px;cursor:pointer;accent-color:var(--amber);flex-shrink:0}
+
+/* ── Categoria badge ── */
 .cat-badge{
   display:inline-block;padding:3px 9px;border-radius:5px;
   font-size:11.5px;font-weight:600;background:#F1F5F9;color:var(--fg-2);white-space:nowrap
 }
-.prod-actions{display:flex;align-items:center;gap:1px}
-input[type=checkbox].row-chk,#chk-all{width:16px;height:16px;cursor:pointer;accent-color:var(--amber)}
