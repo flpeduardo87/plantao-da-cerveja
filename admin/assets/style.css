@@ -403,7 +403,7 @@ textarea{resize:vertical;min-height:80px}
 /* Products filter bar */
 .prod-search{flex:1;min-width:0}
 .prod-selects-wrap{display:flex;gap:8px;flex-shrink:0}
-.prod-selects-wrap .filter-select{min-width:140px}
+.prod-selects-wrap .filter-select{min-width:168px}
 .prod-btns-wrap{display:flex;gap:8px;flex-shrink:0}
 @media(max-width:768px){
   .filter-bar{flex-wrap:wrap;row-gap:8px}
