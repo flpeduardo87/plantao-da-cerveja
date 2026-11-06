@@ -158,7 +158,7 @@
       <h1>Produtos</h1>
       <div class="topbar-right">
         <button class="store-status closed" id="store-status-btn" data-open="0"><span class="dot"></span>Carregando…</button>
-        <button class="btn btn-primary" onclick="openNew()"><i data-lucide="plus" width="15" height="15"></i> Novo produto</button>
+        <button class="btn btn-primary btn-sm" onclick="openNew()"><i data-lucide="plus" width="15" height="15"></i> Novo produto</button>
       </div>
     </div>
 
@@ -171,16 +171,14 @@
         <div class="stat-tile purple"><div class="st-icon"><i data-lucide="layers" width="18" height="18"></i></div><div class="label">Categorias</div><div class="value" id="stat-cats">—</div></div>
       </div>
       <div class="filter-bar">
-        <input type="search" id="search-input" class="filter-input" placeholder="Buscar produto…">
-        <div class="filter-selects-row">
-          <select id="cat-select" class="filter-select"><option value="">Todas as categorias</option></select>
-          <select id="status-select" class="filter-select">
-            <option value="">Todos os status</option>
-            <option value="1">Disponível</option>
-            <option value="0">Indisponível</option>
-          </select>
-        </div>
-        <div class="spacer"></div>
+        <input type="search" id="search-input" class="filter-input prod-search" placeholder="Buscar produto…">
+        <select id="cat-select" class="filter-select prod-filter-sel"><option value="">Todas as categorias</option></select>
+        <select id="status-select" class="filter-select prod-filter-sel">
+          <option value="">Todos os status</option>
+          <option value="1">Disponível</option>
+          <option value="0">Indisponível</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="clearFilters()"><i data-lucide="x" width="14" height="14"></i> Limpar</button>
         <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i data-lucide="download" width="14" height="14"></i> Exportar</button>
       </div>
       <div class="card"><div class="prod-list" id="products-list"></div></div>
@@ -502,6 +500,14 @@ document.getElementById('btn-confirm-delete').addEventListener('click', async ()
 document.getElementById('search-input').addEventListener('input', e => { searchVal = e.target.value; renderProds(); });
 document.getElementById('cat-select').addEventListener('change', e => { catFilter = e.target.value; renderProds(); });
 document.getElementById('status-select').addEventListener('change', e => { statusFilter = e.target.value; renderProds(); });
+
+function clearFilters() {
+  searchVal = ''; catFilter = ''; statusFilter = '';
+  document.getElementById('search-input').value = '';
+  document.getElementById('cat-select').value = '';
+  document.getElementById('status-select').value = '';
+  renderProds();
+}
 
 loadCategories();
 loadProducts();

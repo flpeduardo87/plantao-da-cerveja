@@ -70,8 +70,8 @@ nav{flex:1;padding:8px 0;overflow-y:auto}
 .topbar h1{font-size:16px;font-weight:700;flex:1;color:var(--fg)}
 .topbar-right{display:flex;align-items:center;gap:8px}
 .store-status{
-  display:flex;align-items:center;gap:6px;padding:5px 13px;border-radius:7px;
-  font:600 12px 'Inter',sans-serif;cursor:pointer;border:1px solid transparent;transition:all .1s
+  display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;
+  font:600 12.5px 'Inter',sans-serif;cursor:pointer;border:1px solid transparent;transition:all .1s
 }
 .store-status.open{background:var(--green-lt);color:#166534;border-color:#BBF7D0}
 .store-status.closed{background:var(--red-lt);color:#991B1B;border-color:#FECACA}
@@ -400,13 +400,15 @@ textarea{resize:vertical;min-height:80px}
   transition:border-color .1s;cursor:pointer;min-width:0
 }
 .filter-select:focus{border-color:var(--amber);background:#fff;box-shadow:0 0 0 3px rgba(252,218,36,.12)}
-.filter-selects-row{display:flex;gap:8px;width:100%}
-.filter-selects-row .filter-select{flex:1;min-width:0}
-.filter-bar{flex-wrap:wrap}
-.filter-input{width:100%;flex:none}
-.filter-bar .spacer{display:none}
+/* Products page: search full-width on mobile, selects 2-col */
+.prod-search{flex:1;min-width:160px}
+.prod-filter-sel{min-width:140px}
 @media(max-width:768px){
-  .filter-bar .btn{width:100%}
+  .filter-bar{flex-wrap:wrap}
+  .prod-search{width:100%;flex:none}
+  .prod-filter-sel{flex:1;min-width:0}
+  .filter-bar .spacer{display:none}
+  .filter-bar .btn{flex:1}
 }
 
 /* ── Produto cards ── */
