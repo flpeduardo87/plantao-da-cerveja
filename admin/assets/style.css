@@ -178,7 +178,7 @@ tbody tr:hover td{background:#F8FAFC}
 .btn-icon.borderless{border-color:transparent}
 
 /* ── Filter bar ── */
-.filter-bar{display:flex;align-items:center;gap:8px;row-gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:nowrap}
 .filter-bar .spacer{flex:1}
 
 /* ── Forms ── */
@@ -404,11 +404,13 @@ textarea{resize:vertical;min-height:80px}
 .prod-search{flex:1;min-width:0}
 .prod-selects-wrap{display:flex;gap:8px;flex-shrink:0}
 .prod-selects-wrap .filter-select{min-width:140px}
-.prod-btns-wrap{display:flex;gap:8px;width:100%}
+.prod-btns-wrap{display:flex;gap:8px;flex-shrink:0}
 @media(max-width:768px){
+  .filter-bar{flex-wrap:wrap;row-gap:8px}
   .prod-search{width:100%;flex:none}
   .prod-selects-wrap{width:100%}
   .prod-selects-wrap .filter-select{flex:1;min-width:0}
+  .prod-btns-wrap{width:100%}
   .prod-btns-wrap .btn{flex:1}
   .filter-bar .spacer{display:none}
 }
