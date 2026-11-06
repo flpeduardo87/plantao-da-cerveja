@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Pedidos · Plantão Admin</title>
 <link rel="icon" href="../favicon-icone.webp">
-<link rel="stylesheet" href="assets/style.css?v=3">
+<link rel="stylesheet" href="assets/style.css?v=5">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
@@ -32,7 +32,7 @@
 <div class="layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-<img src="../favicon-icone.webp" alt="Plantão" style="border-radius:50%">
+      <img src="../favicon-icone.webp" alt="Plantão" style="border-radius:50%">
       <div><span>Plantão da Cerveja</span><small>Painel Admin</small></div>
     </div>
     <nav>
@@ -64,27 +64,76 @@
     </div>
 
     <div class="page">
+
+      <!-- Stats -->
+      <div class="stats-grid ord-stats-grid">
+        <div class="stat-tile blue">
+          <div class="st-icon"><i data-lucide="shopping-bag" width="18" height="18"></i></div>
+          <div class="label">Total de pedidos</div>
+          <div class="value" id="stat-total">—</div>
+        </div>
+        <div class="stat-tile green">
+          <div class="st-icon"><i data-lucide="check-circle" width="18" height="18"></i></div>
+          <div class="label">Concluídos</div>
+          <div class="value" id="stat-delivered">—</div>
+        </div>
+        <div class="stat-tile purple">
+          <div class="st-icon"><i data-lucide="truck" width="18" height="18"></i></div>
+          <div class="label">Em entrega</div>
+          <div class="value" id="stat-delivering">—</div>
+        </div>
+        <div class="stat-tile red">
+          <div class="st-icon"><i data-lucide="x-circle" width="18" height="18"></i></div>
+          <div class="label">Cancelados</div>
+          <div class="value" id="stat-cancelled">—</div>
+        </div>
+        <div class="stat-tile amber">
+          <div class="st-icon"><i data-lucide="banknote" width="18" height="18"></i></div>
+          <div class="label">Faturamento</div>
+          <div class="value" id="stat-revenue">—</div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
       <div class="filter-bar">
-        <button class="btn btn-primary btn-sm" data-filter="">Todos</button>
-        <button class="btn btn-ghost btn-sm" data-filter="new">Novos</button>
-        <button class="btn btn-ghost btn-sm" data-filter="accepted">Aceitos</button>
-        <button class="btn btn-ghost btn-sm" data-filter="preparing">Preparando</button>
-        <button class="btn btn-ghost btn-sm" data-filter="delivering">A caminho</button>
-        <button class="btn btn-ghost btn-sm" data-filter="delivered">Entregues</button>
-        <button class="btn btn-ghost btn-sm" data-filter="cancelled">Cancelados</button>
+        <input type="search" id="search-input" class="filter-input" placeholder="Buscar pedido ou cliente…">
+        <select id="period-select" class="filter-select">
+          <option value="today">Hoje</option>
+          <option value="week">Últimos 7 dias</option>
+          <option value="month">Este mês</option>
+          <option value="all" selected>Todos os períodos</option>
+        </select>
+        <select id="status-select" class="filter-select">
+          <option value="">Todos os status</option>
+          <option value="new">Novos</option>
+          <option value="accepted">Aceitos</option>
+          <option value="preparing">Preparando</option>
+          <option value="delivering">A caminho</option>
+          <option value="delivered">Entregues</option>
+          <option value="cancelled">Cancelados</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="clearFilters()"><i data-lucide="x" width="14" height="14"></i> Limpar filtros</button>
         <div class="spacer"></div>
-        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--fg-2);cursor:pointer">
+        <label class="ord-autorefresh-lbl">
           <label class="toggle" style="margin:0"><input type="checkbox" id="auto-refresh" checked><span class="toggle-slider"></span></label>
           Auto-atualizar
         </label>
       </div>
 
-      <div class="card">
+      <!-- Desktop table -->
+      <div class="card ord-desktop-card">
         <div class="tbl-wrap">
           <table>
             <thead>
               <tr>
-                <th>Pedido</th><th>Cliente</th><th>Endereço</th><th>Total</th><th>Pagamento</th><th>Status</th><th>Horário</th><th></th>
+                <th>Pedido</th>
+                <th>Data e Hora</th>
+                <th>Cliente</th>
+                <th>Valor</th>
+                <th>Status</th>
+                <th>Pagamento</th>
+                <th>Entrega</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="orders-tbody">
@@ -92,16 +141,22 @@
             </tbody>
           </table>
         </div>
-        <div class="pagination" id="pagination"></div>
+        <div class="ord-pagination" id="pagination-desktop"></div>
       </div>
+
+      <!-- Mobile cards -->
+      <div class="ord-mobile-list" id="orders-mobile"></div>
+      <div class="ord-pagination" id="pagination-mobile"></div>
+
     </div>
   </div>
 </div>
 
-<script src="assets/app.js?v=3"></script>
+<script src="assets/app.js?v=5"></script>
 <script>
-let currentFilter = '';
+let allOrders = [];
 let currentPage = 1;
+const perPage = 20;
 let lastNewCount = 0;
 let audioCtx;
 let refreshTimer;
@@ -111,7 +166,6 @@ const PAGE_TITLE = 'Pedidos · Plantão Admin';
 const urlParams = new URLSearchParams(window.location.search);
 const directOrderId = urlParams.get('id');
 
-/* ── Chime: C5 → E5 → G5 (acorde maior ascendente) ── */
 function playChime() {
   try {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -119,8 +173,7 @@ function playChime() {
     [[523.25, 0], [659.25, 0.15], [783.99, 0.30]].forEach(([freq, delay]) => {
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = freq;
+      osc.type = 'sine'; osc.frequency.value = freq;
       osc.connect(gain); gain.connect(audioCtx.destination);
       const t = audioCtx.currentTime + delay;
       gain.gain.setValueAtTime(0, t);
@@ -131,98 +184,161 @@ function playChime() {
   } catch {}
 }
 
-/* ── Tab title flash ── */
 function flashTitle(count) {
-  clearInterval(titleFlashTimer);
-  let on = true;
-  titleFlashTimer = setInterval(() => {
-    document.title = on ? `🔔 ${count} NOVO(S) PEDIDO(S)` : PAGE_TITLE;
-    on = !on;
-  }, 900);
+  clearInterval(titleFlashTimer); let on = true;
+  titleFlashTimer = setInterval(() => { document.title = on ? `🔔 ${count} NOVO(S) PEDIDO(S)` : PAGE_TITLE; on = !on; }, 900);
 }
-function stopFlash() {
-  clearInterval(titleFlashTimer);
-  document.title = PAGE_TITLE;
+function stopFlash() { clearInterval(titleFlashTimer); document.title = PAGE_TITLE; }
+function alertNewOrders(count) { playChime(); sendBrowserNotification(count); flashTitle(count); }
+function clearNewAlerts() { stopFlash(); }
+
+function fmtDelivery(type) {
+  if (!type) return '—';
+  const map = { delivery: 'Entrega', pickup: 'Retirada', 'take-away': 'Retirada' };
+  return map[type] || type;
 }
 
-/* ── Alert hub: called when new orders detected ── */
-function alertNewOrders(count) {
-  playChime();
-  sendBrowserNotification(count);
-  flashTitle(count);
+const STATUS_CLS   = { new:'ord-s-new', accepted:'ord-s-accepted', preparing:'ord-s-preparing', delivering:'ord-s-delivering', delivered:'ord-s-delivered', cancelled:'ord-s-cancelled' };
+const STATUS_LABEL = { new:'Novo', accepted:'Aceito', preparing:'Preparando', delivering:'A caminho', delivered:'Entregue', cancelled:'Cancelado' };
+
+function statusBadge(status) {
+  return `<span class="ord-badge ${STATUS_CLS[status]||''}">${STATUS_LABEL[status]||status}</span>`;
 }
-function clearNewAlerts() {
-  stopFlash();
+
+/* ── Filters ── */
+let searchVal = '', periodVal = 'all', statusVal = '';
+
+document.getElementById('search-input').addEventListener('input', function() { searchVal = this.value.toLowerCase().trim(); currentPage = 1; renderOrders(); });
+document.getElementById('period-select').addEventListener('change', function() { periodVal = this.value; currentPage = 1; renderOrders(); });
+document.getElementById('status-select').addEventListener('change', function() { statusVal = this.value; currentPage = 1; renderOrders(); });
+
+function clearFilters() {
+  searchVal = ''; periodVal = 'all'; statusVal = '';
+  document.getElementById('search-input').value = '';
+  document.getElementById('period-select').value = 'all';
+  document.getElementById('status-select').value = '';
+  currentPage = 1; renderOrders();
+}
+
+function matchesPeriod(o) {
+  if (periodVal === 'all') return true;
+  const d = new Date(o.created_at), now = new Date();
+  if (periodVal === 'today') return d.toDateString() === now.toDateString();
+  if (periodVal === 'week') { const ago = new Date(now); ago.setDate(now.getDate()-7); return d >= ago; }
+  if (periodVal === 'month') return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth();
+  return true;
+}
+
+function filteredOrders() {
+  return allOrders.filter(o => {
+    if (statusVal && o.status !== statusVal) return false;
+    if (!matchesPeriod(o)) return false;
+    if (searchVal) {
+      const hay = `#${o.order_number} ${o.customer_name} ${o.customer_phone||''}`.toLowerCase();
+      if (!hay.includes(searchVal)) return false;
+    }
+    return true;
+  });
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent      = allOrders.length;
+  document.getElementById('stat-delivered').textContent  = allOrders.filter(o=>o.status==='delivered').length;
+  document.getElementById('stat-delivering').textContent = allOrders.filter(o=>o.status==='delivering').length;
+  document.getElementById('stat-cancelled').textContent  = allOrders.filter(o=>o.status==='cancelled').length;
+  const rev = allOrders.filter(o=>o.status==='delivered').reduce((s,o)=>s+parseFloat(o.total||0),0);
+  document.getElementById('stat-revenue').textContent = fmtMoney(rev);
+}
+
+function renderPagination(total, cid) {
+  const pg = document.getElementById(cid); if (!pg) return;
+  const pages = Math.ceil(total / perPage);
+  if (total === 0) { pg.innerHTML = ''; return; }
+  if (pages <= 1) { pg.innerHTML = `<span class="info">${total} pedido(s)</span>`; return; }
+  let html = `<button ${currentPage===1?'disabled':''} onclick="goPage(${currentPage-1})">&#8249;</button>`;
+  for (let i = 1; i <= Math.min(pages,7); i++)
+    html += `<button class="${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  html += `<button ${currentPage>=pages?'disabled':''} onclick="goPage(${currentPage+1})">&#8250;</button>`;
+  html += `<span class="info">${total} pedido(s)</span>`;
+  pg.innerHTML = html;
+}
+
+function goPage(p) { currentPage = p; renderOrders(); window.scrollTo(0,0); }
+
+function renderOrders() {
+  updateStats();
+  const list = filteredOrders();
+  const start = (currentPage-1)*perPage;
+  const page = list.slice(start, start+perPage);
+
+  /* Desktop */
+  const tbody = document.getElementById('orders-tbody');
+  if (!page.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><i data-lucide="inbox" width="28" height="28"></i><p>Nenhum pedido encontrado</p></div></td></tr>`;
+  } else {
+    tbody.innerHTML = page.map(o => `
+      <tr class="ord-row-${o.status}">
+        <td><strong>#${o.order_number}</strong></td>
+        <td style="font-size:12px;color:var(--fg-2);white-space:nowrap">${fmtDate(o.created_at)}</td>
+        <td>
+          <div style="font-weight:600;font-size:13px">${o.customer_name}</div>
+          <div style="font-size:11.5px;color:var(--fg-3)">${o.customer_phone||''}</div>
+        </td>
+        <td><strong>${fmtMoney(o.total)}</strong></td>
+        <td style="white-space:nowrap">${statusBadge(o.status)}</td>
+        <td style="font-size:12.5px;color:var(--fg-2)">${fmtPayment(o.payment_method)}</td>
+        <td style="font-size:12.5px;color:var(--fg-2)">${fmtDelivery(o.delivery_type)}</td>
+        <td style="white-space:nowrap">${nextStatusBtn(o.id,o.status)} <button class="btn btn-ghost btn-sm" onclick="viewOrder(${o.id})">Detalhes</button></td>
+      </tr>`).join('');
+  }
+
+  /* Mobile */
+  const mob = document.getElementById('orders-mobile');
+  mob.innerHTML = page.map(o => `
+    <div class="ord-card ord-card-${o.status}">
+      <div class="ord-card-left">
+        <div class="ord-card-num">#${o.order_number}</div>
+        <div class="ord-card-time">${fmtDate(o.created_at)}</div>
+        ${statusBadge(o.status)}
+      </div>
+      <div class="ord-card-mid">
+        <div class="ord-card-name">${o.customer_name}</div>
+        <div class="ord-card-meta">${o.customer_phone||''}</div>
+        <div class="ord-card-meta">${fmtPayment(o.payment_method)} · ${fmtDelivery(o.delivery_type)}</div>
+        <div class="ord-card-value">${fmtMoney(o.total)}</div>
+      </div>
+      <div class="ord-card-actions">
+        ${nextStatusBtn(o.id, o.status)}
+        <button class="btn btn-ghost btn-sm" onclick="viewOrder(${o.id})" style="padding:6px"><i data-lucide="chevron-right" width="16" height="16"></i></button>
+      </div>
+    </div>`).join('');
+
+  lucide.createIcons();
+  renderPagination(list.length, 'pagination-desktop');
+  renderPagination(list.length, 'pagination-mobile');
 }
 
 async function loadOrders() {
-  const qs = new URLSearchParams({ limit: 20, page: currentPage });
-  if (currentFilter) qs.set('status', currentFilter);
   try {
-    const data = await api(`/orders?${qs}`);
+    const data = await api('/orders?limit=500');
     if (!data) return;
-    const orders = data.data || [];
-    const total  = data.total || 0;
+    allOrders = data.data || [];
 
-    const newOrders = orders.filter(o => o.status === 'new').length;
+    const newOrders = allOrders.filter(o => o.status === 'new').length;
     const badge = document.getElementById('new-count');
     if (newOrders > 0) { badge.textContent = newOrders; badge.style.display = ''; }
     else { badge.style.display = 'none'; clearNewAlerts(); }
     if (newOrders > lastNewCount && lastNewCount >= 0) alertNewOrders(newOrders);
     lastNewCount = newOrders;
 
-    const tbody = document.getElementById('orders-tbody');
-    if (!orders.length) {
-      tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><i data-lucide="inbox" width="28" height="28"></i><p>Nenhum pedido encontrado</p></div></td></tr>';
-      lucide.createIcons(); return;
-    }
-    tbody.innerHTML = orders.map(o => `
-      <tr>
-        <td><strong>#${o.order_number}</strong></td>
-        <td>
-          <div style="font-weight:600">${o.customer_name}</div>
-          <div style="font-size:11.5px;color:var(--fg-2)">${o.customer_phone || ''}</div>
-        </td>
-        <td style="font-size:12.5px;color:var(--fg-2);max-width:180px">
-          ${o.address_street ? o.address_street + ', ' + (o.address_number||'') : '—'}
-          ${o.address_neighborhood ? '<br>' + o.address_neighborhood : ''}
-        </td>
-        <td><strong>${fmtMoney(o.total)}</strong></td>
-        <td style="font-size:12.5px;color:var(--fg-2)">${fmtPayment(o.payment_method)}</td>
-        <td style="white-space:nowrap">${nextStatusBtn(o.id,o.status)}</td>
-        <td style="white-space:nowrap;font-size:12px;color:var(--fg-2)">${fmtDate(o.created_at)}</td>
-        <td><button class="btn btn-ghost btn-sm" onclick="viewOrder(${o.id})">Detalhes</button></td>
-      </tr>
-    `).join('');
-    lucide.createIcons();
-
-    const pages = Math.ceil(total / 20);
-    const pg = document.getElementById('pagination');
-    if (pages <= 1) { pg.innerHTML = `<span class="info">${total} pedido(s)</span>`; return; }
-    let html = `<button ${currentPage===1?'disabled':''} onclick="goPage(${currentPage-1})">&#8249;</button>`;
-    for (let i = 1; i <= Math.min(pages,7); i++)
-      html += `<button class="${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
-    html += `<button ${currentPage>=pages?'disabled':''} onclick="goPage(${currentPage+1})">&#8250;</button>`;
-    html += `<span class="info">${total} pedido(s)</span>`;
-    pg.innerHTML = html;
+    renderOrders();
   } catch (e) {
     console.error(e);
     const tbody = document.getElementById('orders-tbody');
     if (tbody) tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><p style="color:var(--red)">Erro ao carregar: ${e.message}</p><button class="btn btn-primary btn-sm" onclick="loadOrders()">Tentar novamente</button></div></td></tr>`;
+    document.getElementById('orders-mobile').innerHTML = '';
   }
 }
-
-function goPage(p) { currentPage = p; loadOrders(); }
-
-document.querySelectorAll('[data-filter]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    currentFilter = btn.dataset.filter;
-    currentPage = 1;
-    document.querySelectorAll('[data-filter]').forEach(b => b.className = 'btn btn-ghost btn-sm');
-    btn.className = 'btn btn-primary btn-sm';
-    loadOrders();
-  });
-});
 
 function startRefresh() { refreshTimer = setInterval(loadOrders, 12000); }
 function stopRefresh()  { clearInterval(refreshTimer); }

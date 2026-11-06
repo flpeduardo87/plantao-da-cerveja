@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Estoque · Plantão Admin</title>
 <link rel="icon" href="../favicon-icone.webp">
-<link rel="stylesheet" href="assets/style.css?v=3">
+<link rel="stylesheet" href="assets/style.css?v=5">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
@@ -168,7 +168,7 @@
   </div>
 </div>
 
-<script src="assets/app.js?v=3"></script>
+<script src="assets/app.js?v=5"></script>
 <script>
 let allProducts = [];
 let stockFilter = '';
