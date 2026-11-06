@@ -172,12 +172,14 @@
       </div>
       <div class="filter-bar">
         <input type="search" id="search-input" class="filter-input" placeholder="Buscar produto…">
-        <select id="cat-select" class="filter-select"><option value="">Todas as categorias</option></select>
-        <select id="status-select" class="filter-select">
-          <option value="">Todos os status</option>
-          <option value="1">Disponível</option>
-          <option value="0">Indisponível</option>
-        </select>
+        <div class="filter-selects-row">
+          <select id="cat-select" class="filter-select"><option value="">Todas as categorias</option></select>
+          <select id="status-select" class="filter-select">
+            <option value="">Todos os status</option>
+            <option value="1">Disponível</option>
+            <option value="0">Indisponível</option>
+          </select>
+        </div>
         <div class="spacer"></div>
         <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i data-lucide="download" width="14" height="14"></i> Exportar</button>
       </div>
