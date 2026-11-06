@@ -114,6 +114,7 @@
   <div class="main">
     <div class="topbar">
       <button class="hamburger" id="hamburger"><i data-lucide="menu" width="24" height="24"></i></button>
+      <img src="../favicon-icone.webp" class="topbar-logo" alt="">
       <h1>Categorias</h1>
       <div class="topbar-right">
         <button class="store-status closed" id="store-status-btn" data-open="0"><span class="dot"></span>Carregando…</button>

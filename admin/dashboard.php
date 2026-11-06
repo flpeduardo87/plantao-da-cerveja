@@ -57,6 +57,7 @@
   <div class="main">
     <div class="topbar">
       <button class="hamburger" id="hamburger"><i data-lucide="menu" width="24" height="24"></i></button>
+      <img src="../favicon-icone.webp" class="topbar-logo" alt="">
       <h1>Dashboard</h1>
       <div class="topbar-right">
         <button id="btn-notify" class="btn btn-sm btn-ghost" onclick="askNotifyPermission()"><i data-lucide="bell-off" width="14" height="14"></i> Ativar alertas</button>
