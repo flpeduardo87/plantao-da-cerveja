@@ -374,3 +374,23 @@ textarea{resize:vertical;min-height:80px}
   .stats-grid{grid-template-columns:1fr}
   .info-grid{grid-template-columns:1fr}
 }
+
+/* ── Product table redesign ── */
+.filter-input{
+  padding:8px 12px;border-radius:8px;border:1px solid var(--border);
+  background:#F8FAFC;font:13px 'Inter',sans-serif;color:var(--fg);outline:none;
+  transition:border-color .1s;width:200px
+}
+.filter-input:focus{border-color:var(--amber);background:#fff;box-shadow:0 0 0 3px rgba(252,218,36,.12)}
+.filter-select{
+  padding:8px 12px;border-radius:8px;border:1px solid var(--border);
+  background:#F8FAFC;font:13px 'Inter',sans-serif;color:var(--fg);outline:none;
+  transition:border-color .1s;cursor:pointer
+}
+.filter-select:focus{border-color:var(--amber);background:#fff;box-shadow:0 0 0 3px rgba(252,218,36,.12)}
+.cat-badge{
+  display:inline-block;padding:3px 9px;border-radius:5px;
+  font-size:11.5px;font-weight:600;background:#F1F5F9;color:var(--fg-2);white-space:nowrap
+}
+.prod-actions{display:flex;align-items:center;gap:1px}
+input[type=checkbox].row-chk,#chk-all{width:16px;height:16px;cursor:pointer;accent-color:var(--amber)}

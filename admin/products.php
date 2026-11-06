@@ -163,10 +163,34 @@
     </div>
 
     <div class="page">
-      <div class="filter-bar" id="cat-filters">
-        <button class="btn btn-primary btn-sm" data-cat="">Todos</button>
+      <div class="stats-grid">
+        <div class="stat-tile blue"><div class="st-icon"><i data-lucide="box" width="18" height="18"></i></div><div class="label">Cadastrados</div><div class="value" id="stat-total">—</div></div>
+        <div class="stat-tile green"><div class="st-icon"><i data-lucide="check-circle" width="18" height="18"></i></div><div class="label">Disponíveis</div><div class="value" id="stat-avail">—</div></div>
+        <div class="stat-tile red"><div class="st-icon"><i data-lucide="x-circle" width="18" height="18"></i></div><div class="label">Indisponíveis</div><div class="value" id="stat-unavail">—</div></div>
+        <div class="stat-tile amber"><div class="st-icon"><i data-lucide="tag" width="18" height="18"></i></div><div class="label">Em oferta</div><div class="value" id="stat-featured">—</div></div>
+        <div class="stat-tile purple"><div class="st-icon"><i data-lucide="layers" width="18" height="18"></i></div><div class="label">Categorias</div><div class="value" id="stat-cats">—</div></div>
       </div>
-      <div id="products-list"></div>
+      <div class="filter-bar">
+        <input type="search" id="search-input" class="filter-input" placeholder="Buscar produto…">
+        <select id="cat-select" class="filter-select"><option value="">Todas as categorias</option></select>
+        <select id="status-select" class="filter-select">
+          <option value="">Todos os status</option>
+          <option value="1">Disponível</option>
+          <option value="0">Indisponível</option>
+        </select>
+        <div class="spacer"></div>
+        <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i data-lucide="download" width="14" height="14"></i> Exportar</button>
+      </div>
+      <div class="card"><div class="tbl-wrap"><table>
+        <thead><tr>
+          <th style="width:36px"><input type="checkbox" id="chk-all" onclick="toggleAllChk(this)"></th>
+          <th>Produto</th><th style="width:110px">Categoria</th>
+          <th style="width:100px">Preço</th><th style="width:70px">Estoque</th>
+          <th style="width:80px">Status</th><th style="width:70px">Oferta</th>
+          <th style="width:88px"></th>
+        </tr></thead>
+        <tbody id="products-list"></tbody>
+      </table></div></div>
     </div>
   </div>
 </div>
@@ -174,44 +198,42 @@
 <script src="assets/app.js?v=3"></script>
 <script>
 let categories = [];
-let catFilter = '';
+let allProds = [];
+let searchVal = '', catFilter = '', statusFilter = '';
 let deleteId = null;
 
 async function toggleProduct(id, current) {
   const newVal = current ? 0 : 1;
-  const cb  = document.getElementById(`cb-active-${id}`);
-  const lbl = document.getElementById(`lbl-active-${id}`);
-  if (cb)  cb.checked    = !!newVal;
-  if (lbl) { lbl.textContent = newVal ? 'Disponível' : 'Indisponível'; lbl.style.color = newVal ? 'var(--green)' : 'var(--fg-3)'; }
-  // atualiza onclick para próximo clique
-  const row = document.getElementById(`prod-row-${id}`);
-  if (row) row.querySelector('.prod-toggle-cell').setAttribute('onclick', `toggleProduct(${id},${newVal})`);
+  const cb = document.getElementById(`cb-active-${id}`);
+  const div = document.getElementById(`toggle-active-${id}`);
+  if (cb) cb.checked = !!newVal;
+  if (div) div.setAttribute('onclick', `toggleProduct(${id},${newVal})`);
   try {
     await api(`/products/${id}`, { method: 'PUT', body: JSON.stringify({ active: newVal }) });
     toast(newVal ? 'Produto ativado' : 'Produto desativado');
+    const p = allProds.find(x => x.id === id);
+    if (p) { p.active = newVal; renderProds(); }
   } catch(e) {
-    if (cb)  cb.checked    = !!current;
-    if (lbl) { lbl.textContent = current ? 'Disponível' : 'Indisponível'; lbl.style.color = current ? 'var(--green)' : 'var(--fg-3)'; }
-    if (row) row.querySelector('.prod-toggle-cell').setAttribute('onclick', `toggleProduct(${id},${current})`);
+    if (cb) cb.checked = !!current;
+    if (div) div.setAttribute('onclick', `toggleProduct(${id},${current})`);
     toast(e.message, 'error');
   }
 }
 
 async function toggleFeatured(id, current) {
   const newVal = current ? 0 : 1;
-  const cb  = document.getElementById(`cb-featured-${id}`);
-  const lbl = document.getElementById(`lbl-featured-${id}`);
-  if (cb)  cb.checked    = !!newVal;
-  if (lbl) { lbl.textContent = newVal ? 'Promoção' : '—'; lbl.style.color = newVal ? 'var(--amber-dk)' : 'var(--fg-3)'; }
-  const row = document.getElementById(`prod-row-${id}`);
-  if (row) row.querySelectorAll('.prod-toggle-cell')[1].setAttribute('onclick', `toggleFeatured(${id},${newVal})`);
+  const cb = document.getElementById(`cb-featured-${id}`);
+  const div = document.getElementById(`toggle-featured-${id}`);
+  if (cb) cb.checked = !!newVal;
+  if (div) div.setAttribute('onclick', `toggleFeatured(${id},${newVal})`);
   try {
     await api(`/products/${id}`, { method: 'PUT', body: JSON.stringify({ featured: newVal }) });
     toast(newVal ? 'Marcado como oferta' : 'Oferta removida');
+    const p = allProds.find(x => x.id === id);
+    if (p) { p.featured = newVal; renderProds(); }
   } catch(e) {
-    if (cb)  cb.checked    = !!current;
-    if (lbl) { lbl.textContent = current ? 'Promoção' : '—'; lbl.style.color = current ? 'var(--amber-dk)' : 'var(--fg-3)'; }
-    if (row) row.querySelectorAll('.prod-toggle-cell')[1].setAttribute('onclick', `toggleFeatured(${id},${current})`);
+    if (cb) cb.checked = !!current;
+    if (div) div.setAttribute('onclick', `toggleFeatured(${id},${current})`);
     toast(e.message, 'error');
   }
 }
@@ -221,8 +243,7 @@ async function loadCategories() {
     const res = await api('/categories');
     categories = Array.isArray(res) ? res : (res.data || []);
     const sel = document.getElementById('p-category');
-    const wrap = document.getElementById('cat-filters');
-    // Deduplicate by name, keep icon type preferred; sort: Ofertas first, rest alphabetically
+    const catSel = document.getElementById('cat-select');
     const seen = new Map();
     categories.forEach(c => {
       const key = c.name.toLowerCase();
@@ -235,91 +256,105 @@ async function loadCategories() {
     });
     deduped.forEach(c => {
       sel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
-      const btn = document.createElement('button');
-      btn.className = 'btn btn-ghost btn-sm';
-      btn.dataset.cat = c.slug;
-      btn.textContent = c.name;
-      if (c.slug === 'ofertas') btn.style.cssText = 'color:var(--amber);border-color:var(--amber)';
-      btn.addEventListener('click', () => setCatFilter(c.slug, btn));
-      wrap.appendChild(btn);
+      catSel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
     });
   } catch {}
 }
 
-function setCatFilter(slug, btn) {
-  catFilter = slug;
-  document.querySelectorAll('[data-cat]').forEach(b => b.className = 'btn btn-ghost btn-sm');
-  btn.className = 'btn btn-primary btn-sm';
-  loadProducts();
+async function loadProducts() {
+  const tbody = document.getElementById('products-list');
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--fg-3)">Carregando…</td></tr>';
+  try {
+    const res = await api('/products?all=1');
+    allProds = Array.isArray(res) ? res : (res.data || []);
+    renderProds();
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><p style="color:var(--red)">${e.message}</p></div></td></tr>`;
+  }
 }
 
-async function loadProducts() {
-  const qs = catFilter ? `?all=1&category=${catFilter}` : '?all=1';
-  const list = document.getElementById('products-list');
-  list.innerHTML = '<p style="padding:24px;color:var(--fg-3)">Carregando…</p>';
-  try {
-    const res = await api(`/products${qs}`);
-    const products = Array.isArray(res) ? res : (res.data || []);
-    if (!products.length) {
-      list.innerHTML = '<div class="empty"><i data-lucide="inbox" width="28" height="28"></i><p>Nenhum produto cadastrado</p></div>';
-      lucide.createIcons(); return;
-    }
-    const grouped = {};
-    products.forEach(p => {
-      const key = p.category_name || 'Sem categoria';
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push(p);
-    });
-    list.innerHTML = Object.entries(grouped).map(([cat, prods]) => `
-      <div style="margin-bottom:20px">
-        <h3 style="font-size:11px;font-weight:700;color:var(--fg-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">${cat}</h3>
-        <div class="card"><div class="tbl-wrap"><table>
-          <thead><tr><th style="width:52px">Foto</th><th>Nome</th><th style="width:100px">Preço</th><th style="width:80px">Estoque</th><th style="width:80px">Status</th><th style="width:70px">Oferta</th><th style="width:90px"></th></tr></thead>
-          <tbody>${prods.map(p => `
-            <tr id="prod-row-${p.id}">
-              <td>${p.image_url
-                ? `<img src="${p.image_url}" style="width:44px;height:44px;border-radius:8px;object-fit:cover">`
-                : `<div class="prod-img-ph"><i data-lucide="image" width="18" height="18"></i></div>`
-              }</td>
-              <td>
-                <div style="font-weight:600">${p.name}</div>
-                ${p.description ? `<div style="font-size:11.5px;color:var(--fg-2)">${p.description.slice(0,60)}${p.description.length>60?'…':''}</div>` : ''}
-              </td>
-              <td>
-                <strong>${fmtMoney(p.price)}</strong>
-                ${p.old_price ? `<div style="font-size:11px;color:var(--fg-3);text-decoration:line-through">${fmtMoney(p.old_price)}</div>` : ''}
-              </td>
-              <td style="font-size:13px">${p.stock > 0 ? p.stock + ' un.' : '<span style="color:var(--fg-3)">Ilimitado</span>'}</td>
-              <td>
-                <div class="prod-toggle-cell" onclick="toggleProduct(${p.id},${p.active})">
-                  <label class="toggle" style="pointer-events:none">
-                    <input type="checkbox" id="cb-active-${p.id}" ${p.active ? 'checked' : ''} style="pointer-events:none">
-                    <span class="toggle-slider"></span>
-                  </label>
-                  <span id="lbl-active-${p.id}" class="prod-toggle-label" style="color:${p.active ? 'var(--green)' : 'var(--fg-3)'}">${p.active ? 'Disponível' : 'Indisponível'}</span>
-                </div>
-              </td>
-              <td>
-                <div class="prod-toggle-cell" onclick="toggleFeatured(${p.id},${p.featured?1:0})">
-                  <label class="toggle" style="pointer-events:none">
-                    <input type="checkbox" id="cb-featured-${p.id}" ${p.featured ? 'checked' : ''} style="pointer-events:none">
-                    <span class="toggle-slider"></span>
-                  </label>
-                  <span id="lbl-featured-${p.id}" class="prod-toggle-label" style="color:${p.featured ? 'var(--amber-dk)' : 'var(--fg-3)'}">${p.featured ? 'Promoção' : '—'}</span>
-                </div>
-              </td>
-              <td style="white-space:nowrap">
-                <button class="btn btn-ghost btn-sm" onclick="editProduct(${p.id})">Editar</button>
-                <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="confirmDelete(${p.id})">Excluir</button>
-              </td>
-            </tr>`).join('')}
-          </tbody>
-        </table></div></div>
-      </div>`).join('');
-    lucide.createIcons();
-  } catch (e) {
-    list.innerHTML = `<div class="empty"><p style="color:var(--red)">${e.message}</p></div>`;
+function renderProds() {
+  const total = allProds.length;
+  const avail = allProds.filter(p => p.active).length;
+  const feat  = allProds.filter(p => p.featured).length;
+  const cats  = new Set(allProds.map(p => p.category_id).filter(Boolean)).size;
+  document.getElementById('stat-total').textContent   = total;
+  document.getElementById('stat-avail').textContent   = avail;
+  document.getElementById('stat-unavail').textContent = total - avail;
+  document.getElementById('stat-featured').textContent = feat;
+  document.getElementById('stat-cats').textContent    = cats;
+
+  const q = searchVal.toLowerCase();
+  const prods = allProds.filter(p => {
+    if (q && !p.name.toLowerCase().includes(q) && !(p.brand||'').toLowerCase().includes(q)) return false;
+    if (catFilter && String(p.category_id) !== catFilter) return false;
+    if (statusFilter !== '' && String(p.active ? 1 : 0) !== statusFilter) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('products-list');
+  if (!prods.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><i data-lucide="inbox" width="28" height="28"></i><p>Nenhum produto encontrado</p></div></td></tr>';
+    lucide.createIcons(); return;
   }
+  tbody.innerHTML = prods.map(p => `
+    <tr id="prod-row-${p.id}">
+      <td><input type="checkbox" class="row-chk" value="${p.id}"></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          ${p.image_url
+            ? `<img src="${p.image_url}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0">`
+            : `<div class="prod-img-ph"><i data-lucide="image" width="18" height="18"></i></div>`}
+          <div>
+            <div style="font-weight:600;line-height:1.2">${p.name}</div>
+            <div style="font-size:11px;color:var(--fg-3);margin-top:2px">#${p.id}</div>
+          </div>
+        </div>
+      </td>
+      <td>${p.category_name ? `<span class="cat-badge">${p.category_name}</span>` : '<span style="color:var(--fg-3)">—</span>'}</td>
+      <td>
+        <strong>${fmtMoney(p.price)}</strong>
+        ${p.old_price ? `<div style="font-size:11px;color:var(--fg-3);text-decoration:line-through">${fmtMoney(p.old_price)}</div>` : ''}
+      </td>
+      <td style="font-size:13px;color:var(--fg-2)">${p.stock > 0 ? p.stock : '∞'}</td>
+      <td>
+        <div id="toggle-active-${p.id}" onclick="toggleProduct(${p.id},${p.active?1:0})" style="cursor:pointer;display:inline-block">
+          <label class="toggle" style="pointer-events:none">
+            <input type="checkbox" id="cb-active-${p.id}" ${p.active?'checked':''}>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </td>
+      <td>
+        <div id="toggle-featured-${p.id}" onclick="toggleFeatured(${p.id},${p.featured?1:0})" style="cursor:pointer;display:inline-block">
+          <label class="toggle" style="pointer-events:none">
+            <input type="checkbox" id="cb-featured-${p.id}" ${p.featured?'checked':''}>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </td>
+      <td>
+        <div class="prod-actions">
+          <button class="btn-icon borderless" onclick="editProduct(${p.id})" title="Editar"><i data-lucide="pencil" width="14" height="14"></i></button>
+          <button class="btn-icon borderless" onclick="duplicateProduct(${p.id})" title="Duplicar"><i data-lucide="copy" width="14" height="14"></i></button>
+          <button class="btn-icon borderless" onclick="confirmDelete(${p.id})" title="Excluir" style="color:var(--red)"><i data-lucide="trash-2" width="14" height="14"></i></button>
+        </div>
+      </td>
+    </tr>`).join('');
+  lucide.createIcons();
+}
+
+function toggleAllChk(master) {
+  document.querySelectorAll('.row-chk').forEach(cb => cb.checked = master.checked);
+}
+
+function exportCSV() {
+  const rows = [['ID','Nome','Categoria','Preço','Estoque','Ativo','Oferta']];
+  allProds.forEach(p => rows.push([p.id, p.name, p.category_name||'', p.price, p.stock, p.active?'Sim':'Não', p.featured?'Sim':'Não']));
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'produtos.csv'; a.click();
 }
 
 function toggleDeposit(checked) {
@@ -354,7 +389,6 @@ async function editProduct(id) {
     document.getElementById('p-active').checked = p.active == 1;
     document.getElementById('p-featured').checked = p.featured == 1;
     document.getElementById('p-image-url').value = p.image_url || '';
-    // Variant fields
     document.getElementById('p-brand').value = p.brand || '';
     document.getElementById('p-unit-type').value = p.unit_type || '';
     document.getElementById('p-size').value = p.size || '';
@@ -365,7 +399,7 @@ async function editProduct(id) {
     const prev = document.getElementById('p-img-preview');
     if (p.image_url) { prev.src = p.image_url; prev.style.display = 'block'; }
     else { prev.style.display = 'none'; }
-  } catch (e) { toast(e.message, 'error'); closeModal('modal-product'); }
+  } catch(e) { toast(e.message, 'error'); closeModal('modal-product'); }
 }
 
 function previewImg(input) {
@@ -418,8 +452,25 @@ async function saveProduct(e) {
     if (id) { await api(`/products/${id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('Produto atualizado'); }
     else { await api('/products', { method: 'POST', body: JSON.stringify(body) }); toast('Produto criado'); }
     closeModal('modal-product'); loadProducts();
-  } catch (err) { toast(err.message, 'error'); }
+  } catch(err) { toast(err.message, 'error'); }
   finally { btn.disabled = false; btn.textContent = 'Salvar produto'; }
+}
+
+async function duplicateProduct(id) {
+  const p = allProds.find(x => x.id === id);
+  if (!p) return;
+  try {
+    const body = {
+      name: p.name + ' (cópia)', price: p.price, old_price: p.old_price || null,
+      category_id: p.category_id || null, description: p.description || '',
+      stock: p.stock || 0, sort_order: p.sort_order || 0, active: 0, featured: 0,
+      image_url: p.image_url || '', brand: p.brand || null,
+      unit_type: p.unit_type || null, size: p.size || null,
+      has_deposit: p.has_deposit || 0, deposit_value: p.deposit_value || 0,
+    };
+    await api('/products', { method: 'POST', body: JSON.stringify(body) });
+    toast('Produto duplicado'); loadProducts();
+  } catch(e) { toast(e.message, 'error'); }
 }
 
 function confirmDelete(id) { deleteId = id; openModal('modal-delete'); }
@@ -429,12 +480,12 @@ document.getElementById('btn-confirm-delete').addEventListener('click', async ()
   try {
     await api(`/products/${deleteId}`, { method: 'DELETE' });
     toast('Produto excluído'); closeModal('modal-delete'); loadProducts();
-  } catch (e) { toast(e.message, 'error'); }
+  } catch(e) { toast(e.message, 'error'); }
 });
 
-document.querySelectorAll('[data-cat]').forEach(btn => {
-  btn.addEventListener('click', () => setCatFilter(btn.dataset.cat, btn));
-});
+document.getElementById('search-input').addEventListener('input', e => { searchVal = e.target.value; renderProds(); });
+document.getElementById('cat-select').addEventListener('change', e => { catFilter = e.target.value; renderProds(); });
+document.getElementById('status-select').addEventListener('change', e => { statusFilter = e.target.value; renderProds(); });
 
 loadCategories();
 loadProducts();
