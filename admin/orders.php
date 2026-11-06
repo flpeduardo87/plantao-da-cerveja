@@ -278,7 +278,7 @@ function renderOrders() {
   } else {
     tbody.innerHTML = page.map(o => `
       <tr class="ord-row-${o.status}">
-        <td><strong>#${o.order_number}</strong></td>
+        <td><strong>#${String(o.order_number).slice(-6)}</strong></td>
         <td style="font-size:12px;color:var(--fg-2);white-space:nowrap">${fmtDate(o.created_at)}</td>
         <td>
           <div style="font-weight:600;font-size:13px">${o.customer_name}</div>
