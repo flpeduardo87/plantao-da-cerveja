@@ -408,8 +408,7 @@ textarea{resize:vertical;min-height:80px}
 @media(max-width:768px){
   .filter-bar{flex-wrap:wrap;row-gap:8px}
   .prod-search{width:100%;flex:none}
-  .prod-selects-wrap{width:100%}
-  .prod-selects-wrap .filter-select{flex:1;min-width:0}
+  .prod-selects-wrap{width:100%;display:grid;grid-template-columns:1fr 1fr}
   .prod-btns-wrap{width:100%}
   .prod-btns-wrap .btn{flex:1}
   .filter-bar .spacer{display:none}
