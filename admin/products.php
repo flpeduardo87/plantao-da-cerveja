@@ -172,14 +172,18 @@
       </div>
       <div class="filter-bar">
         <input type="search" id="search-input" class="filter-input prod-search" placeholder="Buscar produto…">
-        <select id="cat-select" class="filter-select prod-filter-sel"><option value="">Todas as categorias</option></select>
-        <select id="status-select" class="filter-select prod-filter-sel">
-          <option value="">Todos os status</option>
-          <option value="1">Disponível</option>
-          <option value="0">Indisponível</option>
-        </select>
-        <button class="btn btn-ghost btn-sm" onclick="clearFilters()"><i data-lucide="x" width="14" height="14"></i> Limpar</button>
-        <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i data-lucide="download" width="14" height="14"></i> Exportar</button>
+        <div class="prod-selects-wrap">
+          <select id="cat-select" class="filter-select"><option value="">Todas as categorias</option></select>
+          <select id="status-select" class="filter-select">
+            <option value="">Todos os status</option>
+            <option value="1">Disponível</option>
+            <option value="0">Indisponível</option>
+          </select>
+        </div>
+        <div class="prod-btns-wrap">
+          <button class="btn btn-ghost btn-sm" onclick="clearFilters()"><i data-lucide="x" width="14" height="14"></i> Limpar</button>
+          <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i data-lucide="download" width="14" height="14"></i> Exportar</button>
+        </div>
       </div>
       <div class="card"><div class="prod-list" id="products-list"></div></div>
     </div>
