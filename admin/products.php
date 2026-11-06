@@ -376,7 +376,7 @@ function renderProds() {
         : `<div class="prod-card-ph"><i data-lucide="image" width="20" height="20"></i></div>`}
       <div class="prod-card-info">
         <div class="prod-card-name">${p.name}</div>
-        <div class="prod-card-sku">#${p.id}</div>
+
         ${p.category_name ? `<span class="cat-badge">${p.category_name}</span>` : ''}
         <div class="prod-card-price">${fmtMoney(p.price)}${p.old_price?` <s style="font-size:11px;color:var(--fg-3);font-weight:400">${fmtMoney(p.old_price)}</s>`:''}</div>
       </div>
