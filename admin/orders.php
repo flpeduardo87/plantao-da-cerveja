@@ -297,7 +297,7 @@ function renderOrders() {
   mob.innerHTML = page.map(o => `
     <div class="ord-card ord-card-${o.status}">
       <div class="ord-card-left">
-        <div class="ord-card-num">#${o.order_number}</div>
+        <div class="ord-card-num">#${String(o.order_number).slice(-6)}</div>
         <div class="ord-card-time">${fmtDate(o.created_at)}</div>
         ${statusBadge(o.status)}
       </div>
