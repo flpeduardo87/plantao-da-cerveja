@@ -1686,7 +1686,10 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
             <button type="button" class="input-ic-end-btn" onclick="togglePwdVisibility('acct-password',this)" aria-label="Mostrar senha"><i data-lucide="eye" width="16" height="16"></i></button>
           </div>
         </div>
-        <div style="text-align:right;margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--fg-2);cursor:pointer;user-select:none">
+            <input type="checkbox" id="keep-login" checked style="width:15px;height:15px;accent-color:var(--amber);cursor:pointer"> Manter conectado
+          </label>
           <button type="button" style="background:none;border:none;font-size:13px;color:var(--fg-2);cursor:pointer;text-decoration:underline">Esqueceu sua senha?</button>
         </div>
         <div id="acct-err" style="color:var(--red);font-size:13px;margin-bottom:10px;display:none"></div>
@@ -1724,6 +1727,9 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
           <input id="reg-password" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;background:var(--bg);color:var(--fg)">
         </div>
         <div id="reg-err" style="color:var(--red);font-size:13px;margin-bottom:10px;display:none"></div>
+        <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--fg-2);cursor:pointer;user-select:none;margin-bottom:12px">
+          <input type="checkbox" id="keep-register" checked style="width:15px;height:15px;accent-color:var(--amber);cursor:pointer"> Manter conectado
+        </label>
         <button class="btn-primary" onclick="acctRegister()">Criar conta →</button>
       </div>
 
@@ -3278,7 +3284,7 @@ lucide.createIcons();
 
 // ── CUSTOMER ACCOUNT ──────────────────────────────────────────────────────────
 let acctToken = null;
-try { acctToken = localStorage.getItem('cust_token') || localStorage.getItem('acct_token'); } catch{}
+try { acctToken = localStorage.getItem('cust_token') || localStorage.getItem('acct_token') || sessionStorage.getItem('cust_token'); } catch{}
 
 function goToAccount(){
   setNavActive('nb-acct');
@@ -3406,7 +3412,9 @@ async function acctLogin(){
     const j = await r.json();
     if(!j.success){ err.textContent=j.error||'E-mail ou senha incorretos'; err.style.display=''; btn.disabled=false; btn.textContent='Entrar →'; return; }
     acctToken = j.token;
-    try{ localStorage.setItem('cust_token',acctToken); if(j.name) localStorage.setItem('acct_name',j.name); localStorage.setItem('acct_email',email); }catch{}
+    const keep = document.getElementById('keep-login')?.checked !== false;
+    const store = keep ? localStorage : sessionStorage;
+    try{ store.setItem('cust_token',acctToken); if(j.name) store.setItem('acct_name',j.name); store.setItem('acct_email',email); }catch{}
     document.getElementById('acct-dname').textContent = j.name||'';
     document.getElementById('acct-dphone').textContent = j.phone ? fmtPhoneDisplay(j.phone) : email;
     acctShowDashboard();
@@ -3433,7 +3441,9 @@ async function acctRegister(){
     const j = await r.json();
     if(!j.success){ err.textContent=j.error||'Erro ao criar conta'; err.style.display=''; btn.disabled=false; btn.textContent='Criar conta →'; return; }
     acctToken = j.token;
-    try{ localStorage.setItem('cust_token',acctToken); localStorage.setItem('acct_name',name); localStorage.setItem('acct_email',email); }catch{}
+    const keepReg = document.getElementById('keep-register')?.checked !== false;
+    const storeReg = keepReg ? localStorage : sessionStorage;
+    try{ storeReg.setItem('cust_token',acctToken); storeReg.setItem('acct_name',name); storeReg.setItem('acct_email',email); }catch{}
     document.getElementById('acct-dname').textContent = name;
     document.getElementById('acct-dphone').textContent = phone ? fmtPhoneDisplay(phone) : email;
     acctShowDashboard();
@@ -3523,7 +3533,7 @@ function acctOpenOrder(orderNumber){
 function acctLogout(){
   try{ fetch(`${API}/customer/logout`,{method:'POST',headers:{'Authorization':'Bearer '+acctToken}}); }catch{}
   acctToken=null;
-  try{ localStorage.removeItem('cust_token'); localStorage.removeItem('acct_token'); localStorage.removeItem('acct_name'); localStorage.removeItem('acct_email'); }catch{}
+  try{ localStorage.removeItem('cust_token'); localStorage.removeItem('acct_token'); localStorage.removeItem('acct_name'); localStorage.removeItem('acct_email'); sessionStorage.removeItem('cust_token'); sessionStorage.removeItem('acct_name'); sessionStorage.removeItem('acct_email'); }catch{}
   acctShowLogin();
 }
 
