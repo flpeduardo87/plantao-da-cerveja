@@ -200,7 +200,7 @@ async function toggleProduct(id, current) {
   const lbl = document.getElementById(`lbl-active-${id}`);
   if (cb)  cb.checked = !!newVal;
   if (div) div.setAttribute('onclick', `toggleProduct(${id},${newVal})`);
-  if (lbl) { lbl.textContent = newVal ? 'Disponível' : 'Indisponível'; lbl.className = `prod-toggle-lbl${newVal?' active-lbl':''}`; }
+  if (lbl) { lbl.textContent = newVal ? 'Disponível' : 'Inativo'; lbl.className = `prod-toggle-lbl${newVal?' active-lbl':''}`; }
   try {
     await api(`/products/${id}`, { method: 'PUT', body: JSON.stringify({ active: newVal }) });
     toast(newVal ? 'Produto ativado' : 'Produto desativado');
@@ -315,22 +315,18 @@ function renderProds() {
       <div class="prod-card-right">
         <div class="prod-card-stock${isUnlimited?' unlimited':''}">${stockTxt}</div>
         <div class="prod-toggles">
-          <div class="prod-toggle-col">
-            <div id="toggle-active-${p.id}" onclick="toggleProduct(${p.id},${p.active?1:0})" style="cursor:pointer">
-              <label class="toggle" style="pointer-events:none">
-                <input type="checkbox" id="cb-active-${p.id}" ${p.active?'checked':''}>
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-            <span id="lbl-active-${p.id}" class="prod-toggle-lbl${p.active?' active-lbl':''}">${p.active?'Disponível':'Indisponível'}</span>
+          <div class="prod-toggle-col" id="toggle-active-${p.id}" onclick="toggleProduct(${p.id},${p.active?1:0})">
+            <label class="toggle" style="pointer-events:none">
+              <input type="checkbox" id="cb-active-${p.id}" ${p.active?'checked':''}>
+              <span class="toggle-slider"></span>
+            </label>
+            <span id="lbl-active-${p.id}" class="prod-toggle-lbl${p.active?' active-lbl':''}">${p.active?'Disponível':'Inativo'}</span>
           </div>
-          <div class="prod-toggle-col">
-            <div id="toggle-featured-${p.id}" onclick="toggleFeatured(${p.id},${p.featured?1:0})" style="cursor:pointer">
-              <label class="toggle" style="pointer-events:none">
-                <input type="checkbox" id="cb-featured-${p.id}" ${p.featured?'checked':''}>
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
+          <div class="prod-toggle-col" id="toggle-featured-${p.id}" onclick="toggleFeatured(${p.id},${p.featured?1:0})">
+            <label class="toggle" style="pointer-events:none">
+              <input type="checkbox" id="cb-featured-${p.id}" ${p.featured?'checked':''}>
+              <span class="toggle-slider"></span>
+            </label>
             <span id="lbl-featured-${p.id}" class="prod-toggle-lbl${p.featured?' promo-lbl':''}">${p.featured?'Promoção':'—'}</span>
           </div>
         </div>
