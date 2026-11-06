@@ -361,7 +361,7 @@ async function _savePushSub(sub) {
 }
 
 function sendBrowserNotification(count) {
-  if (Notification.permission !== 'granted') return;
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
   new Notification('🍺 Novo pedido!', {
     body: `${count} pedido(s) aguardando confirmação`,
     icon: '../favicon-icone.webp',
