@@ -455,6 +455,7 @@ function openNew() {
 async function editProduct(id) {
   openModal('modal-product');
   document.getElementById('modal-product-title').textContent = 'Editar produto';
+  document.getElementById('p-img-file').value = '';
   try {
     const p = await api(`/products/${id}`);
     document.getElementById('p-id').value = p.id;
