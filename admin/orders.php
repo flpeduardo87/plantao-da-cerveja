@@ -96,28 +96,31 @@
 
       <!-- Filtros -->
       <div class="filter-bar">
-        <input type="search" id="search-input" class="filter-input" placeholder="Buscar pedido ou cliente…">
-        <select id="period-select" class="filter-select">
-          <option value="today">Hoje</option>
-          <option value="week">Últimos 7 dias</option>
-          <option value="month">Este mês</option>
-          <option value="all" selected>Todos os períodos</option>
-        </select>
-        <select id="status-select" class="filter-select">
-          <option value="">Todos os status</option>
-          <option value="new">Novos</option>
-          <option value="accepted">Aceitos</option>
-          <option value="preparing">Preparando</option>
-          <option value="delivering">A caminho</option>
-          <option value="delivered">Entregues</option>
-          <option value="cancelled">Cancelados</option>
-        </select>
-        <button class="btn btn-ghost btn-sm" onclick="clearFilters()"><i data-lucide="x" width="14" height="14"></i> Limpar filtros</button>
-        <div class="spacer"></div>
-        <label class="ord-autorefresh-lbl">
-          <label class="toggle" style="margin:0"><input type="checkbox" id="auto-refresh" checked><span class="toggle-slider"></span></label>
-          Auto-atualizar
-        </label>
+        <input type="search" id="search-input" class="filter-input prod-search" placeholder="Buscar pedido ou cliente…">
+        <div class="prod-selects-wrap">
+          <select id="period-select" class="filter-select">
+            <option value="today">Hoje</option>
+            <option value="week">Últimos 7 dias</option>
+            <option value="month">Este mês</option>
+            <option value="all" selected>Todos os períodos</option>
+          </select>
+          <select id="status-select" class="filter-select">
+            <option value="">Todos os status</option>
+            <option value="new">Novos</option>
+            <option value="accepted">Aceitos</option>
+            <option value="preparing">Preparando</option>
+            <option value="delivering">A caminho</option>
+            <option value="delivered">Entregues</option>
+            <option value="cancelled">Cancelados</option>
+          </select>
+        </div>
+        <div class="prod-btns-wrap">
+          <button class="btn btn-ghost btn-sm" onclick="clearFilters()"><i data-lucide="x" width="14" height="14"></i> Limpar</button>
+          <label class="ord-autorefresh-lbl">
+            <label class="toggle" style="margin:0"><input type="checkbox" id="auto-refresh" checked><span class="toggle-slider"></span></label>
+            Auto-atualizar
+          </label>
+        </div>
       </div>
 
       <!-- Desktop table -->
