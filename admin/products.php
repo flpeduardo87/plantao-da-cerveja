@@ -311,7 +311,7 @@ function buildExtraCatsUI() {
          ${cats.map(c => `
            <label style="display:flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:500;user-select:none">
              <input type="checkbox" class="extra-cat-chk" data-cat-id="${c.id}" style="accent-color:var(--amber);cursor:pointer">
-             ${c.emoji ? c.emoji + ' ' : ''}${c.name}
+             ${c.name}
            </label>`).join('')}
        </div>
      </div>`
