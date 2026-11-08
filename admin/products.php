@@ -39,8 +39,12 @@
             <input type="number" id="p-old-price" min="0" step="0.01" placeholder="0,00 (deixe vazio se não houver desconto)">
           </div>
           <div class="field">
-            <label>Categoria *</label>
+            <label>Categoria principal *</label>
             <select id="p-category" required><option value="">Selecione…</option></select>
+          </div>
+          <div class="field form-full">
+            <label>Também aparece em <span style="color:var(--fg-3);font-weight:400;font-size:12px">(marque as subcategorias extras)</span></label>
+            <div id="extra-cats-wrap" style="display:flex;flex-wrap:wrap;gap:6px 10px;margin-top:6px"></div>
           </div>
           <div class="field">
             <label>Estoque (0 = ilimitado)</label>
@@ -265,6 +269,7 @@ async function loadCategories() {
     categories = Array.isArray(res) ? res : (res.data || []);
     const sel = document.getElementById('p-category');
     const catSel = document.getElementById('cat-select');
+    // Dropdown principal: deduplica por nome, prioriza icon
     const seen = new Map();
     categories.forEach(c => {
       const key = c.name.toLowerCase();
@@ -279,7 +284,38 @@ async function loadCategories() {
       sel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
       catSel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
     });
+    // Checkboxes de subcategorias (image) agrupadas por categoria-pai
+    buildExtraCatsUI();
   } catch {}
+}
+
+function buildExtraCatsUI() {
+  const wrap = document.getElementById('extra-cats-wrap');
+  if (!wrap) return;
+  // Monta mapa id→cat e encontra pais das subcategorias
+  const catById = {};
+  categories.forEach(c => { catById[c.id] = c; });
+  const imgCats = categories.filter(c => c.display_type === 'image');
+  if (!imgCats.length) { wrap.closest('.field').style.display = 'none'; return; }
+  // Agrupa por parent_id
+  const groups = {};
+  imgCats.forEach(c => {
+    const parentName = c.parent_id && catById[c.parent_id] ? catById[c.parent_id].name : 'Outras';
+    if (!groups[parentName]) groups[parentName] = [];
+    groups[parentName].push(c);
+  });
+  wrap.innerHTML = Object.entries(groups).map(([groupName, cats]) =>
+    `<div style="width:100%">
+       <div style="font-size:11px;font-weight:600;color:var(--fg-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">${groupName}</div>
+       <div style="display:flex;flex-wrap:wrap;gap:6px">
+         ${cats.map(c => `
+           <label style="display:flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:500;user-select:none">
+             <input type="checkbox" class="extra-cat-chk" data-cat-id="${c.id}" style="accent-color:var(--amber);cursor:pointer">
+             ${c.emoji ? c.emoji + ' ' : ''}${c.name}
+           </label>`).join('')}
+       </div>
+     </div>`
+  ).join('');
 }
 
 async function loadProducts() {
@@ -448,6 +484,7 @@ function openNew() {
   const prev = document.getElementById('p-img-preview');
   prev.style.display = 'none'; prev.src = '';
   toggleDeposit(false);
+  document.querySelectorAll('.extra-cat-chk').forEach(cb => { cb.checked = false; });
   document.getElementById('modal-product-title').textContent = 'Novo produto';
   openModal('modal-product');
 }
@@ -456,6 +493,8 @@ async function editProduct(id) {
   openModal('modal-product');
   document.getElementById('modal-product-title').textContent = 'Editar produto';
   document.getElementById('p-img-file').value = '';
+  // Limpa checkboxes de categorias extras
+  document.querySelectorAll('.extra-cat-chk').forEach(cb => { cb.checked = false; });
   try {
     const p = await api(`/products/${id}`);
     document.getElementById('p-id').value = p.id;
@@ -479,6 +518,11 @@ async function editProduct(id) {
     const prev = document.getElementById('p-img-preview');
     if (p.image_url) { prev.src = p.image_url; prev.style.display = 'block'; }
     else { prev.style.display = 'none'; }
+    // Marcar categorias extras do produto
+    const catIds = p.category_ids || [];
+    document.querySelectorAll('.extra-cat-chk').forEach(cb => {
+      cb.checked = catIds.includes(parseInt(cb.dataset.catId));
+    });
   } catch(e) { toast(e.message, 'error'); closeModal('modal-product'); }
 }
 
@@ -512,11 +556,20 @@ async function saveProduct(e) {
     if (fileInput.files[0]) imageUrl = await uploadImage(fileInput.files[0]);
     const id = document.getElementById('p-id').value;
     const oldPrice = document.getElementById('p-old-price').value;
+    const primaryCatId = parseInt(document.getElementById('p-category').value) || null;
+    // Coleta categorias extras marcadas
+    const extraCatIds = [...document.querySelectorAll('.extra-cat-chk:checked')]
+      .map(cb => parseInt(cb.dataset.catId)).filter(Boolean);
+    // category_ids = categoria principal + extras (sem duplicatas)
+    const allCatIds = primaryCatId
+      ? [...new Set([primaryCatId, ...extraCatIds])]
+      : extraCatIds;
     const body = {
       name: document.getElementById('p-name').value,
       price: parseFloat(document.getElementById('p-price').value),
       old_price: oldPrice ? parseFloat(oldPrice) : null,
-      category_id: parseInt(document.getElementById('p-category').value) || null,
+      category_id: primaryCatId,
+      category_ids: allCatIds,
       description: document.getElementById('p-description').value,
       stock: parseInt(document.getElementById('p-stock').value) || 0,
       sort_order: parseInt(document.getElementById('p-sort').value) || 0,

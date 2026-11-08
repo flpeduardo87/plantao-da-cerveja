@@ -1927,7 +1927,29 @@ function prodImg(id,w,h){
 let CATS = [{id:'all',em:'🏠',lb:'Todos'}];
 let CATALOG = {};
 let SEC_LABELS = {};
+let CAT_CHILDREN = {}; // { parentSlug: [childSlug, ...] }
 let allProds = [];
+const CAT_COLORS = {
+  'ofertas':['#FEE2E2','#B91C1C'],'ofertas-img':['#FEE2E2','#B91C1C'],
+  'novidades':['#EDE9FE','#5B21B6'],
+  'cervejas':['#FEF3C7','#92400E'],'cervejas-lata':['#FEF3C7','#92400E'],
+  'packs-cervejas':['#FEF3C7','#92400E'],'long-necks':['#FEF3C7','#92400E'],
+  'retornaveis':['#FEF3C7','#92400E'],'zero':['#DBEAFE','#1E40AF'],
+  'baixas-calorias':['#D1FAE5','#065F46'],
+  'churrasco':['#FFE4E6','#9F1239'],'churrasco-img':['#FFE4E6','#9F1239'],
+  'aguas-gelos':['#E0F2FE','#0369A1'],'aguas-gelos-img':['#E0F2FE','#0369A1'],
+  'drinks':['#FDF4FF','#86198F'],'drinks-prontos':['#FDF4FF','#86198F'],
+  'nao-alcoolicos':['#F0FDF4','#166534'],'nao-alcoolicos-img':['#F0FDF4','#166534'],
+  'energeticos':['#FFF7ED','#9A3412'],
+  'destilados':['#FEF3C7','#78350F'],'destilados-img':['#FEF3C7','#78350F'],
+  'vinhos':['#FDF2F8','#831843'],'vinhos-img':['#FDF2F8','#831843'],
+  'congelados':['#F0F9FF','#0C4A6E'],'congelados-img':['#F0F9FF','#0C4A6E'],
+  'salgadinhos':['#FFF7ED','#7C2D12'],'salgadinhos-img':['#FFF7ED','#7C2D12'],
+  'doces':['#FDF4FF','#4C1D95'],'doces-img':['#FDF4FF','#4C1D95'],
+  'sorvetes':['#FDF2F8','#9D174D'],
+  'mercearia':['#F1F5F9','#334155'],'mercearia-img':['#F1F5F9','#334155'],
+  'tabacos':['#E7E5E4','#57534E'],
+};
 let DELIVERY_FEE = 0;
 let MIN_ORDER = 0;
 
@@ -2192,15 +2214,24 @@ async function enterStore(){
     if(cats.length && prods.length){
       const imgCatsDB = cats.filter(c=>c.display_type==='image');
       const _seen = new Set();
-      const iconCats  = cats.filter(c=>c.display_type!=='image' && !_seen.has(c.slug) && _seen.add(c.slug));
+      const iconCats = cats.filter(c=>c.display_type!=='image' && !_seen.has(c.slug) && _seen.add(c.slug));
       CATS = [{id:'all',lb:'Todos'},...iconCats.map(c=>({id:c.slug,lb:c.name,em:c.emoji||''}))];
-      CATALOG={}; SEC_LABELS={};
+      CATALOG={}; SEC_LABELS={}; CAT_CHILDREN={};
       const catById={};
-      cats.forEach(c=>{ catById[c.id]=c;CATALOG[c.slug]=[];SEC_LABELS[c.slug]=c.name; });
+      cats.forEach(c=>{ catById[c.id]=c; CATALOG[c.slug]=[]; SEC_LABELS[c.slug]=c.name; });
+      // Monta mapa pai → filhos (para agregação nos tabs)
+      cats.forEach(c=>{
+        if(c.parent_id && catById[c.parent_id]){
+          const ps=catById[c.parent_id].slug;
+          if(!CAT_CHILDREN[ps]) CAT_CHILDREN[ps]=[];
+          CAT_CHILDREN[ps].push(c.slug);
+        }
+      });
       if(imgCatsDB.length){
         IMG_CATS.splice(0,IMG_CATS.length,...imgCatsDB.map(c=>({
-          slug:c.slug,name:c.name,em:c.emoji||'📦',
-          color:['#F1F5F9','#334155'],cat:c.slug,
+          slug:c.slug, name:c.name, em:c.emoji||'📦',
+          color:CAT_COLORS[c.slug]||['#F1F5F9','#475569'],
+          cat:c.slug,
           ...(c.image_url?{image_url:c.image_url}:{})
         })));
       } else {
@@ -2209,12 +2240,21 @@ async function enterStore(){
           if(mc && c.image_url) mc.image_url=c.image_url;
         });
       }
+      // Popula CATALOG com multi-categoria (produto pode estar em vários buckets)
       prods.forEach(p=>{
-        const cat=catById[p.category_id];
-        if(cat&&CATALOG[cat.slug]) CATALOG[cat.slug].push({id:p.id,name:p.name,price:parseFloat(p.price),old:p.old_price?parseFloat(p.old_price):null,disc:parseInt(p.discount_pct)||0,image_url:p.image_url||null,featured:p.featured==1||p.featured===true,brand:p.brand||null,unit_type:p.unit_type||null,size:p.size||null,has_deposit:p.has_deposit==1,deposit_value:parseFloat(p.deposit_value)||0});
+        const pObj={id:p.id,name:p.name,price:parseFloat(p.price),old:p.old_price?parseFloat(p.old_price):null,disc:parseInt(p.discount_pct)||0,image_url:p.image_url||null,featured:p.featured==1||p.featured===true,brand:p.brand||null,unit_type:p.unit_type||null,size:p.size||null,has_deposit:p.has_deposit==1,deposit_value:parseFloat(p.deposit_value)||0};
+        const catIds=p.category_ids&&p.category_ids.length?p.category_ids:(p.category_id?[p.category_id]:[]);
+        const added=new Set();
+        catIds.forEach(cid=>{
+          const cat=catById[cid];
+          if(cat&&CATALOG[cat.slug]!==undefined&&!added.has(cat.slug)){
+            CATALOG[cat.slug].push(pObj);
+            added.add(cat.slug);
+          }
+        });
       });
       Object.keys(CATALOG).forEach(k=>{if(!CATALOG[k].length)delete CATALOG[k];});
-      allProds=Object.values(CATALOG).flat();
+      allProds=[...new Map(Object.values(CATALOG).flat().map(p=>[p.id,p])).values()];
       buildOffersSection();
       buildCats(); buildCatGrid(); renderSections();
     }
@@ -2264,12 +2304,11 @@ function buildCatGrid(){
   const wrap=document.getElementById('cat-grid-wrap');
   if(!wrap)return;
   function mcHTML(c){
-    const [bg]=c.color;
-    const catFb=c.cat||c.slug;
+    const [bg]=c.color||CAT_COLORS[c.slug]||['#F1F5F9','#475569'];
     const imgContent = c.image_url
       ? `<img src="${esc(c.image_url)}" alt="${esc(c.name)}" loading="lazy">`
       : c.em;
-    return `<div class="cat-mc" data-slug="${c.slug}" onclick="enterCatView('${c.slug}','${c.name.replace(/'/g,"\\'")}','${catFb}')">
+    return `<div class="cat-mc" data-slug="${c.slug}" onclick="enterCatView('${c.slug}','${c.name.replace(/'/g,"\\'")}')">
       <div class="cat-mc-img" style="background:${bg}">${imgContent}</div>
       <div class="cat-mc-name">${c.name}</div>
     </div>`;
@@ -2277,7 +2316,7 @@ function buildCatGrid(){
   wrap.innerHTML=`<div class="cat-marquee-wrap"><div class="cat-grid">${IMG_CATS.map(mcHTML).join('')}</div></div>`;
   // Scroll livre — sem auto-scroll. Gradiente já indica mais conteúdo.
 }
-function enterCatView(slug,name,catFallback=''){
+function enterCatView(slug,name,prodsOrFallback=null){
   // Hide everything above products — hero, store info, category strips
   document.querySelector('.store-hero').hidden=true;
   document.querySelector('.store-info-card').hidden=true;
@@ -2287,11 +2326,17 @@ function enterCatView(slug,name,catFallback=''){
   const hd=document.getElementById('cat-view-hd');
   hd.hidden=false;
   // Resolve products
-  let prods=[];
-  if(slug==='ofertas'||catFallback==='ofertas') prods=allProds.filter(p=>p.featured);
-  else {
+  let prods;
+  if(Array.isArray(prodsOrFallback)){
+    prods=prodsOrFallback;
+  } else if(slug==='ofertas'||slug==='ofertas-img'||(typeof prodsOrFallback==='string'&&prodsOrFallback==='ofertas')){
+    prods=allProds.filter(p=>p.featured);
+  } else {
     prods=CATALOG[slug]||[];
-    if(!prods.length&&catFallback&&catFallback!==slug) prods=CATALOG[catFallback]||[];
+    // fallback legado (string)
+    if(!prods.length&&typeof prodsOrFallback==='string'&&prodsOrFallback&&prodsOrFallback!==slug){
+      prods=CATALOG[prodsOrFallback]||[];
+    }
   }
   renderSections(prods, name);
   // Scroll to very top so cat header is first thing visible
@@ -2362,23 +2407,19 @@ function buildCats(){
 let catObserver = null;
 function setCat(id){
   document.getElementById('s-in').value='';
-  const feed = document.getElementById('feed');
   if(id==='all'){
-    feed.scrollTo({top:0,behavior:'smooth'});
-  } else {
-    const strip = document.querySelector('.cat-strip');
-    const offset = strip ? strip.offsetHeight : 0;
-    // Sub-category takes priority (cervejas-lata > cervejas), fallback to exact
-    const subMatch = Object.keys(CATALOG).find(k=>k.startsWith(id+'-'));
-    const targetKey = subMatch || (CATALOG[id]!==undefined ? id : null);
-    if(targetKey){
-      const secEl = document.getElementById('sec-'+targetKey);
-      if(secEl && feed){
-        const top = feed.scrollTop + secEl.getBoundingClientRect().top - feed.getBoundingClientRect().top - offset;
-        feed.scrollTo({top: Math.max(0, top), behavior:'smooth'});
-      }
-    }
+    exitCatView();
+    setActivePill('all');
+    return;
   }
+  // Agrega produtos desta categoria + todas as subcategorias filhas
+  const childSlugs=CAT_CHILDREN[id]||[];
+  const seen=new Set(); const prods=[];
+  [id,...childSlugs].forEach(s=>{
+    (CATALOG[s]||[]).forEach(p=>{ if(!seen.has(p.id)){seen.add(p.id);prods.push(p);} });
+  });
+  const catName=SEC_LABELS[id]||id;
+  enterCatView(id,catName,prods);
   setActivePill(id);
 }
 function setActivePill(id){

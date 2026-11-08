@@ -1,6 +1,6 @@
 <?php
-// GET /products              — list active products (optionally ?category_id=X)
-// GET /products/{id}         — single product
+// GET /products              — list active products (optionally ?category_id=X or ?category=slug)
+// GET /products/{id}         — single product (inclui category_ids)
 // POST /products             — create  [admin]
 // PUT /products/{id}         — update  [admin]
 // PATCH /products/{id}       — partial update (e.g. toggle active/featured)
@@ -11,28 +11,52 @@ $pdo = db();
 match ($method) {
     'GET' => (function () use ($pdo, $id) {
         if ($id) {
-            $s = $pdo->prepare('SELECT * FROM products WHERE id = ?');
+            $s = $pdo->prepare(
+                'SELECT p.*, c.slug AS category_slug, c.name AS category_name
+                 FROM products p
+                 LEFT JOIN categories c ON c.id = p.category_id
+                 WHERE p.id = ?'
+            );
             $s->execute([$id]);
             $row = $s->fetch();
-            $row ? json_ok($row) : json_err('Not found', 404);
+            if (!$row) { json_err('Not found', 404); return; }
+            // Carrega todas as categorias do produto (multi-categoria)
+            $cs = $pdo->prepare('SELECT category_id FROM product_categories WHERE product_id = ?');
+            $cs->execute([$id]);
+            $row['category_ids'] = array_column($cs->fetchAll(), 'category_id');
+            json_ok($row);
         } else {
             $where = empty($_GET['all']) ? 'p.active = 1' : '1=1';
             $vals  = [];
             if (!empty($_GET['category_id'])) {
-                $where .= ' AND p.category_id = ?';
+                $where .= ' AND p.id IN (SELECT product_id FROM product_categories WHERE category_id = ?)';
                 $vals[] = (int)$_GET['category_id'];
             } elseif (!empty($_GET['category'])) {
-                $where .= ' AND c.slug = ?';
+                $where .= ' AND p.id IN (
+                    SELECT pc.product_id FROM product_categories pc
+                    JOIN categories cc ON cc.id = pc.category_id
+                    WHERE cc.slug = ? OR cc.parent_id = (SELECT id FROM categories WHERE slug = ? LIMIT 1)
+                )';
+                $vals[] = $_GET['category'];
                 $vals[] = $_GET['category'];
             }
-            $sql = "SELECT p.*, c.slug AS category_slug, c.name AS category_name
+            $sql = "SELECT p.*, c.slug AS category_slug, c.name AS category_name,
+                           COALESCE(GROUP_CONCAT(DISTINCT pc.category_id ORDER BY pc.category_id), '') AS _cat_ids_str
                     FROM products p
                     LEFT JOIN categories c ON c.id = p.category_id
+                    LEFT JOIN product_categories pc ON pc.product_id = p.id
                     WHERE $where
+                    GROUP BY p.id
                     ORDER BY p.sort_order, p.id";
             $s = $pdo->prepare($sql);
             $s->execute($vals);
-            json_ok($s->fetchAll());
+            $rows = $s->fetchAll();
+            foreach ($rows as &$r) {
+                $str = $r['_cat_ids_str'] ?? '';
+                $r['category_ids'] = $str !== '' ? array_map('intval', explode(',', $str)) : [];
+                unset($r['_cat_ids_str']);
+            }
+            json_ok($rows);
         }
     })(),
 
@@ -62,7 +86,14 @@ match ($method) {
             (int)($d['has_deposit'] ?? 0),
             (float)($d['deposit_value'] ?? 0),
         ]);
-        json_ok(['id' => (int)$pdo->lastInsertId()], 201);
+        $newId = (int)$pdo->lastInsertId();
+        // Sincroniza product_categories
+        $catIds = isset($d['category_ids'])
+            ? array_filter(array_unique(array_map('intval', (array)$d['category_ids'])))
+            : [(int)$d['category_id']];
+        $ins = $pdo->prepare('INSERT IGNORE INTO product_categories (product_id, category_id) VALUES (?,?)');
+        foreach ($catIds as $cid) { if ($cid) $ins->execute([$newId, $cid]); }
+        json_ok(['id' => $newId], 201);
     })(),
 
     'PUT', 'PATCH' => (function () use ($pdo, $id, $method) {
@@ -74,9 +105,19 @@ match ($method) {
         foreach ($allowed as $f) {
             if (array_key_exists($f, $d)) { $fields[] = "$f = ?"; $vals[] = $d[$f]; }
         }
-        if (!$fields) json_err('Nothing to update');
-        $vals[] = $id;
-        $pdo->prepare('UPDATE products SET ' . implode(', ', $fields) . ' WHERE id = ?')->execute($vals);
+        if ($fields) {
+            $vals[] = $id;
+            $pdo->prepare('UPDATE products SET ' . implode(', ', $fields) . ' WHERE id = ?')->execute($vals);
+        }
+        // Sincroniza product_categories quando category_ids enviado
+        if (isset($d['category_ids'])) {
+            $catIds = array_filter(array_unique(array_map('intval', (array)$d['category_ids'])));
+            $pdo->prepare('DELETE FROM product_categories WHERE product_id = ?')->execute([$id]);
+            $ins = $pdo->prepare('INSERT IGNORE INTO product_categories (product_id, category_id) VALUES (?,?)');
+            foreach ($catIds as $cid) { $ins->execute([$id, $cid]); }
+        } elseif (isset($d['category_id']) && $d['category_id']) {
+            $pdo->prepare('INSERT IGNORE INTO product_categories (product_id, category_id) VALUES (?,?)')->execute([$id, (int)$d['category_id']]);
+        }
         json_ok(['updated' => true]);
     })(),
 
