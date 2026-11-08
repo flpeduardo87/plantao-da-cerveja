@@ -305,9 +305,9 @@ function buildExtraCatsUI() {
     groups[parentName].push(c);
   });
   wrap.innerHTML = Object.entries(groups).map(([groupName, cats]) =>
-    `<div style="width:100%">
-       <div style="font-size:11px;font-weight:600;color:var(--fg-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">${groupName}</div>
-       <div style="display:flex;flex-wrap:wrap;gap:6px">
+    `<div style="display:inline-flex;flex-direction:column;gap:4px;margin-bottom:6px;margin-right:16px;vertical-align:top">
+       <div style="font-size:11px;font-weight:600;color:var(--fg-3);text-transform:uppercase;letter-spacing:.05em">${groupName}</div>
+       <div style="display:flex;flex-wrap:wrap;gap:5px">
          ${cats.map(c => `
            <label style="display:flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:500;user-select:none">
              <input type="checkbox" class="extra-cat-chk" data-cat-id="${c.id}" style="accent-color:var(--amber);cursor:pointer">
