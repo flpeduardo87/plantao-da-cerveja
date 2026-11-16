@@ -325,16 +325,16 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 .site-footer{background:#111;color:#fff;padding:48px 24px 0;margin-top:40px}
 .site-footer-grid{display:grid;grid-template-columns:1fr 1px 1fr 1px 1fr 1px 1fr;gap:0 32px;align-items:start;padding-bottom:40px}
 .site-footer-div{background:rgba(255,255,255,.1);width:1px;height:100%;min-height:120px}
-.site-footer-logo img{height:52px;width:auto;display:block;filter:brightness(0) saturate(100%) invert(89%) sepia(47%) saturate(500%) hue-rotate(1deg) brightness(103%) contrast(103%)}
+.site-footer-logo img{height:52px;width:auto;display:block;filter:brightness(0) saturate(100%) invert(88%) sepia(74%) saturate(609%) hue-rotate(2deg)}
 .site-footer-logo p{font-size:12px;color:rgba(255,255,255,.45);margin-top:12px;line-height:1.6;max-width:180px}
 .site-footer-col h4{font-size:14px;font-weight:700;color:#fff;margin-bottom:14px}
 .site-footer-col a,.site-footer-col button.footer-link{
   display:block;font-size:13.5px;color:rgba(255,255,255,.6);
   text-decoration:none;background:none;border:none;padding:0;cursor:pointer;
-  margin-bottom:10px;text-align:left;transition:color .15s
+  margin-bottom:10px;text-align:left;transition:color .15s;font-family:inherit
 }
 .site-footer-col a:hover,.site-footer-col button.footer-link:hover{color:#fff}
-.footer-wa{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.6);font-size:13.5px;cursor:pointer;background:none;border:none;padding:0;transition:color .15s}
+.footer-wa{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.6);font-size:13.5px;cursor:pointer;background:none;border:none;padding:0;transition:color .15s;font-family:inherit}
 .footer-wa:hover{color:#25D366}
 .footer-wa-ic{width:36px;height:36px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .footer-socials{display:flex;gap:14px;margin-top:4px}
@@ -1608,8 +1608,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
       <div class="site-footer-bottom">
         <p>© 2026 Plantão da Cerveja. Todos os direitos reservados.</p>
         <div class="footer-dev">
-          <span>Desenvolvido por</span>
-          <img src="logo-webfun.webp" alt="Webfun" onerror="this.replaceWith(document.createTextNode('Webfun'))">
+          Feito com ♥ por <a href="https://webfun.com.br" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;font-family:inherit">Webfun</a>
         </div>
       </div>
     </footer>
