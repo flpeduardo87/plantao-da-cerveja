@@ -3232,7 +3232,7 @@ async function finalizarPedido(){
       body:JSON.stringify(payload),
     });
     const j = await r.json();
-    if(!r.ok||!j.success) throw new Error(j.message||'Erro ao registrar pedido.');
+    if(!r.ok||!j.success) throw new Error(j.error||j.message||'Erro ao registrar pedido.');
     try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, phone: coData.tel, ts: Date.now()})); }catch{}
     try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
     lastPaymentUrl = j.payment_url || null;

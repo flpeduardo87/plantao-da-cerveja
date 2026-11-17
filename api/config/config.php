@@ -9,3 +9,8 @@ define('UPLOADS_URL',  'https://plantaodacerveja.com.br/uploads/products/');
 // Session
 define('SESSION_NAME',     'plantao_admin');
 define('SESSION_LIFETIME', 3600 * 8); // 8 hours
+
+// Pagar.me v5 — adicione as chaves do painel pagar.me
+define('PAGARME_SECRET_KEY',     ''); // sk_... (chave secreta)
+define('PAGARME_PUBLIC_KEY',     ''); // pk_... (chave pública)
+define('PAGARME_WEBHOOK_SECRET', ''); // segredo do webhook (em pagar.me > webhooks)
