@@ -13,7 +13,7 @@ match ($method) {
         if (!empty($_GET['order_number']) && !empty($_GET['phone'])) {
             $phone = preg_replace('/\D/', '', $_GET['phone']);
             $s = $pdo->prepare(
-                'SELECT o.order_number, o.status, o.created_at, o.total, o.payment_method, o.delivery_type,
+                'SELECT o.order_number, o.status, o.payment_status, o.created_at, o.total, o.payment_method, o.delivery_type,
                         o.address_street, o.address_number,
                         GROUP_CONCAT(
                             JSON_OBJECT(
@@ -238,6 +238,30 @@ match ($method) {
             }
         }
 
+        // Pagar.me PIX — gera QR code (best-effort, nao bloqueia criacao do pedido)
+        $pixQrCode   = null;
+        $pixExpiresIn = 1800;
+        if ($d['payment_method'] === 'pix') {
+            try {
+                require_once __DIR__ . '/../lib/pagarme.php';
+                $pm = new PagarMe();
+                if ($pm->isConfigured()) {
+                    $pixResult  = $pm->createPixOrder([
+                        'order_number'   => $orderNumber,
+                        'total'          => $total,
+                        'customer_name'  => trim($d['customer_name']),
+                        'customer_phone' => preg_replace('/\D/', '', $d['customer_phone']),
+                        'items'          => $lineItems,
+                    ]);
+                    $pixQrCode   = $pixResult['qr_code'];
+                    $pixExpiresIn = $pixResult['expires_in'] ?? 1800;
+                }
+            } catch (\Throwable $pixErr) {
+                error_log('Pagar.me PIX error: ' . $pixErr->getMessage());
+                // Continua sem QR code — cliente paga manualmente
+            }
+        }
+
         // WhatsApp via Fonnte (best-effort, never blocks order creation)
         $fonnteToken = $cfg['fonnte_token'] ?? '';
         $ownerPhone  = preg_replace('/\D/', '', $cfg['store_whatsapp'] ?? '');
@@ -291,6 +315,10 @@ match ($method) {
         } catch (\Throwable $e2) { /* best-effort */ }
 
         $resp = ['success' => true, 'id' => $orderId, 'order_number' => $orderNumber, 'total' => $total];
+        if ($pixQrCode) {
+            $resp['pix_qr_code']   = $pixQrCode;
+            $resp['pix_expires_in'] = $pixExpiresIn;
+        }
         json_ok($resp, 201);
     })(),
 

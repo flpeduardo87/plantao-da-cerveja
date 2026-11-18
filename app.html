@@ -875,6 +875,9 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
   display:inline-block;font-size:10px;font-weight:600;
   background:#00BDAE22;color:#00837A;padding:2px 7px;border-radius:999px;margin-left:6px;
 }
+.pix-overlay-wrap{position:fixed;inset:0;z-index:9998;background:#fff;display:flex;flex-direction:column;overflow-y:auto;}
+@keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:.35;}}
+.pix-pulse{animation:pulse-dot 1.5s ease-in-out infinite;}
 
 .step-btns{display:flex;gap:10px;margin-top:4px;}
 .btn-back{
@@ -1366,6 +1369,7 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 .fav-card-price{font-size:14px;font-weight:700;color:var(--fg);margin-top:4px;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 <script>
@@ -1738,6 +1742,36 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
     <button onclick="closePay()" style="border:none;background:none;color:#6b7280;cursor:pointer;font-size:13px;text-decoration:underline">Fechar</button>
   </div>
 </div>
+
+<!-- Overlay de pagamento PIX -->
+<div id="pix-overlay" class="pix-overlay-wrap hidden">
+  <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #e5e7eb;background:#fff;flex-shrink:0;">
+    <span style="font-weight:600;font-size:15px;">Pagamento via PIX</span>
+    <span class="pix-badge">PIX</span>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;color:#6b7280;"><i data-lucide="lock" width="12" height="12"></i> Seguro</div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:24px 20px;gap:16px;text-align:center;">
+    <p style="font-size:14px;color:#4b5563;margin:0;">Escaneie o QR code ou use o <strong>Pix Copia e Cola</strong></p>
+    <div id="pix-qr" style="width:200px;height:200px;background:#f3f4f6;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px;"></div>
+    <div style="width:100%;background:#f3f4f6;border-radius:10px;padding:12px;">
+      <p style="font-size:11px;font-weight:500;color:#6b7280;margin-bottom:6px;text-align:left;">Pix Copia e Cola</p>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="pix-code-input" type="text" readonly style="flex:1;min-width:0;font-size:11px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;color:#374151;" />
+        <button id="pix-copy-btn" onclick="copyPixCode()" style="flex-shrink:0;padding:8px 14px;background:#00BDAE;color:#fff;border:none;border-radius:8px;font:600 13px sans-serif;cursor:pointer;white-space:nowrap;">Copiar</button>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:14px;color:#4b5563;">
+      <i data-lucide="clock" width="16" height="16" style="color:#9ca3af;"></i>
+      <span>Expira em <strong id="pix-timer" style="font-variant-numeric:tabular-nums;min-width:44px;display:inline-block;">30:00</strong></span>
+    </div>
+    <div id="pix-status-row" style="display:flex;align-items:center;gap:8px;font-size:14px;color:#6b7280;padding:12px 20px;background:#fefce8;border-radius:10px;width:100%;">
+      <span id="pix-dot" class="pix-pulse" style="width:10px;height:10px;border-radius:50%;background:#fbbf24;flex-shrink:0;display:inline-block;"></span>
+      <span id="pix-status-txt">Aguardando pagamento...</span>
+    </div>
+    <p style="font-size:12px;color:#9ca3af;">Assim que o pagamento for confirmado, seu pedido avanca automaticamente.</p>
+  </div>
+</div>
+
 
 <!-- ═══ CUSTOMER ACCOUNT SCREEN ═══ -->
 <div id="s-account" class="screen slide-right hidden" onclick="if(event.target===this)hideScreen('s-account')">
@@ -3368,11 +3402,16 @@ async function finalizarPedido(){
     if(!r.ok||!j.success) throw new Error(j.error||j.message||'Erro ao registrar pedido.');
     try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, phone: coData.tel, ts: Date.now()})); }catch{}
     try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
-    coStep=4;
-    renderCoStep();
-    document.getElementById('co-body').scrollTop=0;
-    startOrderTracking();
-    cart=[]; saveCart(); updateBadge();
+    if(j.pix_qr_code){
+      cart=[]; saveCart(); updateBadge();
+      showPixOverlay(j.pix_qr_code, j.order_number||j.order?.order_number, j.pix_expires_in||1800);
+    } else {
+      coStep=4;
+      renderCoStep();
+      document.getElementById('co-body').scrollTop=0;
+      startOrderTracking();
+      cart=[]; saveCart(); updateBadge();
+    }
   } catch(e) {
     toast(e.message);
     btn.disabled=false;
@@ -3391,6 +3430,92 @@ function openPayIframe(url){
 }
 function closePay(){
   document.getElementById('pay-iframe-overlay').classList.add('hidden');
+}
+
+
+// -- PIX OVERLAY -----------------------------------------------------------
+let _pixPollTimer = null;
+let _pixCountTimer = null;
+
+function showPixOverlay(pixCode, orderNumber, expiresIn) {
+  const overlay = document.getElementById('pix-overlay');
+  overlay.classList.remove('hidden');
+  overlay.style.display = 'flex';
+  lucide.createIcons();
+  document.getElementById('pix-code-input').value = pixCode;
+  const qrEl = document.getElementById('pix-qr');
+  qrEl.innerHTML = '';
+  if(window.QRCode){
+    new QRCode(qrEl, {text: pixCode, width:184, height:184, colorDark:'#000000', colorLight:'#f3f4f6', correctLevel: QRCode.CorrectLevel.M});
+  } else {
+    qrEl.innerHTML = '<p style="font-size:12px;color:#9ca3af;padding:16px;">Use o codigo acima.</p>';
+  }
+  startPixCountdown(expiresIn);
+  startPixPolling(orderNumber);
+}
+
+function copyPixCode() {
+  const input = document.getElementById('pix-code-input');
+  if(!input) return;
+  const val = input.value;
+  try { navigator.clipboard.writeText(val).catch(()=>{ input.select(); document.execCommand('copy'); }); }
+  catch { input.select(); document.execCommand('copy'); }
+  const btn = document.getElementById('pix-copy-btn');
+  if(btn){ btn.textContent='Copiado!'; setTimeout(()=>{ btn.textContent='Copiar'; }, 2000); }
+  toast('Codigo PIX copiado!');
+}
+
+function startPixCountdown(expiresIn) {
+  clearInterval(_pixCountTimer);
+  let remaining = expiresIn;
+  function tick(){
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    const el = document.getElementById('pix-timer');
+    if(el) el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    if(remaining <= 0) {
+      clearInterval(_pixCountTimer);
+      clearInterval(_pixPollTimer);
+      const statusTxt = document.getElementById('pix-status-txt');
+      const dot = document.getElementById('pix-dot');
+      if(statusTxt) statusTxt.textContent = 'Tempo expirado. Feche e refaca o pedido.';
+      if(dot){ dot.style.background='#ef4444'; dot.classList.remove('pix-pulse'); }
+    }
+    remaining--;
+  }
+  tick();
+  _pixCountTimer = setInterval(tick, 1000);
+}
+
+function startPixPolling(orderNumber) {
+  clearInterval(_pixPollTimer);
+  _pixPollTimer = setInterval(async () => {
+    try {
+      const phone = coData.tel;
+      const r = await fetch(API+'/orders?order_number='+encodeURIComponent(orderNumber)+'&phone='+encodeURIComponent(phone));
+      const j = await r.json();
+      if(j.success && j.order && j.order.payment_status === 'paid'){
+        clearInterval(_pixPollTimer);
+        clearInterval(_pixCountTimer);
+        onPixPaid();
+      }
+    } catch {}
+  }, 5000);
+}
+
+function onPixPaid() {
+  const statusTxt = document.getElementById('pix-status-txt');
+  const dot = document.getElementById('pix-dot');
+  const row = document.getElementById('pix-status-row');
+  if(statusTxt) statusTxt.textContent = 'Pagamento confirmado!';
+  if(dot){ dot.style.background='#22c55e'; dot.classList.remove('pix-pulse'); }
+  if(row) row.style.background='#f0fdf4';
+  setTimeout(()=>{
+    document.getElementById('pix-overlay').classList.add('hidden');
+    coStep=4; renderCoStep();
+    document.getElementById('co-body').scrollTop=0;
+    startOrderTracking();
+  }, 2000);
 }
 
 // ── ORDER TRACKING ──────────────────────────────────────────────────────────

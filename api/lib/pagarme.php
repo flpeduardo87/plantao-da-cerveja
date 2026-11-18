@@ -144,6 +144,68 @@ class PagarMe {
     }
 
     /**
+     * Cria pedido PIX e retorna QR code para exibição imediata.
+     *
+     * @param array $order  order_number, total, customer_name, customer_phone, items[]
+     * @return array ['qr_code'=>'...', 'expires_in'=>1800, 'pagarme_order_id'=>'...']
+     */
+    public function createPixOrder(array $order): array {
+        $amountCents = (int) round((float) $order['total'] * 100);
+        $phone       = preg_replace('/\D/', '', $order['customer_phone']);
+        $areaCode    = strlen($phone) >= 11 ? substr($phone, 0, 2) : '11';
+        $number      = strlen($phone) >= 11 ? substr($phone, 2) : substr($phone, 2);
+
+        $items = array_values(array_map(function ($item, $idx) {
+            return [
+                'amount'      => (int) round((float)($item['price'] ?? $item['unit_price'] ?? 0) * 100),
+                'description' => $item['name'] ?? ('Item ' . ($idx + 1)),
+                'quantity'    => (int)($item['qty'] ?? $item['quantity'] ?? 1),
+                'code'        => (string)($item['product_id'] ?? ($idx + 1)),
+            ];
+        }, $order['items'], array_keys($order['items'])));
+
+        $expiresIn = 1800; // 30 min
+
+        $payload = [
+            'code'     => $order['order_number'],
+            'customer' => [
+                'name'   => $order['customer_name'],
+                'type'   => 'individual',
+                'phones' => [
+                    'mobile_phone' => [
+                        'country_code' => '55',
+                        'area_code'    => $areaCode,
+                        'number'       => $number,
+                    ],
+                ],
+            ],
+            'items'    => $items,
+            'payments' => [[
+                'payment_method' => 'pix',
+                'amount'         => $amountCents,
+                'pix'            => [
+                    'expires_in' => $expiresIn,
+                ],
+            ]],
+        ];
+
+        $result = $this->request('POST', '/orders', $payload);
+
+        $txn    = $result['charges'][0]['last_transaction'] ?? [];
+        $qrCode = $txn['qr_code'] ?? null;
+
+        if (!$qrCode) {
+            throw new \RuntimeException('PIX: QR code nao retornado. Resposta: ' . json_encode($result));
+        }
+
+        return [
+            'qr_code'          => $qrCode,
+            'expires_in'       => $expiresIn,
+            'pagarme_order_id' => $result['id'] ?? null,
+        ];
+    }
+
+    /**
      * Verifica assinatura HMAC-SHA256 do webhook Pagar.me.
      * Header recebido: X-Hub-Signature  (formato: sha256=xxxx)
      */
