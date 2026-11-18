@@ -142,7 +142,7 @@ match ($method) {
         if (!$lineItems) json_err('No valid items');
 
         // Fetch delivery fee and min order from settings
-        $cfg = $pdo->query("SELECT setting_key, setting_value FROM store_settings WHERE setting_key IN ('delivery_fee','min_order','store_open','fonnte_token','store_whatsapp')")->fetchAll(\PDO::FETCH_KEY_PAIR);
+        $cfg = $pdo->query("SELECT setting_key, setting_value FROM store_settings WHERE setting_key IN ('delivery_fee','min_order','store_open','fonnte_token','store_whatsapp','pix_key')")->fetchAll(\PDO::FETCH_KEY_PAIR);
         if (($cfg['store_open'] ?? '1') === '0') json_err('Loja fechada no momento', 503);
 
         $minOrder = (float)($cfg['min_order'] ?? 0);
@@ -321,8 +321,10 @@ match ($method) {
         if ($pixQrCode) {
             $resp['pix_qr_code']   = $pixQrCode;
             $resp['pix_expires_in'] = $pixExpiresIn;
-        } elseif ($pixError) {
-            $resp['pix_error'] = $pixError;
+        } else {
+            $storePix = trim($cfg['pix_key'] ?? '');
+            if ($storePix) $resp['pix_key'] = $storePix;
+            if ($pixError) $resp['pix_error'] = $pixError;
         }
         json_ok($resp, 201);
     })(),

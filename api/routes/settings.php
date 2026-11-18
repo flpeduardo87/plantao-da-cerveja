@@ -7,7 +7,7 @@
 
 $pdo = db();
 
-$PUBLIC_KEYS = ['store_name','min_order','delivery_fee','delivery_time_min','delivery_time_max','store_open','store_whatsapp','store_hours'];
+$PUBLIC_KEYS = ['store_name','min_order','delivery_fee','delivery_time_min','delivery_time_max','store_open','store_whatsapp','store_hours','pix_key'];
 
 // Shared upsert logic
 $upsert = function (array $d) use ($pdo): void {

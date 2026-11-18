@@ -139,6 +139,29 @@
         </div>
       </div>
 
+      <!-- Chave PIX -->
+      <div class="card">
+        <div class="card-header">
+          <div class="ch-icon green"><i data-lucide="qr-code" width="14" height="14"></i></div>
+          <h2>PIX — Chave da loja</h2>
+        </div>
+        <div class="card-body">
+          <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:9px;padding:12px 14px;margin-bottom:14px;font-size:12.5px;color:#166534;line-height:1.6">
+            Quando o PIX automático (Pagar.me) não estiver disponível, o cliente verá esta chave para pagar manualmente.
+          </div>
+          <form id="form-pix" onsubmit="savePix(event)">
+            <div class="form-grid" style="margin-bottom:14px">
+              <div class="field form-full">
+                <label>Chave PIX</label>
+                <input type="text" id="s-pix-key" placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória">
+                <span class="field-hint">Chave PIX cadastrada no seu banco. Exibida ao cliente quando necessário.</span>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar chave PIX</button>
+          </form>
+        </div>
+      </div>
+
       <!-- Pagamento Stone -->
       <div class="card">
         <div class="card-header">
@@ -280,6 +303,7 @@ async function loadSettings() {
     document.getElementById('s-stone-sandbox').checked = data.stone_sandbox === '1' || data.stone_sandbox === 1;
     if (data.fonnte_token)    document.getElementById('s-fonnte-token').placeholder    = '(configurado)';
     if (data.store_whatsapp)  document.getElementById('s-store-whatsapp').value        = data.store_whatsapp;
+    if (data.pix_key)         document.getElementById('s-pix-key').value               = data.pix_key;
     if (data.stone_client_id) document.getElementById('s-stone-client-id').placeholder = '(configurado)';
     buildHoursGrid(data.store_hours ? (typeof data.store_hours === 'string' ? JSON.parse(data.store_hours) : data.store_hours) : null);
   } catch (e) {
@@ -335,6 +359,16 @@ async function saveSecrets(e) {
     if (token) { document.getElementById('s-fonnte-token').value = ''; document.getElementById('s-fonnte-token').placeholder = '(configurado)'; }
   } catch (e) { toast(e.message, 'error'); }
   finally { btn.disabled = false; btn.textContent = 'Salvar WhatsApp'; }
+}
+
+async function savePix(e) {
+  e.preventDefault();
+  const btn = e.submitter; btn.disabled = true; btn.textContent = 'Salvando…';
+  try {
+    await api('/settings', { method: 'PUT', body: JSON.stringify({ pix_key: document.getElementById('s-pix-key').value }) });
+    toast('Chave PIX salva');
+  } catch (e) { toast(e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Salvar chave PIX'; }
 }
 
 async function saveStone(e) {

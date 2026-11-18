@@ -1770,7 +1770,11 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
         <button id="pix-copy-btn" onclick="copyPixCode()" style="flex-shrink:0;padding:8px 14px;background:#00BDAE;color:#fff;border:none;border-radius:8px;font:600 13px sans-serif;cursor:pointer;white-space:nowrap;">Copiar</button>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:8px;font-size:14px;color:#4b5563;">
+    <div id="pix-static-info" style="display:none;width:100%;background:#fef9c3;border:1px solid #fde047;border-radius:10px;padding:14px 16px;text-align:left;">
+      <p style="font-size:13px;font-weight:600;color:#713f12;margin:0 0 6px;">Pagamento manual via PIX</p>
+      <p style="font-size:12.5px;color:#78350f;margin:0;line-height:1.6;">Faça uma transferencia PIX para a chave acima e envie o comprovante pelo WhatsApp. O pedido sera confirmado assim que recebermos o pagamento.</p>
+    </div>
+    <div id="pix-countdown" style="display:flex;align-items:center;gap:8px;font-size:14px;color:#4b5563;">
       <i data-lucide="clock" width="16" height="16" style="color:#9ca3af;"></i>
       <span>Expira em <strong id="pix-timer" style="font-variant-numeric:tabular-nums;min-width:44px;display:inline-block;">30:00</strong></span>
     </div>
