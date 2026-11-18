@@ -3280,10 +3280,15 @@ function fmtCCExp(el){
   el.value=v;
 }
 async function tokenizeCard(publicKey){
-  const num = (document.getElementById('cc-num').value||'').replace(/\s/g,'');
-  const name = (document.getElementById('cc-name').value||'').trim();
-  const exp = (document.getElementById('cc-exp').value||'').trim();
-  const cvv = (document.getElementById('cc-cvv').value||'').trim();
+  const numEl  = document.getElementById('cc-num');
+  const nameEl = document.getElementById('cc-name');
+  const expEl  = document.getElementById('cc-exp');
+  const cvvEl  = document.getElementById('cc-cvv');
+  if(!numEl||!nameEl||!expEl||!cvvEl) throw new Error('Selecione "Cartão de Crédito Online" e preencha os dados do cartão antes de confirmar.');
+  const num  = (numEl.value||'').replace(/\s/g,'');
+  const name = (nameEl.value||'').trim();
+  const exp  = (expEl.value||'').trim();
+  const cvv  = (cvvEl.value||'').trim();
   if(!num||num.length<13) throw new Error('Número do cartão inválido.');
   if(!name) throw new Error('Nome do cartão obrigatório.');
   const expParts = exp.split('/');
