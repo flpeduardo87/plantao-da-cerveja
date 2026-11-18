@@ -3423,8 +3423,12 @@ async function finalizarPedido(){
       btn.disabled=false;
       btn.innerHTML='Confirmar Pedido <i data-lucide="check" width="16" height="16"></i>';
       showPixOverlay(j.pix_qr_code, j.order_number||j.order?.order_number, j.pix_expires_in||1800);
+    } else if(j.pix_key){
+      cart=[]; saveCart(); updateBadge();
+      btn.disabled=false;
+      btn.innerHTML='Confirmar Pedido <i data-lucide="check" width="16" height="16"></i>';
+      showPixOverlay(j.pix_key, j.order_number||j.order?.order_number, 0);
     } else {
-      if(j.pix_error) toast('PIX indisponivel: ' + j.pix_error);
       coStep=4;
       renderCoStep();
       document.getElementById('co-body').scrollTop=0;
@@ -3457,20 +3461,33 @@ let _pixPollTimer = null;
 let _pixCountTimer = null;
 
 function showPixOverlay(pixCode, orderNumber, expiresIn) {
+  const isStatic = !expiresIn;
   const overlay = document.getElementById('pix-overlay');
   overlay.classList.remove('hidden');
   overlay.style.display = 'flex';
   lucide.createIcons();
-  document.getElementById('pix-code-input').value = pixCode;
+  document.getElementById('pix-code-input').value = pixCode || '';
   const qrEl = document.getElementById('pix-qr');
   qrEl.innerHTML = '';
-  if(window.QRCode){
+  if(pixCode && window.QRCode){
     new QRCode(qrEl, {text: pixCode, width:184, height:184, colorDark:'#000000', colorLight:'#f3f4f6', correctLevel: QRCode.CorrectLevel.M});
-  } else {
-    qrEl.innerHTML = '<p style="font-size:12px;color:#9ca3af;padding:16px;">Use o codigo acima.</p>';
+  } else if(!pixCode) {
+    qrEl.innerHTML = '<p style="font-size:12px;color:#9ca3af;padding:16px;">Use a chave acima.</p>';
   }
-  startPixCountdown(expiresIn);
-  startPixPolling(orderNumber);
+  const info = document.getElementById('pix-static-info');
+  const countdown = document.getElementById('pix-countdown');
+  const statusRow = document.getElementById('pix-status-row');
+  if(isStatic){
+    if(info) info.style.display = 'block';
+    if(countdown) countdown.style.display = 'none';
+    if(statusRow) statusRow.style.display = 'none';
+  } else {
+    if(info) info.style.display = 'none';
+    if(countdown) countdown.style.display = 'flex';
+    if(statusRow) statusRow.style.display = 'flex';
+    startPixCountdown(expiresIn);
+    startPixPolling(orderNumber);
+  }
 }
 
 function copyPixCode() {
