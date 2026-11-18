@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -857,6 +857,20 @@ label{display:block;font-size:12px;font-weight:500;color:var(--fg-2);margin-bott
 .pay-icon{flex-shrink:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;}
 .pay-info strong{display:block;font-size:14px;font-weight:500;}
 .pay-info span{font-size:12px;color:var(--fg-2);}
+/* Card form */
+.card-form{
+  margin-top:12px;padding:16px;
+  background:var(--bg-2);border-radius:var(--r-sm);
+  display:flex;flex-direction:column;gap:12px;
+}
+.card-form label{font-size:12px;font-weight:500;color:var(--fg-2);margin-bottom:4px;display:block;}
+.card-form .form-input{background:var(--bg);}
+.card-brand{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--fg-3);
+  background:var(--bg-2);padding:2px 7px;border-radius:4px;
+}
+
 .pix-badge{
   display:inline-block;font-size:10px;font-weight:600;
   background:#00BDAE22;color:#00837A;padding:2px 7px;border-radius:999px;margin-left:6px;
@@ -2055,8 +2069,7 @@ let chosenScheduledAt = null;
 let coStep = 1;
 let coData = {};
 let payMethod = null;
-let lastPaymentUrl = null;
-let lastStoneDebug = null;
+let lastPaymentUrl = null; // kept for openPayIframe (overlay de link externo)
 let confirmedTotal = 0;
 let confirmedItems = 0;
 
@@ -3071,8 +3084,48 @@ function renderCoStep(){
       <label class="pay-opt${payMethod==='credito'?' selected':''}" onclick="selPay('credito')">
         <input type="radio" name="pay" ${payMethod==='credito'?'checked':''}>
         <span class="pay-icon"><i data-lucide="wallet" width="22" height="22"></i></span>
-        <div class="pay-info"><strong>Cartão de Crédito Online</strong><span>Parcelamento disponível</span></div>
+        <div class="pay-info"><strong>Cartão de Crédito Online</strong><span>Pagamento seguro via Pagar.me</span></div>
       </label>
+      ${payMethod==='credito'?`
+      <div class="card-form" id="card-form">
+        <div class="form-group" style="margin:0">
+          <label>Número do cartão</label>
+          <div style="position:relative">
+            <input id="cc-num" class="form-input" inputmode="numeric" autocomplete="cc-number"
+              placeholder="0000 0000 0000 0000" maxlength="19"
+              oninput="fmtCCNum(this)" style="letter-spacing:.5px">
+            <span id="cc-brand" class="card-brand"></span>
+          </div>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Nome impresso no cartão</label>
+          <input id="cc-name" class="form-input" autocomplete="cc-name"
+            placeholder="NOME SOBRENOME" style="text-transform:uppercase"
+            oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="margin:0">
+            <label>Validade</label>
+            <input id="cc-exp" class="form-input" inputmode="numeric" autocomplete="cc-exp"
+              placeholder="MM/AA" maxlength="5" oninput="fmtCCExp(this)">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>CVV</label>
+            <input id="cc-cvv" class="form-input" inputmode="numeric" autocomplete="cc-csc"
+              placeholder="123" maxlength="4">
+          </div>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Parcelas</label>
+          <select id="cc-inst" class="form-input">
+            ${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}x de R$ ${fmt(total/(i+1))}${i===0?' (sem juros)':''}</option>`).join('')}
+          </select>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--fg-3)">
+          <i data-lucide="lock" width="12" height="12"></i>
+          Dados criptografados com segurança via Pagar.me
+        </div>
+      </div>`:''}
       <label class="pay-opt${payMethod==='dinheiro'?' selected':''}" onclick="selPay('dinheiro')">
         <input type="radio" name="pay" ${payMethod==='dinheiro'?'checked':''}>
         <span class="pay-icon"><i data-lucide="banknote" width="22" height="22"></i></span>
@@ -3119,12 +3172,7 @@ function renderCoStep(){
           <p>Entrega: <strong>${esc(coData.rua||'—')}, ${esc(coData.num||'')}</strong></p>
           <p>Pagamento: <strong>${{pix:'PIX',maquininha:'Maquininha',credito:'Cartão de Crédito',dinheiro:'Dinheiro'}[payMethod]||'—'}</strong></p>
         </div>
-        ${lastStoneDebug ? `<p style="background:#fee2e2;color:#991b1b;padding:10px;border-radius:8px;font-size:12px;word-break:break-all;margin-bottom:10px"><strong>Erro pagamento:</strong> ${esc(lastStoneDebug)}</p>` : ''}
-        ${lastPaymentUrl ? `
-        <button class="btn-primary" style="margin-bottom:10px" onclick="openPayIframe('${lastPaymentUrl}')">
-          💳 Concluir pagamento com cartão
-        </button>` : ''}
-        <button class="btn-primary" style="${lastPaymentUrl?'background:var(--fg-3);':''}" onclick="closeCheckout();goHome();refreshFeed()">Continuar comprando</button>
+        <button class="btn-primary" onclick="closeCheckout();goHome();refreshFeed()">Continuar comprando</button>
       </div>`;
   }
   el.innerHTML = `<div class="co-scroll">${summaryHtml}${content}</div>`;
@@ -3199,15 +3247,77 @@ function nextStep(from){
   document.querySelector('.checkout-sheet').scrollTop=0;
   document.getElementById('co-body').scrollTop=0;
 }
+// ── Card formatting helpers ─────────────────────────────────────────────────
+let _pmPublicKey = null;
+async function getPmPublicKey(){
+  if(_pmPublicKey) return _pmPublicKey;
+  try{
+    const r = await fetch(API+'/payment/config');
+    const j = await r.json();
+    _pmPublicKey = j.public_key||'';
+  }catch{ _pmPublicKey=''; }
+  return _pmPublicKey;
+}
+function detectBrand(num){
+  num=num.replace(/\D/g,'');
+  if(/^4/.test(num)) return 'VISA';
+  if(/^5[1-5]|^2[2-7]/.test(num)) return 'MASTER';
+  if(/^3[47]/.test(num)) return 'AMEX';
+  if(/^6(?:011|5)/.test(num)) return 'ELO';
+  if(/^3(?:0[0-5]|[68])/.test(num)) return 'DINNERS';
+  return '';
+}
+function fmtCCNum(el){
+  let v=el.value.replace(/\D/g,'').substring(0,16);
+  el.value=v.replace(/(.{4})/g,'$1 ').trim();
+  const brand=detectBrand(v);
+  const b=document.getElementById('cc-brand');
+  if(b) b.textContent=brand;
+}
+function fmtCCExp(el){
+  let v=el.value.replace(/\D/g,'');
+  if(v.length>=3) v=v.substring(0,2)+'/'+v.substring(2,4);
+  el.value=v;
+}
+async function tokenizeCard(publicKey){
+  const num = (document.getElementById('cc-num').value||'').replace(/\s/g,'');
+  const name = (document.getElementById('cc-name').value||'').trim();
+  const exp = (document.getElementById('cc-exp').value||'').trim();
+  const cvv = (document.getElementById('cc-cvv').value||'').trim();
+  if(!num||num.length<13) throw new Error('Número do cartão inválido.');
+  if(!name) throw new Error('Nome do cartão obrigatório.');
+  const expParts = exp.split('/');
+  if(expParts.length!==2||expParts[0].length!==2||expParts[1].length!==2) throw new Error('Validade inválida. Use MM/AA.');
+  if(!cvv||cvv.length<3) throw new Error('CVV inválido.');
+  const r = await fetch(`https://api.pagar.me/core/v5/tokens?appId=${encodeURIComponent(publicKey)}`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      type:'card',
+      card:{
+        number: num,
+        holder_name: name,
+        exp_month: parseInt(expParts[0],10),
+        exp_year: 2000+parseInt(expParts[1],10),
+        cvv: cvv,
+      }
+    })
+  });
+  const j = await r.json();
+  if(!r.ok) throw new Error(j.errors?.[0]?.message||'Erro ao validar dados do cartão.');
+  return j.id;
+}
+
 function selPay(v){
   payMethod=v;
   renderCoStep();
   document.getElementById('co-body').scrollTop=999;
+  if(v==='credito') setTimeout(()=>{ const f=document.getElementById('cc-num'); if(f) f.focus(); },100);
 }
 async function finalizarPedido(){
   if(!payMethod){ toast('Escolha uma forma de pagamento.'); return; }
   const btn = document.getElementById('pay-btn');
-  btn.disabled=true; btn.textContent='Enviando...';
+  btn.disabled=true; btn.innerHTML='<span style="display:flex;align-items:center;gap:8px"><span style="width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block"></span>Processando…</span>';
   const payMap = {pix:'pix',maquininha:'machine',credito:'credit_card',dinheiro:'cash'};
   const payload = {
     customer_name: coData.nome,
@@ -3225,6 +3335,22 @@ async function finalizarPedido(){
     notes: '',
     items: cart.map(i=>({product_id:i.id,product_name:i.name,quantity:i.qty,unit_price:i.price})),
   };
+  // Tokenizar cartão se pagamento for crédito
+  if(payMethod==='credito'){
+    try{
+      const pk = await getPmPublicKey();
+      if(!pk) throw new Error('Chave pública Pagar.me não configurada. Contate o estabelecimento.');
+      const token = await tokenizeCard(pk);
+      payload.card_token = token;
+      payload.installments = parseInt(document.getElementById('cc-inst')?.value||'1',10);
+    } catch(e){
+      toast(e.message);
+      btn.disabled=false;
+      btn.innerHTML='Confirmar Pedido <i data-lucide="check" width="16" height="16"></i>';
+      lucide.createIcons();
+      return;
+    }
+  }
   const orderHeaders = {'Content-Type':'application/json'};
   if(acctToken) orderHeaders['Authorization'] = 'Bearer '+acctToken;
   try {
@@ -3237,14 +3363,11 @@ async function finalizarPedido(){
     if(!r.ok||!j.success) throw new Error(j.error||j.message||'Erro ao registrar pedido.');
     try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, phone: coData.tel, ts: Date.now()})); }catch{}
     try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
-    lastPaymentUrl = j.payment_url || null;
-    lastStoneDebug = j.pm_debug || null;
     coStep=4;
     renderCoStep();
     document.getElementById('co-body').scrollTop=0;
     startOrderTracking();
     cart=[]; saveCart(); updateBadge();
-    if(lastPaymentUrl) try{ openPayIframe(lastPaymentUrl); }catch(e){ console.error('iframe err',e); }
   } catch(e) {
     toast(e.message);
     btn.disabled=false;
@@ -3252,7 +3375,6 @@ async function finalizarPedido(){
     lucide.createIcons();
   }
 }
-
 function openPayIframe(url){
   const overlay = document.getElementById('pay-iframe-overlay');
   const link    = document.getElementById('pay-iframe-link');

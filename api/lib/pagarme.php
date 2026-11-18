@@ -84,6 +84,66 @@ class PagarMe {
     }
 
     /**
+     * Cria pedido com pagamento direto via token de cartão (checkout transparente).
+     *
+     * @param array  $order       order_number, total, customer_name, customer_phone, items[]
+     * @param string $cardToken   token gerado pelo frontend via /v5/tokens
+     * @param int    $installments parcelas (1–12)
+     * @return array ['status'=>'paid'|'failed', 'pagarme_order_id'=>'...', 'charge_id'=>'...']
+     */
+    public function createCreditCardOrder(array $order, string $cardToken, int $installments = 1): array {
+        $amountCents = (int) round((float) $order['total'] * 100);
+        $phone       = preg_replace('/\D/', '', $order['customer_phone']);
+        $areaCode    = strlen($phone) >= 11 ? substr($phone, 0, 2) : '11';
+        $number      = strlen($phone) >= 11 ? substr($phone, 2) : substr($phone, 2);
+
+        $items = array_values(array_map(function ($item, $idx) {
+            return [
+                'amount'      => (int) round((float)($item['price'] ?? $item['unit_price'] ?? 0) * 100),
+                'description' => $item['name'] ?? ('Item ' . ($idx + 1)),
+                'quantity'    => (int)($item['qty'] ?? $item['quantity'] ?? 1),
+                'code'        => (string)($item['product_id'] ?? ($idx + 1)),
+            ];
+        }, $order['items'], array_keys($order['items'])));
+
+        $payload = [
+            'code'     => $order['order_number'],
+            'customer' => [
+                'name'   => $order['customer_name'],
+                'type'   => 'individual',
+                'phones' => [
+                    'mobile_phone' => [
+                        'country_code' => '55',
+                        'area_code'    => $areaCode,
+                        'number'       => $number,
+                    ],
+                ],
+            ],
+            'items'    => $items,
+            'payments' => [[
+                'payment_method' => 'credit_card',
+                'amount'         => $amountCents,
+                'credit_card'    => [
+                    'installments'         => max(1, (int) $installments),
+                    'statement_descriptor' => 'PLANTAO CERVEJA',
+                    'card_token'           => $cardToken,
+                ],
+            ]],
+        ];
+
+        $result = $this->request('POST', '/orders', $payload);
+
+        $status   = $result['status'] ?? 'failed';
+        $chargeId = $result['charges'][0]['id'] ?? null;
+
+        return [
+            'status'          => $status,
+            'pagarme_order_id'=> $result['id'] ?? null,
+            'charge_id'       => $chargeId,
+        ];
+    }
+
+    /**
      * Verifica assinatura HMAC-SHA256 do webhook Pagar.me.
      * Header recebido: X-Hub-Signature  (formato: sha256=xxxx)
      */

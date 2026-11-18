@@ -196,32 +196,45 @@ match ($method) {
             json_err('Erro ao salvar pedido: ' . $e->getMessage(), 500);
         }
 
-        // Pagar.me checkout (cartão de crédito — best-effort, não bloqueia o pedido)
-        $paymentUrl = null;
-        $pmDebugErr = null;
+        // Pagar.me checkout transparente (cartão de crédito)
+        $pmDebugErr  = null;
+        $pmPaid      = false;
         if ($d['payment_method'] === 'credit_card') {
+            $cardToken    = trim($d['card_token'] ?? '');
+            $installments = max(1, (int)($d['installments'] ?? 1));
+            if (!$cardToken) {
+                json_err('Token do cartão ausente.');
+            }
             try {
                 require_once __DIR__ . '/../lib/pagarme.php';
                 $pm = new PagarMe();
                 if (!$pm->isConfigured()) {
                     $pmDebugErr = 'NOT_CONFIGURED: PAGARME_SECRET_KEY ausente em config.php';
                 } else {
-                    $successUrl = rtrim(FRONTEND_URL, '/') . '/#pedido/' . $orderNumber;
-                    $webhookUrl = rtrim(API_URL, '/') . '/payment/webhook';
-                    $link = $pm->createCheckout([
+                    $result = $pm->createCreditCardOrder([
                         'order_number'   => $orderNumber,
                         'total'          => $total,
                         'customer_name'  => trim($d['customer_name']),
                         'customer_phone' => preg_replace('/\D/', '', $d['customer_phone']),
                         'items'          => $lineItems,
-                    ], $successUrl, $webhookUrl);
-                    $paymentUrl = $link['payment_url'];
-                    $pdo->prepare('UPDATE orders SET stone_payment_url = ? WHERE id = ?')
-                        ->execute([$paymentUrl, $orderId]);
+                    ], $cardToken, $installments);
+
+                    $pmPaid = ($result['status'] === 'paid');
+                    if ($pmPaid) {
+                        $pdo->prepare("UPDATE orders SET payment_status='paid', status='accepted' WHERE id=?")
+                            ->execute([$orderId]);
+                    } elseif ($result['status'] === 'failed') {
+                        $pmDebugErr = 'Pagamento recusado. Verifique os dados do cartão.';
+                    }
                 }
             } catch (\Throwable $pmErr) {
-                error_log('Pagar.me checkout error: ' . $pmErr->getMessage());
-                $pmDebugErr = 'EXCEPTION: ' . $pmErr->getMessage();
+                error_log('Pagar.me error: ' . $pmErr->getMessage());
+                $pmDebugErr = $pmErr->getMessage();
+            }
+            if ($pmDebugErr) {
+                // Cancelar pedido e informar erro
+                $pdo->prepare("UPDATE orders SET payment_status='failed', status='cancelled' WHERE id=?")->execute([$orderId]);
+                json_err($pmDebugErr);
             }
         }
 
@@ -278,8 +291,6 @@ match ($method) {
         } catch (\Throwable $e2) { /* best-effort */ }
 
         $resp = ['success' => true, 'id' => $orderId, 'order_number' => $orderNumber, 'total' => $total];
-        if ($paymentUrl) $resp['payment_url'] = $paymentUrl;
-        if ($pmDebugErr)  $resp['pm_debug']   = $pmDebugErr;
         json_ok($resp, 201);
     })(),
 

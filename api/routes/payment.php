@@ -1,9 +1,15 @@
 <?php
+// GET  /payment/config   — retorna public key para tokenização client-side
 // POST /payment/webhook  — Pagar.me v5 webhook (público, verificado por HMAC)
 
 require_once __DIR__ . '/../lib/pagarme.php';
 
 $pdo = db();
+
+// ── Config pública ────────────────────────────────────────────────────────────
+if ($method === 'GET' && ($sub ?? '') === 'config') {
+    json_ok(['public_key' => defined('PAGARME_PUBLIC_KEY') ? PAGARME_PUBLIC_KEY : '']);
+}
 
 if ($method !== 'POST') json_err('Method not allowed', 405);
 if (($sub ?? '') !== 'webhook') json_err('Not found', 404);
