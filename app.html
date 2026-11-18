@@ -3414,8 +3414,11 @@ async function finalizarPedido(){
     try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
     if(j.pix_qr_code){
       cart=[]; saveCart(); updateBadge();
+      btn.disabled=false;
+      btn.innerHTML='Confirmar Pedido <i data-lucide="check" width="16" height="16"></i>';
       showPixOverlay(j.pix_qr_code, j.order_number||j.order?.order_number, j.pix_expires_in||1800);
     } else {
+      if(j.pix_error) toast('PIX indisponivel: ' + j.pix_error);
       coStep=4;
       renderCoStep();
       document.getElementById('co-body').scrollTop=0;

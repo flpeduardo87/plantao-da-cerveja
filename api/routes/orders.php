@@ -241,11 +241,14 @@ match ($method) {
         // Pagar.me PIX — gera QR code (best-effort, nao bloqueia criacao do pedido)
         $pixQrCode   = null;
         $pixExpiresIn = 1800;
+        $pixError    = null;
         if ($d['payment_method'] === 'pix') {
             try {
                 require_once __DIR__ . '/../lib/pagarme.php';
                 $pm = new PagarMe();
-                if ($pm->isConfigured()) {
+                if (!$pm->isConfigured()) {
+                    $pixError = 'NOT_CONFIGURED';
+                } else {
                     $pixResult  = $pm->createPixOrder([
                         'order_number'   => $orderNumber,
                         'total'          => $total,
@@ -257,8 +260,8 @@ match ($method) {
                     $pixExpiresIn = $pixResult['expires_in'] ?? 1800;
                 }
             } catch (\Throwable $pixErr) {
-                error_log('Pagar.me PIX error: ' . $pixErr->getMessage());
-                // Continua sem QR code — cliente paga manualmente
+                $pixError = $pixErr->getMessage();
+                error_log('Pagar.me PIX error: ' . $pixError);
             }
         }
 
@@ -318,6 +321,8 @@ match ($method) {
         if ($pixQrCode) {
             $resp['pix_qr_code']   = $pixQrCode;
             $resp['pix_expires_in'] = $pixExpiresIn;
+        } elseif ($pixError) {
+            $resp['pix_error'] = $pixError;
         }
         json_ok($resp, 201);
     })(),
