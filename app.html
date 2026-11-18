@@ -2082,7 +2082,7 @@ function loadCart(){
 }
 loadCart();
 
-function fmt(n){ const v=parseFloat(n); return isNaN(v)?'0,00':v.toLocaleString('pt-BR',{minimumFractionDigits:2}); }
+function fmt(n){ const v=parseFloat(n); return isNaN(v)?'0,00':v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function show(id){ document.getElementById(id).classList.remove('hidden'); }
 function hide(id){ document.getElementById(id).classList.add('hidden'); }
 function showScreen(id){
