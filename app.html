@@ -2624,6 +2624,8 @@ function search(q){
   document.getElementById('cat-grid-wrap').hidden=true;
   document.getElementById('cat-view-hd').hidden=true;
   renderSections(allProds.filter(p=>p.name.toLowerCase().includes(q.toLowerCase())));
+  const sec = document.getElementById('sections');
+  if(sec) setTimeout(()=>sec.scrollIntoView({behavior:'smooth',block:'start'}),80);
 }
 function onSearchInput(el){ search(el.value); }
 function clearSearch(){
