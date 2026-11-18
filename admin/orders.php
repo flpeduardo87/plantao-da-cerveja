@@ -197,7 +197,7 @@ function clearNewAlerts() { stopFlash(); }
 
 function fmtDelivery(type) {
   if (!type) return '—';
-  const map = { delivery: 'Entrega', pickup: 'Retirada', 'take-away': 'Retirada' };
+  const map = { immediate: 'Imediata', scheduled: 'Agendada', delivery: 'Entrega', pickup: 'Retirada', 'take-away': 'Retirada' };
   return map[type] || type;
 }
 
