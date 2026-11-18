@@ -1704,22 +1704,24 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
   </div>
 </div>
 
-<!-- Overlay de pagamento com cartão (iframe Stone) -->
+<!-- Overlay de pagamento com cartão -->
 <div id="pay-iframe-overlay" class="hidden" style="position:fixed;inset:0;z-index:9999;background:#fff;display:flex;flex-direction:column">
   <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #e5e7eb;background:#fff">
     <button onclick="closePay()" style="border:none;background:none;cursor:pointer;padding:4px;display:flex"><i data-lucide="arrow-left" width="20" height="20"></i></button>
     <span style="font-weight:600;font-size:15px">Pagamento com Cartão</span>
     <div style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;color:#6b7280"><i data-lucide="lock" width="12" height="12"></i> Ambiente seguro</div>
   </div>
-  <div id="pay-iframe-loading" style="position:absolute;inset:0;top:53px;display:flex;align-items:center;justify-content:center;background:#fff;z-index:1">
-    <div style="text-align:center;color:#6b7280"><div style="width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#111;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px"></div>Carregando pagamento…</div>
-  </div>
-  <iframe id="pay-iframe" src="" style="flex:1;border:none;width:100%" onload="document.getElementById('pay-iframe-loading').style.display='none'"></iframe>
-  <div id="pay-iframe-blocked" class="hidden" style="position:absolute;inset:0;top:53px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:12px">
-    <i data-lucide="external-link" width="36" height="36" style="color:#6b7280"></i>
-    <p style="font-size:14px;color:#374151">O pagamento precisa ser concluído em uma nova janela.</p>
-    <a id="pay-iframe-link" href="#" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none;display:inline-block">Abrir pagamento →</a>
-    <button onclick="closePay()" style="border:none;background:none;color:#6b7280;cursor:pointer;font-size:13px">Cancelar</button>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;gap:16px">
+    <div style="width:64px;height:64px;border-radius:50%;background:#f0fdf4;display:flex;align-items:center;justify-content:center">
+      <i data-lucide="external-link" width="28" height="28" style="color:#16a34a"></i>
+    </div>
+    <div>
+      <p style="font-size:16px;font-weight:600;color:#111827;margin:0 0 6px">Conclua o pagamento</p>
+      <p style="font-size:14px;color:#6b7280;margin:0">Uma nova aba foi aberta com a página de pagamento seguro.</p>
+    </div>
+    <a id="pay-iframe-link" href="#" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none;display:inline-block;margin-top:4px">💳 Abrir pagamento</a>
+    <p style="font-size:12px;color:#9ca3af;margin:0">Se a aba não abriu, clique no botão acima. Após pagar, volte aqui e acompanhe seu pedido.</p>
+    <button onclick="closePay()" style="border:none;background:none;color:#6b7280;cursor:pointer;font-size:13px;text-decoration:underline">Fechar</button>
   </div>
 </div>
 
@@ -3117,7 +3119,7 @@ function renderCoStep(){
           <p>Entrega: <strong>${esc(coData.rua||'—')}, ${esc(coData.num||'')}</strong></p>
           <p>Pagamento: <strong>${{pix:'PIX',maquininha:'Maquininha',credito:'Cartão de Crédito',dinheiro:'Dinheiro'}[payMethod]||'—'}</strong></p>
         </div>
-        ${lastStoneDebug ? `<p style="background:#fee2e2;color:#991b1b;padding:10px;border-radius:8px;font-size:12px;word-break:break-all;margin-bottom:10px"><strong>Stone erro:</strong> ${esc(lastStoneDebug)}</p>` : ''}
+        ${lastStoneDebug ? `<p style="background:#fee2e2;color:#991b1b;padding:10px;border-radius:8px;font-size:12px;word-break:break-all;margin-bottom:10px"><strong>Erro pagamento:</strong> ${esc(lastStoneDebug)}</p>` : ''}
         ${lastPaymentUrl ? `
         <button class="btn-primary" style="margin-bottom:10px" onclick="openPayIframe('${lastPaymentUrl}')">
           💳 Concluir pagamento com cartão
@@ -3236,7 +3238,7 @@ async function finalizarPedido(){
     try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, phone: coData.tel, ts: Date.now()})); }catch{}
     try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
     lastPaymentUrl = j.payment_url || null;
-    lastStoneDebug = j.stone_debug || null;
+    lastStoneDebug = j.pm_debug || null;
     coStep=4;
     renderCoStep();
     document.getElementById('co-body').scrollTop=0;
@@ -3253,38 +3255,15 @@ async function finalizarPedido(){
 
 function openPayIframe(url){
   const overlay = document.getElementById('pay-iframe-overlay');
-  const iframe  = document.getElementById('pay-iframe');
-  const loading = document.getElementById('pay-iframe-loading');
-  const blocked = document.getElementById('pay-iframe-blocked');
   const link    = document.getElementById('pay-iframe-link');
-  loading.style.display = 'flex';
-  blocked.style.display = 'none';
-  iframe.src = url;
-  link.href  = url;
+  link.href = url;
   overlay.classList.remove('hidden');
-  overlay.style.display = 'flex'; // força sobre o !important
+  overlay.style.display = 'flex';
   lucide.createIcons();
-  // Detect iframe blocked (X-Frame-Options) after 4s
-  setTimeout(()=>{
-    try {
-      // If we can't access contentDocument, it's cross-origin (loaded OK)
-      const doc = iframe.contentDocument;
-      // If contentDocument exists and is empty/about:blank, it was blocked
-      if(doc && (doc.URL==='about:blank'||doc.body?.innerHTML==='')){
-        loading.style.display='none';
-        blocked.style.display='flex';
-        lucide.createIcons();
-      }
-    } catch(e){
-      // Cross-origin means it loaded successfully — hide loading
-      loading.style.display='none';
-    }
-  }, 4000);
+  window.open(url, '_blank');
 }
 function closePay(){
-  const overlay = document.getElementById('pay-iframe-overlay');
-  document.getElementById('pay-iframe').src = '';
-  overlay.classList.add('hidden');
+  document.getElementById('pay-iframe-overlay').classList.add('hidden');
 }
 
 // ── ORDER TRACKING ──────────────────────────────────────────────────────────
