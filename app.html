@@ -3297,7 +3297,7 @@ function nextStep(from){
 }
 // ── Card formatting helpers ─────────────────────────────────────────────────
 let _pmPublicKey = null;
-async function getPmPublicKey(){
+async async function getPmPublicKey(){
   if(_pmPublicKey) return _pmPublicKey;
   try{
     const r = await fetch(API+'/payment/config');
