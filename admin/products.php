@@ -217,7 +217,7 @@
   </div>
 </div>
 
-<script src="assets/app.js?v=5"></script>
+<script src="assets/app.js?v=6"></script>
 <script>
 let categories = [];
 let allProds = [];
