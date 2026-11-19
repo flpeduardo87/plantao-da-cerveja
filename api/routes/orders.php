@@ -265,6 +265,7 @@ match ($method) {
                 $pixError = $pixErr->getMessage();
                 error_log('Pagar.me PIX error: ' . $pixError);
             }
+            error_log('Pagar.me PIX qr_code=' . ($pixQrCode ? 'found' : 'null') . ' error=' . ($pixError ?? 'none'));
         }
 
         // WhatsApp via Fonnte (best-effort, never blocks order creation)

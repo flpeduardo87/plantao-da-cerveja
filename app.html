@@ -3444,6 +3444,7 @@ async function finalizarPedido(){
       btn.innerHTML='Confirmar Pedido <i data-lucide="check" width="16" height="16"></i>';
       showPixOverlay(j.pix_key, j.order_number||j.order?.order_number, 0);
     } else {
+      if(j.pix_error) toast('PIX indisponivel: ' + j.pix_error, 'warning');
       coStep=4;
       renderCoStep();
       document.getElementById('co-body').scrollTop=0;
