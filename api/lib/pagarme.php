@@ -106,11 +106,14 @@ class PagarMe {
             ];
         }, $order['items'], array_keys($order['items'])));
 
+        $cpf = preg_replace('/\D/', '', $order['customer_cpf'] ?? '');
         $payload = [
             'code'     => $order['order_number'],
-            'customer' => [
-                'name'   => $order['customer_name'],
-                'type'   => 'individual',
+            'customer' => array_filter([
+                'name'          => $order['customer_name'],
+                'type'          => 'individual',
+                'document'      => $cpf ?: null,
+                'document_type' => $cpf ? 'CPF' : null,
                 'phones' => [
                     'mobile_phone' => [
                         'country_code' => '55',
@@ -118,7 +121,7 @@ class PagarMe {
                         'number'       => $number,
                     ],
                 ],
-            ],
+            ]),
             'items'    => $items,
             'payments' => [[
                 'payment_method' => 'credit_card',

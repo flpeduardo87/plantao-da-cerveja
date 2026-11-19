@@ -216,6 +216,7 @@ match ($method) {
                         'total'          => $total,
                         'customer_name'  => trim($d['customer_name']),
                         'customer_phone' => preg_replace('/\D/', '', $d['customer_phone']),
+                        'customer_cpf'   => preg_replace('/\D/', '', $d['customer_cpf'] ?? ''),
                         'items'          => $lineItems,
                     ], $cardToken, $installments);
 

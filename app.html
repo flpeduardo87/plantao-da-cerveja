@@ -3171,6 +3171,11 @@ function renderCoStep(){
             ${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}x de R$ ${fmt(grandTotal/(i+1))}${i===0?' (sem juros)':''}</option>`).join('')}
           </select>
         </div>
+        <div class="form-group" style="margin:0">
+          <label>CPF do titular</label>
+          <input id="cc-cpf" class="form-input" inputmode="numeric" autocomplete="off"
+            placeholder="000.000.000-00" maxlength="14" oninput="fmtCPF(this)">
+        </div>
         <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--fg-3)">
           <i data-lucide="lock" width="12" height="12"></i>
           Dados criptografados com segurança via Pagar.me
@@ -3329,6 +3334,13 @@ function fmtCCExp(el){
   if(v.length>=3) v=v.substring(0,2)+'/'+v.substring(2,4);
   el.value=v;
 }
+function fmtCPF(el){
+  let v=el.value.replace(/\D/g,'').substring(0,11);
+  if(v.length>9) v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/,'$1.$2.$3-$4');
+  else if(v.length>6) v=v.replace(/(\d{3})(\d{3})(\d{0,3})/,'$1.$2.$3');
+  else if(v.length>3) v=v.replace(/(\d{3})(\d{0,3})/,'$1.$2');
+  el.value=v;
+}
 async function tokenizeCard(publicKey){
   const numEl  = document.getElementById('cc-num');
   const nameEl = document.getElementById('cc-name');
@@ -3398,6 +3410,9 @@ async function finalizarPedido(){
       const token = await tokenizeCard(pk);
       payload.card_token = token;
       payload.installments = parseInt(document.getElementById('cc-inst')?.value||'1',10);
+      const cpfVal = (document.getElementById('cc-cpf')?.value||'').replace(/\D/g,'');
+      if(!cpfVal||cpfVal.length!==11){ toast('CPF do titular obrigatório (11 dígitos).'); btn.disabled=false; btn.innerHTML='Confirmar Pedido <i data-lucide="check" width="16" height="16"></i>'; lucide.createIcons(); return; }
+      payload.customer_cpf = cpfVal;
     } catch(e){
       toast(e.message);
       btn.disabled=false;
