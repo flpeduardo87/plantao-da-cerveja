@@ -145,7 +145,9 @@ class PagarMe {
                     'installments'         => max(1, (int) $installments),
                     'statement_descriptor' => 'PLANTAO CERVEJA',
                     'card_token'           => $cardToken,
-                    'billing_address'      => $addrObj,
+                    'card'                 => [
+                        'billing_address' => $addrObj,
+                    ],
                 ],
             ]],
         ];
