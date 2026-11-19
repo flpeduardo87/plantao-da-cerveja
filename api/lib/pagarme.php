@@ -107,7 +107,7 @@ class PagarMe {
         }, $order['items'], array_keys($order['items'])));
 
         $cpf     = preg_replace('/\D/', '', $order['customer_cpf'] ?? '');
-        $zip     = preg_replace('/\D/', '', $order['address_zip'] ?? '');
+        $zip     = preg_replace('/\D/', '', $order['address_cep'] ?? $order['address_zip'] ?? '');
         $street  = $order['address_street'] ?? '';
         $num     = $order['address_number'] ?? '0';
         $city    = $order['address_city'] ?? '';
@@ -146,6 +146,7 @@ class PagarMe {
                     'installments'         => max(1, (int) $installments),
                     'statement_descriptor' => 'PLANTAO CERVEJA',
                     'card_token'           => $cardToken,
+                    'billing'              => $billing,
                 ],
             ]],
         ];
