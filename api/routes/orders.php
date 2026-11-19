@@ -225,7 +225,8 @@ match ($method) {
                         $pdo->prepare("UPDATE orders SET payment_status='paid', status='accepted' WHERE id=?")
                             ->execute([$orderId]);
                     } elseif ($result['status'] === 'failed') {
-                        $pmDebugErr = 'Pagamento recusado. Verifique os dados do cartão.';
+                        $reason = $result['decline_reason'] ?? null;
+                        $pmDebugErr = 'Pagamento recusado' . ($reason ? ': ' . $reason : '. Verifique os dados do cartão.');
                     }
                 }
             } catch (\Throwable $pmErr) {

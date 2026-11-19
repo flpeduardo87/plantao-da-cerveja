@@ -136,13 +136,16 @@ class PagarMe {
 
         $result = $this->request('POST', '/orders', $payload);
 
-        $status   = $result['status'] ?? 'failed';
-        $chargeId = $result['charges'][0]['id'] ?? null;
+        $status      = $result['status'] ?? 'failed';
+        $chargeId    = $result['charges'][0]['id'] ?? null;
+        $lastTxn     = $result['charges'][0]['last_transaction'] ?? [];
+        $declineMsg  = $lastTxn['acquirer_message'] ?? ($lastTxn['gateway_response']['code'] ?? null);
 
         return [
             'status'          => $status,
             'pagarme_order_id'=> $result['id'] ?? null,
             'charge_id'       => $chargeId,
+            'decline_reason'  => $declineMsg,
         ];
     }
 
