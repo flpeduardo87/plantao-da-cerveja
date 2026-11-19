@@ -142,13 +142,11 @@ class PagarMe {
             'items'    => $items,
             'payments' => [[
                 'payment_method' => 'credit_card',
-                'amount'         => $amountCents,
                 'credit_card'    => [
                     'installments'         => max(1, (int) $installments),
                     'statement_descriptor' => 'PLANTAO CERVEJA',
                     'card_token'           => $cardToken,
                 ],
-                'billing' => $billing,
             ]],
         ];
 
