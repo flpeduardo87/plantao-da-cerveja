@@ -2266,6 +2266,7 @@ async function enterStore(){
   buildCats();
   renderSections();
   lucide.createIcons();
+  updateTrackingBanner();
   // Try API in background — replaces demo if it has products
   try {
     const [catsRes, prodsRes] = await Promise.all([
@@ -3647,7 +3648,7 @@ function startOrderTracking(){
     if(last.last_status) updateTrackUI(last.last_status);
   }catch{}
   pollOrderStatus();
-  _trackTimer = setInterval(pollOrderStatus, 15000);
+  _trackTimer = setInterval(pollOrderStatus, 8000);
 }
 
 function stopOrderTracking(){
@@ -3986,6 +3987,14 @@ try {
         const saved = localStorage.getItem('loc_addr');
         if(saved){ const el=document.getElementById('loc-field-txt'); if(el) el.textContent=saved; }
       }
+      // If there's a recent active order, start background polling so banner stays current
+      try {
+        const lo = JSON.parse(localStorage.getItem('plantao_last_order')||'{}');
+        if(lo.order_number && !lo.done && (Date.now()-lo.ts) < 4*60*60*1000) {
+          if(lo.phone) coData.tel = lo.phone;
+          startOrderTracking();
+        }
+      } catch {}
     });
   }
 } catch {}
