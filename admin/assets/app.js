@@ -120,6 +120,12 @@ function fmtStatus(s) {
 function fmtPayment(p) {
   return { pix: 'PIX', credit_card: 'Cartão crédito', debit_card: 'Cartão débito', cash: 'Dinheiro', machine: 'Maquininha' }[p] || p || '—';
 }
+function fmtPaymentStatus(ps, pm) {
+  if (pm === 'cash' || pm === 'machine') return '<span class="pay-st pay-st-na">Na entrega</span>';
+  if (ps === 'paid')    return '<span class="pay-st pay-st-paid">✓ Pago</span>';
+  if (ps === 'failed')  return '<span class="pay-st pay-st-failed">✗ Falhou</span>';
+  return '<span class="pay-st pay-st-pending">⏳ Aguardando</span>';
+}
 
 /* ── Modal helpers ── */
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
@@ -192,6 +198,7 @@ async function viewOrder(id) {
         <div class="info-cell">
           <div class="ic-label">Pagamento</div>
           <div class="ic-value">${fmtPayment(o.payment_method)}</div>
+          <div style="margin-top:5px">${fmtPaymentStatus(o.payment_status, o.payment_method)}</div>
         </div>
         <div class="info-cell">
           <div class="ic-label">Status</div>

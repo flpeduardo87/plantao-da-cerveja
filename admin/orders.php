@@ -289,7 +289,7 @@ function renderOrders() {
         </td>
         <td><strong>${fmtMoney(o.total)}</strong></td>
         <td style="white-space:nowrap">${statusBadge(o.status)}</td>
-        <td style="font-size:12.5px;color:var(--fg-2)">${fmtPayment(o.payment_method)}</td>
+        <td style="font-size:12.5px;color:var(--fg-2)">${fmtPayment(o.payment_method)}<br>${fmtPaymentStatus(o.payment_status,o.payment_method)}</td>
         <td style="font-size:12.5px;color:var(--fg-2)">${fmtDelivery(o.delivery_type)}</td>
         <td style="white-space:nowrap">${nextStatusBtn(o.id,o.status)} <button class="btn btn-ghost btn-sm" onclick="viewOrder(${o.id})">Detalhes</button></td>
       </tr>`).join('');
@@ -307,7 +307,7 @@ function renderOrders() {
       <div class="ord-card-mid">
         <div class="ord-card-name">${o.customer_name}</div>
         <div class="ord-card-meta">${o.customer_phone||''}</div>
-        <div class="ord-card-meta">${fmtPayment(o.payment_method)} · ${fmtDelivery(o.delivery_type)}</div>
+        <div class="ord-card-meta">${fmtPayment(o.payment_method)} · ${fmtDelivery(o.delivery_type)} ${fmtPaymentStatus(o.payment_status,o.payment_method)}</div>
         <div class="ord-card-value">${fmtMoney(o.total)}</div>
       </div>
       <div class="ord-card-actions">
