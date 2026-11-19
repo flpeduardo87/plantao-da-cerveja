@@ -1173,7 +1173,7 @@ label{display:block;font-size:13px;font-weight:500;color:var(--fg-2);margin-bott
 .spin{animation:spin-ic 1s linear infinite;}
 /* ── TRACKING BANNER ── */
 #track-banner{
-  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+  position:fixed;bottom:24px;right:24px;left:auto;transform:none;
   display:none;align-items:center;gap:10px;
   background:#111;color:#fff;
   padding:12px 18px;border-radius:999px;
@@ -1186,8 +1186,8 @@ label{display:block;font-size:13px;font-weight:500;color:var(--fg-2);margin-bott
 }
 #track-banner:hover{background:#222;}
 #track-banner .tb-dot{width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0;animation:tlPulse 1.5s infinite;}
-@keyframes bannerIn{from{opacity:0;transform:translateX(-50%) translateY(12px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
-@media(max-width:600px){#track-banner{bottom:72px;font-size:12px;padding:10px 16px;}}
+@keyframes bannerIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:768px){#track-banner{bottom:76px;right:50%;transform:translateX(50%);font-size:12px;padding:10px 16px;}}
 
 /* ── CUSTOMER ACCOUNT SCREEN ── */
 #s-account{
