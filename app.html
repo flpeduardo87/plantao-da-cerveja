@@ -3369,6 +3369,8 @@ async function tokenizeCard(publicKey){
   const expParts = exp.split('/');
   if(expParts.length!==2||expParts[0].length!==2||expParts[1].length!==2) throw new Error('Validade inválida. Use MM/AA.');
   if(!cvv||cvv.length<3) throw new Error('CVV inválido.');
+  const billingZip = (coData.cep||'').replace(/\D/g,'') || '00000000';
+  const billingLine1 = [(coData.num||''), (coData.rua||'Rua nao informada'), (coData.bairro||'Centro')].filter(Boolean).join(', ');
   const r = await fetch(`https://api.pagar.me/core/v5/tokens?appId=${encodeURIComponent(publicKey)}`,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
@@ -3380,6 +3382,13 @@ async function tokenizeCard(publicKey){
         exp_month: parseInt(expParts[0],10),
         exp_year: 2000+parseInt(expParts[1],10),
         cvv: cvv,
+        billing_address:{
+          line_1: billingLine1 || '0, Rua nao informada, Centro',
+          zip_code: billingZip,
+          city: coData.cidade || window._viaCepCity || 'São Paulo',
+          state: coData.uf || window._viaCepState || 'SP',
+          country:'BR',
+        },
       }
     })
   });
