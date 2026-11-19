@@ -114,6 +114,13 @@ class PagarMe {
         $state   = strtoupper(substr($order['address_state'] ?? '', 0, 2)) ?: 'SP';
 
         $addressLine1 = trim($num . ', ' . $street) ?: '0, Rua nao informada';
+        $addrObj = [
+            'line_1'   => $addressLine1,
+            'zip_code' => $zip ?: '00000000',
+            'city'     => $city ?: 'São Paulo',
+            'state'    => $state,
+            'country'  => 'BR',
+        ];
 
         $payload = [
             'code'     => $order['order_number'],
@@ -122,13 +129,7 @@ class PagarMe {
                 'type'          => 'individual',
                 'document'      => $cpf ?: null,
                 'document_type' => $cpf ? 'CPF' : null,
-                'address'       => [
-                    'line_1'   => $addressLine1,
-                    'zip_code' => $zip ?: '00000000',
-                    'city'     => $city ?: 'São Paulo',
-                    'state'    => $state,
-                    'country'  => 'BR',
-                ],
+                'address'       => $addrObj,
                 'phones' => [
                     'mobile_phone' => [
                         'country_code' => '55',
@@ -144,6 +145,7 @@ class PagarMe {
                     'installments'         => max(1, (int) $installments),
                     'statement_descriptor' => 'PLANTAO CERVEJA',
                     'card_token'           => $cardToken,
+                    'billing_address'      => $addrObj,
                 ],
             ]],
         ];
