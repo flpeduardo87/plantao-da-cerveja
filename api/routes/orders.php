@@ -212,12 +212,17 @@ match ($method) {
                     $pmDebugErr = 'NOT_CONFIGURED: PAGARME_SECRET_KEY ausente em config.php';
                 } else {
                     $result = $pm->createCreditCardOrder([
-                        'order_number'   => $orderNumber,
-                        'total'          => $total,
-                        'customer_name'  => trim($d['customer_name']),
-                        'customer_phone' => preg_replace('/\D/', '', $d['customer_phone']),
-                        'customer_cpf'   => preg_replace('/\D/', '', $d['customer_cpf'] ?? ''),
-                        'items'          => $lineItems,
+                        'order_number'    => $orderNumber,
+                        'total'           => $total,
+                        'customer_name'   => trim($d['customer_name']),
+                        'customer_phone'  => preg_replace('/\D/', '', $d['customer_phone']),
+                        'customer_cpf'    => preg_replace('/\D/', '', $d['customer_cpf'] ?? ''),
+                        'address_street'  => $d['address_street'] ?? '',
+                        'address_number'  => $d['address_number'] ?? '',
+                        'address_city'    => $d['address_city'] ?? '',
+                        'address_state'   => $d['address_state'] ?? '',
+                        'address_zip'     => preg_replace('/\D/', '', $d['address_cep'] ?? ''),
+                        'items'           => $lineItems,
                     ], $cardToken, $installments);
 
                     $pmPaid = ($result['status'] === 'paid');
@@ -256,6 +261,7 @@ match ($method) {
                         'total'          => $total,
                         'customer_name'  => trim($d['customer_name']),
                         'customer_phone' => preg_replace('/\D/', '', $d['customer_phone']),
+                        'customer_cpf'   => preg_replace('/\D/', '', $d['customer_cpf'] ?? ''),
                         'items'          => $lineItems,
                     ]);
                     $pixQrCode   = $pixResult['qr_code'];

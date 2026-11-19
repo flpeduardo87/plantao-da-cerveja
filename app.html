@@ -3126,6 +3126,14 @@ function renderCoStep(){
         <span class="pay-icon"><i data-lucide="qr-code" width="22" height="22"></i></span>
         <div class="pay-info"><strong>PIX <span class="pix-badge">Aprovação imediata</span></strong><span>Transferência instantânea</span></div>
       </label>
+      ${payMethod==='pix'?`
+      <div class="card-form" style="margin-top:-8px;margin-bottom:8px">
+        <div class="form-group" style="margin:0">
+          <label>CPF do pagador</label>
+          <input id="pix-cpf" class="form-input" inputmode="numeric" autocomplete="off"
+            placeholder="000.000.000-00" maxlength="14" oninput="fmtCPF(this)">
+        </div>
+      </div>`:''}
       <label class="pay-opt${payMethod==='maquininha'?' selected':''}" onclick="selPay('maquininha')">
         <input type="radio" name="pay" ${payMethod==='maquininha'?'checked':''}>
         <span class="pay-icon"><i data-lucide="credit-card" width="22" height="22"></i></span>
@@ -3249,6 +3257,8 @@ function renderCoStep(){
           const bairro = document.getElementById('co-bairro');
           if(rua && !rua.value) rua.value = d.logradouro || '';
           if(bairro && !bairro.value) bairro.value = d.bairro || '';
+          window._viaCepCity = d.localidade || '';
+          window._viaCepState = d.uf || '';
         }
       } catch {}
     });
@@ -3288,6 +3298,8 @@ function nextStep(from){
     coData.rua=rua; coData.num=num;
     coData.comp=document.getElementById('co-comp').value;
     coData.bairro=bairro; coData.ref=document.getElementById('co-ref').value;
+    coData.cidade = window._viaCepCity || '';
+    coData.uf = window._viaCepState || '';
     coStep=2;
   } else if(from===2){
     const nome=document.getElementById('co-nome').value.trim();
@@ -3396,6 +3408,8 @@ async function finalizarPedido(){
     address_complement: coData.comp||'',
     address_neighborhood: coData.bairro,
     address_reference: coData.ref||'',
+    address_city: coData.cidade||'',
+    address_state: coData.uf||'',
     payment_method: payMap[payMethod]||'pix',
     delivery_type: chosenWhen==='imediata'?'immediate':'scheduled',
     scheduled_at: chosenScheduledAt || null,
@@ -3420,6 +3434,11 @@ async function finalizarPedido(){
       lucide.createIcons();
       return;
     }
+  }
+  if(payMethod==='pix'){
+    const pixCpf = (document.getElementById('pix-cpf')?.value||'').replace(/\D/g,'');
+    if(!pixCpf||pixCpf.length!==11){ toast('CPF do pagador obrigatório para PIX (11 dígitos).'); btn.disabled=false; btn.innerHTML='Confirmar Pedido <i data-lucide="check" width="16" height="16"></i>'; lucide.createIcons(); return; }
+    payload.customer_cpf = pixCpf;
   }
   const orderHeaders = {'Content-Type':'application/json'};
   if(acctToken) orderHeaders['Authorization'] = 'Bearer '+acctToken;

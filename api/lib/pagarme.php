@@ -106,7 +106,24 @@ class PagarMe {
             ];
         }, $order['items'], array_keys($order['items'])));
 
-        $cpf = preg_replace('/\D/', '', $order['customer_cpf'] ?? '');
+        $cpf     = preg_replace('/\D/', '', $order['customer_cpf'] ?? '');
+        $zip     = preg_replace('/\D/', '', $order['address_zip'] ?? '');
+        $street  = $order['address_street'] ?? '';
+        $num     = $order['address_number'] ?? '0';
+        $city    = $order['address_city'] ?? '';
+        $state   = strtoupper(substr($order['address_state'] ?? '', 0, 2)) ?: 'SP';
+
+        $billing = [
+            'name'    => $order['customer_name'],
+            'address' => [
+                'line_1'   => $num . ', ' . $street,
+                'zip_code' => $zip ?: '00000000',
+                'city'     => $city ?: 'São Paulo',
+                'state'    => $state,
+                'country'  => 'BR',
+            ],
+        ];
+
         $payload = [
             'code'     => $order['order_number'],
             'customer' => array_filter([
@@ -130,6 +147,7 @@ class PagarMe {
                     'installments'         => max(1, (int) $installments),
                     'statement_descriptor' => 'PLANTAO CERVEJA',
                     'card_token'           => $cardToken,
+                    'billing'              => $billing,
                 ],
             ]],
         ];
@@ -174,12 +192,15 @@ class PagarMe {
         }, $order['items'], array_keys($order['items'])));
 
         $expiresIn = 1800; // 30 min
+        $cpf = preg_replace('/\D/', '', $order['customer_cpf'] ?? '');
 
         $payload = [
             'code'     => $order['order_number'],
-            'customer' => [
-                'name'   => $order['customer_name'],
-                'type'   => 'individual',
+            'customer' => array_filter([
+                'name'          => $order['customer_name'],
+                'type'          => 'individual',
+                'document'      => $cpf ?: null,
+                'document_type' => $cpf ? 'CPF' : null,
                 'phones' => [
                     'mobile_phone' => [
                         'country_code' => '55',
@@ -187,7 +208,7 @@ class PagarMe {
                         'number'       => $number,
                     ],
                 ],
-            ],
+            ]),
             'items'    => $items,
             'payments' => [[
                 'payment_method' => 'pix',
