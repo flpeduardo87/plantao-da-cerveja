@@ -244,6 +244,7 @@ class PagarMe {
         $data = json_decode($body, true) ?? [];
 
         if ($code >= 400) {
+            error_log('Pagar.me HTTP ' . $code . ' — ' . $method . ' ' . $path . ' — body: ' . $body);
             $msg = $data['errors'][0]['message'] ?? ($data['message'] ?? ('Pagar.me HTTP ' . $code));
             throw new \RuntimeException('Pagar.me: ' . $msg);
         }
