@@ -139,7 +139,10 @@ class PagarMe {
         $status      = $result['status'] ?? 'failed';
         $chargeId    = $result['charges'][0]['id'] ?? null;
         $lastTxn     = $result['charges'][0]['last_transaction'] ?? [];
-        $declineMsg  = $lastTxn['acquirer_message'] ?? ($lastTxn['gateway_response']['code'] ?? null);
+        error_log('Pagar.me charge result: ' . json_encode($result['charges'][0] ?? []));
+        $declineMsg  = $lastTxn['acquirer_message']
+            ?? ($lastTxn['gateway_response']['errors'][0]['message'] ?? null)
+            ?? ($lastTxn['gateway_response']['code'] ?? null);
 
         return [
             'status'          => $status,
