@@ -147,8 +147,8 @@ class PagarMe {
                     'installments'         => max(1, (int) $installments),
                     'statement_descriptor' => 'PLANTAO CERVEJA',
                     'card_token'           => $cardToken,
-                    'billing'              => $billing,
                 ],
+                'billing' => $billing,
             ]],
         ];
 
@@ -192,7 +192,8 @@ class PagarMe {
         }, $order['items'], array_keys($order['items'])));
 
         $expiresIn = 1800; // 30 min
-        $cpf = preg_replace('/\D/', '', $order['customer_cpf'] ?? '');
+        $cpf   = preg_replace('/\D/', '', $order['customer_cpf'] ?? '');
+        $email = $order['customer_email'] ?? null;
 
         $payload = [
             'code'     => $order['order_number'],
@@ -201,6 +202,7 @@ class PagarMe {
                 'type'          => 'individual',
                 'document'      => $cpf ?: null,
                 'document_type' => $cpf ? 'CPF' : null,
+                'email'         => $email ?: null,
                 'phones' => [
                     'mobile_phone' => [
                         'country_code' => '55',
@@ -219,6 +221,7 @@ class PagarMe {
             ]],
         ];
 
+        error_log('Pagar.me PIX payload: ' . json_encode($payload));
         $result = $this->request('POST', '/orders', $payload);
 
         $txn    = $result['charges'][0]['last_transaction'] ?? [];
