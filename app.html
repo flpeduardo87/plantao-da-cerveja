@@ -3462,7 +3462,14 @@ async function finalizarPedido(){
     if(!r.ok||!j.success) throw new Error(j.error||j.message||'Erro ao registrar pedido.');
     try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, phone: coData.tel, ts: Date.now()})); }catch{}
     try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
-    if(j.pix_qr_code){
+    if(j.threed_secure_url){
+      // 3DS authentication required — save order and redirect
+      try{ localStorage.setItem('plantao_last_order', JSON.stringify({id:j.id||j.order?.id, order_number:j.order_number||j.order?.order_number, phone:coData.tel, ts:Date.now()})); }catch{}
+      try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
+      cart=[]; saveCart(); updateBadge();
+      window.location.href = j.threed_secure_url;
+      return;
+    } else if(j.pix_qr_code){
       cart=[]; saveCart(); updateBadge();
       btn.disabled=false;
       btn.innerHTML='Confirmar Pedido <i data-lucide="check" width="16" height="16"></i>';
@@ -4015,6 +4022,23 @@ try {
         if(lo.order_number && !lo.done && (Date.now()-lo.ts) < 4*60*60*1000) {
           if(lo.phone) coData.tel = lo.phone;
           startOrderTracking();
+        }
+      } catch {}
+
+      // 3DS return: user came back from Pagar.me authentication page
+      try {
+        const params = new URLSearchParams(window.location.search);
+        if(params.get('pago') === '1'){
+          // Clean URL without reload
+          history.replaceState(null, '', window.location.pathname);
+          const lo = JSON.parse(localStorage.getItem('plantao_last_order')||'{}');
+          if(lo.order_number && (Date.now()-lo.ts) < 4*60*60*1000){
+            if(lo.phone) coData.tel = lo.phone;
+            coStep = 4;
+            show('checkout-overlay');
+            renderCoStep();
+            startOrderTracking();
+          }
         }
       } catch {}
     });

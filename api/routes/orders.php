@@ -226,9 +226,14 @@ match ($method) {
                         'items'           => $lineItems,
                     ], $cardToken, $installments);
 
-                    $pmPaid = ($result['status'] === 'paid');
+                    $pmPaid     = ($result['status'] === 'paid' || $result['status'] === 'authorized');
+                    $pm3dsUrl   = $result['threed_secure_url'] ?? null;
                     if ($pmPaid) {
                         $pdo->prepare("UPDATE orders SET payment_status='paid', status='accepted' WHERE id=?")
+                            ->execute([$orderId]);
+                    } elseif ($pm3dsUrl) {
+                        // 3DS authentication required — keep order as processing
+                        $pdo->prepare("UPDATE orders SET payment_status='processing', status='accepted' WHERE id=?")
                             ->execute([$orderId]);
                     } elseif ($result['status'] === 'failed') {
                         $reason = $result['decline_reason'] ?? null;
@@ -329,6 +334,7 @@ match ($method) {
         } catch (\Throwable $e2) { /* best-effort */ }
 
         $resp = ['success' => true, 'id' => $orderId, 'order_number' => $orderNumber, 'total' => $total];
+        if (!empty($pm3dsUrl)) $resp['threed_secure_url'] = $pm3dsUrl;
         if ($pixQrCode) {
             $resp['pix_qr_code']   = $pixQrCode;
             $resp['pix_expires_in'] = $pixExpiresIn;

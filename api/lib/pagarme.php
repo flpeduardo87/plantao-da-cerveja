@@ -127,6 +127,10 @@ class PagarMe {
             'country'  => 'BR',
         ];
 
+        $successUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http')
+            . '://' . ($_SERVER['HTTP_HOST'] ?? 'plantaodacerveja.com.br')
+            . '/?pago=1';
+
         $payload = [
             'code'     => $order['order_number'],
             'customer' => array_filter([
@@ -151,6 +155,11 @@ class PagarMe {
                     'installments'         => max(1, (int) $installments),
                     'statement_descriptor' => 'PLANT CERVEJA',
                     'card_token'           => $cardToken,
+                    'threed_secure_mode'   => 'with_fallback',
+                    'threed_secure'        => [
+                        'mpi'         => 'pagarme',
+                        'success_url' => $successUrl,
+                    ],
                     'card'                 => [
                         'billing_address' => $addrObj,
                     ],
@@ -166,12 +175,14 @@ class PagarMe {
         $declineMsg  = $lastTxn['acquirer_message']
             ?? ($lastTxn['gateway_response']['errors'][0]['message'] ?? null)
             ?? ($lastTxn['gateway_response']['code'] ?? null);
+        $threedUrl   = $lastTxn['threed_secure_authentication_url'] ?? null;
 
         return [
-            'status'          => $status,
-            'pagarme_order_id'=> $result['id'] ?? null,
-            'charge_id'       => $chargeId,
-            'decline_reason'  => $declineMsg,
+            'status'           => $status,
+            'pagarme_order_id' => $result['id'] ?? null,
+            'charge_id'        => $chargeId,
+            'decline_reason'   => $declineMsg,
+            'threed_secure_url'=> $threedUrl,
         ];
     }
 
