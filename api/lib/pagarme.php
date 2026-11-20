@@ -169,13 +169,48 @@ class PagarMe {
 
         $result = $this->request('POST', '/orders', $payload);
 
-        $status      = $result['status'] ?? 'failed';
-        $chargeId    = $result['charges'][0]['id'] ?? null;
-        $lastTxn     = $result['charges'][0]['last_transaction'] ?? [];
-        $declineMsg  = $lastTxn['acquirer_message']
-            ?? ($lastTxn['gateway_response']['errors'][0]['message'] ?? null)
-            ?? ($lastTxn['gateway_response']['code'] ?? null);
-        $threedUrl   = $lastTxn['threed_secure_authentication_url'] ?? null;
+        $orderStatus  = $result['status'] ?? 'failed';
+        $charge       = $result['charges'][0] ?? [];
+        $chargeId     = $charge['id'] ?? null;
+        $chargeStatus = $charge['status'] ?? null;
+        $lastTxn      = $charge['last_transaction'] ?? [];
+        $txnStatus    = $lastTxn['status'] ?? null;
+
+        // Consider paid if order OR charge is paid/authorized/captured
+        $paidStatuses = ['paid', 'authorized', 'captured', 'overpaid'];
+        $isPaid = in_array($orderStatus, $paidStatuses, true)
+               || in_array($chargeStatus, $paidStatuses, true)
+               || in_array($txnStatus, $paidStatuses, true);
+
+        // 3DS redirect URL — try multiple paths Pagar.me may use
+        $threedUrl = $lastTxn['threed_secure_authentication_url']
+            ?? ($lastTxn['threed_secure_object']['authentication_url'] ?? null)
+            ?? ($lastTxn['threed_secure_object']['acs_url'] ?? null)
+            ?? null;
+
+        // Decline message from acquirer — only show when truly failed
+        $declineMsg = null;
+        if (!$isPaid && !$threedUrl) {
+            $declineMsg = $lastTxn['acquirer_message']
+                ?? ($lastTxn['gateway_response']['errors'][0]['message'] ?? null)
+                ?? ($lastTxn['gateway_response']['code'] ?? null);
+            // Don't show success messages as decline reasons
+            if ($declineMsg && preg_match('/aprovad|sucesso/i', $declineMsg)) {
+                $declineMsg = null;
+            }
+        }
+
+        // Normalize status for caller
+        if ($isPaid) {
+            $status = 'paid';
+        } elseif ($threedUrl) {
+            $status = 'pending';
+        } elseif (in_array($orderStatus, ['pending', 'processing'], true)
+               || in_array($chargeStatus, ['pending', 'waiting_payment', 'processing'], true)) {
+            $status = 'pending';
+        } else {
+            $status = 'failed';
+        }
 
         return [
             'status'           => $status,

@@ -226,8 +226,8 @@ match ($method) {
                         'items'           => $lineItems,
                     ], $cardToken, $installments);
 
-                    $pmPaid     = ($result['status'] === 'paid' || $result['status'] === 'authorized');
-                    $pm3dsUrl   = $result['threed_secure_url'] ?? null;
+                    $pmPaid   = ($result['status'] === 'paid');
+                    $pm3dsUrl = $result['threed_secure_url'] ?? null;
                     if ($pmPaid) {
                         $pdo->prepare("UPDATE orders SET payment_status='paid', status='accepted' WHERE id=?")
                             ->execute([$orderId]);
@@ -235,9 +235,13 @@ match ($method) {
                         // 3DS authentication required — keep order as processing
                         $pdo->prepare("UPDATE orders SET payment_status='processing', status='accepted' WHERE id=?")
                             ->execute([$orderId]);
+                    } elseif ($result['status'] === 'pending') {
+                        // Payment processing / waiting confirmation
+                        $pdo->prepare("UPDATE orders SET payment_status='processing', status='accepted' WHERE id=?")
+                            ->execute([$orderId]);
                     } elseif ($result['status'] === 'failed') {
                         $reason = $result['decline_reason'] ?? null;
-                        $pmDebugErr = 'Pagamento recusado' . ($reason ? ': ' . $reason : '. Verifique os dados do cartão.');
+                        $pmDebugErr = 'Pagamento recusado' . ($reason ? ': ' . $reason : '. Verifique os dados do cartão e tente novamente.');
                     }
                 }
             } catch (\Throwable $pmErr) {
