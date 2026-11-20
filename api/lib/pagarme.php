@@ -169,6 +169,13 @@ class PagarMe {
 
         $result = $this->request('POST', '/orders', $payload);
 
+        // TEMP DEBUG — remove after diagnosis
+        error_log('PAGARME_RESP order_status=' . ($result['status'] ?? 'null')
+            . ' charge_status=' . ($result['charges'][0]['status'] ?? 'null')
+            . ' txn_status=' . ($result['charges'][0]['last_transaction']['status'] ?? 'null')
+            . ' threed_url=' . ($result['charges'][0]['last_transaction']['threed_secure_authentication_url'] ?? 'none')
+            . ' acquirer_msg=' . ($result['charges'][0]['last_transaction']['acquirer_message'] ?? 'null'));
+
         $orderStatus  = $result['status'] ?? 'failed';
         $charge       = $result['charges'][0] ?? [];
         $chargeId     = $charge['id'] ?? null;
