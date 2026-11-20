@@ -107,6 +107,11 @@ class PagarMe {
         }, $order['items'], array_keys($order['items'])));
 
         $cpf     = preg_replace('/\D/', '', $order['customer_cpf'] ?? '');
+        $email   = trim($order['customer_email'] ?? '');
+        if (!$email) {
+            $cleanPhone = preg_replace('/\D/', '', $order['customer_phone'] ?? '');
+            $email = $cleanPhone . '@noemail.plantaodacerveja.com.br';
+        }
         $zip     = preg_replace('/\D/', '', $order['address_cep'] ?? $order['address_zip'] ?? '');
         $street  = $order['address_street'] ?? '';
         $num     = $order['address_number'] ?? '0';
@@ -126,6 +131,7 @@ class PagarMe {
             'code'     => $order['order_number'],
             'customer' => array_filter([
                 'name'          => $order['customer_name'],
+                'email'         => $email,
                 'type'          => 'individual',
                 'document'      => $cpf ?: null,
                 'document_type' => $cpf ? 'CPF' : null,

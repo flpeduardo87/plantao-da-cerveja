@@ -217,6 +217,7 @@ match ($method) {
                         'customer_name'   => trim($d['customer_name']),
                         'customer_phone'  => preg_replace('/\D/', '', $d['customer_phone']),
                         'customer_cpf'    => preg_replace('/\D/', '', $d['customer_cpf'] ?? ''),
+                        'customer_email'  => $d['customer_email'] ?? '',
                         'address_street'  => $d['address_street'] ?? '',
                         'address_number'  => $d['address_number'] ?? '',
                         'address_city'    => $d['address_city'] ?? '',
