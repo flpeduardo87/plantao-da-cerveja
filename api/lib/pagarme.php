@@ -167,21 +167,14 @@ class PagarMe {
                 ],
             ];
         } else {
-            // Fluxo padrão: token de cartão (threed_secure_mode como fallback legado)
+            // Fluxo padrão: token de cartão sem parâmetros 3DS
             $paymentEntry = [
                 'payment_method' => 'credit_card',
                 'credit_card'    => [
+                    'operation_type'       => 'auth_and_capture',
                     'installments'         => max(1, (int)$installments),
                     'statement_descriptor' => 'PLANT CERVEJA',
                     'card_token'           => $cardToken,
-                    'threed_secure_mode'   => 'with_fallback',
-                    'threed_secure'        => [
-                        'mpi'         => 'pagarme',
-                        'success_url' => $successUrl,
-                    ],
-                    'card'                 => [
-                        'billing_address' => $addrObj,
-                    ],
                 ],
             ];
         }
