@@ -158,14 +158,11 @@ class PagarMe {
             ]],
         ];
 
-        error_log('Pagar.me CC payload: ' . json_encode($payload));
         $result = $this->request('POST', '/orders', $payload);
-        error_log('Pagar.me CC result status=' . ($result['status'] ?? 'n/a') . ' charges=' . json_encode($result['charges'][0]['last_transaction'] ?? []));
 
         $status      = $result['status'] ?? 'failed';
         $chargeId    = $result['charges'][0]['id'] ?? null;
         $lastTxn     = $result['charges'][0]['last_transaction'] ?? [];
-        error_log('Pagar.me charge result: ' . json_encode($result['charges'][0] ?? []));
         $declineMsg  = $lastTxn['acquirer_message']
             ?? ($lastTxn['gateway_response']['errors'][0]['message'] ?? null)
             ?? ($lastTxn['gateway_response']['code'] ?? null);
@@ -229,7 +226,6 @@ class PagarMe {
             ]],
         ];
 
-        error_log('Pagar.me PIX payload: ' . json_encode($payload));
         $result = $this->request('POST', '/orders', $payload);
 
         $txn    = $result['charges'][0]['last_transaction'] ?? [];
