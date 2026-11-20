@@ -40,8 +40,13 @@ if (!isset($statusMap[$type])) {
     json_ok(['received' => true]);
 }
 
-// order_number fica em data.code (evento order) ou data.order.code (evento charge)
-$orderNumber = $data['code'] ?? $data['order']['code'] ?? '';
+// order.* events: data IS the order, data['code'] = our order_number
+// charge.* events: data IS the charge, data['code'] = charge code, data['order']['code'] = our order_number
+if (str_starts_with($type, 'order.')) {
+    $orderNumber = $data['code'] ?? '';
+} else {
+    $orderNumber = $data['order']['code'] ?? $data['code'] ?? '';
+}
 
 if ($orderNumber) {
     $update = $statusMap[$type];
