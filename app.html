@@ -3152,7 +3152,7 @@ function renderCoStep(){
           <div style="position:relative">
             <input id="cc-num" class="form-input" inputmode="numeric" autocomplete="cc-number"
               placeholder="0000 0000 0000 0000" maxlength="19"
-              oninput="fmtCCNum(this)" style="letter-spacing:.5px">
+              oninput="fmtCCNum(this);document.getElementById('cc-err-box')?.remove()" style="letter-spacing:.5px">
             <span id="cc-brand" class="card-brand"></span>
           </div>
         </div>
@@ -3481,7 +3481,20 @@ async function finalizarPedido(){
       cart=[]; saveCart(); updateBadge();
     }
   } catch(e) {
-    toast(e.message);
+    if(payMethod==='credito'){
+      let errBox = document.getElementById('cc-err-box');
+      if(!errBox){
+        errBox = document.createElement('div');
+        errBox.id = 'cc-err-box';
+        errBox.style.cssText = 'margin:12px 0 4px;padding:12px 14px;background:#fff0f0;border:1px solid #f5c6c6;border-radius:10px;color:#c0392b;font-size:13px;line-height:1.5;word-break:break-word;';
+        const cpfRow = document.getElementById('cc-cpf')?.closest('label') || document.querySelector('.cc-row-last') || document.querySelector('#pay-btn')?.parentElement;
+        if(cpfRow) cpfRow.insertAdjacentElement('afterend', errBox);
+      }
+      errBox.textContent = e.message;
+      errBox.scrollIntoView({behavior:'smooth', block:'center'});
+    } else {
+      toast(e.message);
+    }
     btn.disabled=false;
     btn.innerHTML='Confirmar Pedido <i data-lucide="check" width="16" height="16"></i>';
     lucide.createIcons();
