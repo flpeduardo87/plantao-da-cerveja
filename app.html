@@ -1704,6 +1704,15 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
   </div>
 </div>
 
+<!-- ═══ 3DS AUTHENTICATION CONTAINERS ═══ -->
+<div id="tds-method-container" style="display:none" aria-hidden="true"></div>
+<div id="tds-challenge-overlay" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.75);align-items:center;justify-content:center" aria-live="polite">
+  <div style="background:#fff;border-radius:12px;padding:0;overflow:hidden;width:500px;max-width:95vw;max-height:95vh">
+    <div style="padding:12px 16px;background:#222;color:#fff;font-size:14px;font-weight:600">Verificação de segurança do banco</div>
+    <div id="tds-challenge" style="width:100%;min-height:400px;overflow:auto"></div>
+  </div>
+</div>
+
 <!-- ═══ CHECKOUT MODAL ═══ -->
 <div id="checkout-overlay" class="hidden" role="dialog" aria-modal="true" aria-label="Finalizar pedido">
   <div class="checkout-sheet">
@@ -3426,17 +3435,109 @@ async function finalizarPedido(){
     notes: '',
     items: cart.map(i=>({product_id:i.id,product_name:i.name,quantity:i.qty,unit_price:i.price})),
   };
-  // Tokenizar cartão se pagamento for crédito
+  // Pagamento via cartão de crédito
   if(payMethod==='credito'){
     try{
-      const pk = await getPmPublicKey();
-      if(!pk) throw new Error('Chave pública Pagar.me não configurada. Contate o estabelecimento.');
-      const token = await tokenizeCard(pk);
-      payload.card_token = token;
-      payload.installments = parseInt(document.getElementById('cc-inst')?.value||'1',10);
+      const numEl  = document.getElementById('cc-num');
+      const nameEl = document.getElementById('cc-name');
+      const expEl  = document.getElementById('cc-exp');
+      const cvvEl  = document.getElementById('cc-cvv');
+      if(!numEl||!nameEl||!expEl||!cvvEl) throw new Error('Preencha os dados do cartão antes de confirmar.');
+      const num  = (numEl.value||'').replace(/\s/g,'');
+      const name = (nameEl.value||'').trim();
+      const exp  = (expEl.value||'').trim();
+      const cvv  = (cvvEl.value||'').trim();
+      if(!num||num.length<13) throw new Error('Número do cartão inválido.');
+      if(!name) throw new Error('Nome do cartão obrigatório.');
+      const expParts = exp.split('/');
+      if(expParts.length!==2||expParts[0].length!==2||expParts[1].length!==2) throw new Error('Validade inválida. Use MM/AA.');
+      if(!cvv||cvv.length<3) throw new Error('CVV inválido.');
       const cpfVal = (document.getElementById('cc-cpf')?.value||'').replace(/\D/g,'');
-      if(!cpfVal||cpfVal.length!==11){ toast('CPF do titular obrigatório (11 dígitos).'); btn.disabled=false; btn.innerHTML='Confirmar Pedido <i data-lucide="check" width="16" height="16"></i>'; lucide.createIcons(); return; }
+      if(!cpfVal||cpfVal.length!==11) throw new Error('CPF do titular obrigatório (11 dígitos).');
       payload.customer_cpf = cpfVal;
+      payload.installments = parseInt(document.getElementById('cc-inst')?.value||'1',10);
+
+      const billingZip  = (coData.cep||'').replace(/\D/g,'')||'00000000';
+      const billingLine1 = [(coData.num||''),(coData.rua||'Rua nao informada'),(coData.bairro||'Centro')].filter(Boolean).join(', ');
+      const rawCard = {
+        number: num, holder_name: name,
+        exp_month: parseInt(expParts[0],10),
+        exp_year:  2000+parseInt(expParts[1],10),
+        cvv,
+      };
+
+      // ── Tentativa 3DS via SDK Stone ──────────────────────────────────────
+      let used3ds = false;
+      try {
+        btn.innerHTML='<span style="display:flex;align-items:center;gap:8px"><span style="width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block"></span>Autenticando cartão…</span>';
+        const tdsTokenResp = await fetch(API+'/payment/3ds-token');
+        if(tdsTokenResp.ok){
+          const tdsTokenData = await tdsTokenResp.json();
+          if(tdsTokenData.tds_token){
+            if(!window.TDS){
+              await new Promise((res,rej)=>{
+                const s=document.createElement('script');
+                s.src='https://3ds-nx-js.stone.com.br/live/v2/3ds2.min.js';
+                s.onload=res; s.onerror=rej;
+                document.head.appendChild(s);
+              });
+            }
+            const challengeOverlay = document.getElementById('tds-challenge-overlay');
+            const challengeEl = document.getElementById('tds-challenge');
+            challengeOverlay.style.display='flex';
+            btn.innerHTML='<span style="display:flex;align-items:center;gap:8px"><span style="width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block"></span>Verificando segurança…</span>';
+            const customerEmail = coData.email||((coData.tel||'').replace(/\D/g,'')+'@noemail.plantaodacerveja.com.br');
+            let tdsResult;
+            try {
+              tdsResult = await window.TDS.init({
+                token: tdsTokenData.tds_token,
+                tds_method_container_element: document.getElementById('tds-method-container'),
+                challenge_container_element: challengeEl,
+                use_default_challenge_iframe_style: true,
+                challenge_window_size: '03',
+              },{
+                payments:[{
+                  payment_method:'credit_card',
+                  credit_card:{
+                    card:{
+                      number: rawCard.number,
+                      holder_name: rawCard.holder_name,
+                      exp_month: rawCard.exp_month,
+                      exp_year:  rawCard.exp_year,
+                      billing_address:{ line_1: billingLine1||'0, Rua nao informada, Centro', zip_code: billingZip, city: coData.cidade||'São Paulo', state: coData.uf||'SP', country:'BR' },
+                    },
+                    amount: Math.round(total*100),
+                  },
+                }],
+                customer:{ name: coData.nome||name, email: customerEmail },
+                shipping:{ electronic_delivery:true, recipient_name: coData.nome||name },
+              });
+            } finally {
+              challengeOverlay.style.display='none';
+            }
+            const auth = Array.isArray(tdsResult)?tdsResult[0]:tdsResult;
+            if(auth && auth.trans_status==='Y'){
+              payload.card_raw = rawCard;
+              payload.tds_transaction_id = auth.tds_server_trans_id;
+              used3ds = true;
+            }
+          }
+        }
+      } catch(tdsErr){
+        // 3DS indisponível ou conta sem habilitação — cai no fluxo de token
+        const challengeOverlay = document.getElementById('tds-challenge-overlay');
+        if(challengeOverlay) challengeOverlay.style.display='none';
+        console.warn('3DS fallback:', tdsErr?.message||tdsErr);
+      }
+
+      // ── Fallback: tokenização padrão ─────────────────────────────────────
+      if(!used3ds){
+        btn.innerHTML='<span style="display:flex;align-items:center;gap:8px"><span style="width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block"></span>Processando…</span>';
+        const pk = await getPmPublicKey();
+        if(!pk) throw new Error('Chave pública Pagar.me não configurada. Contate o estabelecimento.');
+        const token = await tokenizeCard(pk);
+        payload.card_token = token;
+      }
     } catch(e){
       toast(e.message);
       btn.disabled=false;

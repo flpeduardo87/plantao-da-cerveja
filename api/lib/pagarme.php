@@ -91,7 +91,15 @@ class PagarMe {
      * @param int    $installments parcelas (1–12)
      * @return array ['status'=>'paid'|'failed', 'pagarme_order_id'=>'...', 'charge_id'=>'...']
      */
-    public function createCreditCardOrder(array $order, string $cardToken, int $installments = 1): array {
+    /**
+     * @param array       $order         Dados do pedido.
+     * @param string      $cardToken     Token do cartão (fluxo padrão sem 3DS).
+     * @param int         $installments  Parcelas.
+     * @param array|null  $rawCard       Dados brutos do cartão (fluxo 3DS autenticado).
+     *                                   ['number','holder_name','exp_month','exp_year','cvv']
+     * @param string|null $tdsTransId    tds_server_trans_id retornado pelo SDK 3DS.
+     */
+    public function createCreditCardOrder(array $order, string $cardToken, int $installments = 1, ?array $rawCard = null, ?string $tdsTransId = null): array {
         $amountCents = (int) round((float) $order['total'] * 100);
         $phone       = preg_replace('/\D/', '', $order['customer_phone']);
         $areaCode    = strlen($phone) >= 11 ? substr($phone, 0, 2) : '11';
@@ -131,6 +139,53 @@ class PagarMe {
             . '://' . ($_SERVER['HTTP_HOST'] ?? 'plantaodacerveja.com.br')
             . '/?pago=1';
 
+        $use3ds = $rawCard && $tdsTransId;
+
+        if ($use3ds) {
+            // Fluxo 3DS autenticado via SDK Stone: cartão bruto + authentication object
+            $cardObj = [
+                'number'          => preg_replace('/\D/', '', $rawCard['number'] ?? ''),
+                'holder_name'     => $rawCard['holder_name'] ?? '',
+                'exp_month'       => (int)($rawCard['exp_month'] ?? 1),
+                'exp_year'        => (int)($rawCard['exp_year'] ?? 2030),
+                'cvv'             => $rawCard['cvv'] ?? '',
+                'billing_address' => $addrObj,
+            ];
+            $paymentEntry = [
+                'payment_method' => 'credit_card',
+                'credit_card'    => [
+                    'installments'         => max(1, (int)$installments),
+                    'statement_descriptor' => 'PLANT CERVEJA',
+                    'card'                 => $cardObj,
+                    'authentication'       => [
+                        'type'          => 'threed_secure',
+                        'threed_secure' => [
+                            'mpi'            => 'pagarme',
+                            'transaction_id' => $tdsTransId,
+                        ],
+                    ],
+                ],
+            ];
+        } else {
+            // Fluxo padrão: token de cartão (threed_secure_mode como fallback legado)
+            $paymentEntry = [
+                'payment_method' => 'credit_card',
+                'credit_card'    => [
+                    'installments'         => max(1, (int)$installments),
+                    'statement_descriptor' => 'PLANT CERVEJA',
+                    'card_token'           => $cardToken,
+                    'threed_secure_mode'   => 'with_fallback',
+                    'threed_secure'        => [
+                        'mpi'         => 'pagarme',
+                        'success_url' => $successUrl,
+                    ],
+                    'card'                 => [
+                        'billing_address' => $addrObj,
+                    ],
+                ],
+            ];
+        }
+
         $payload = [
             'code'     => $order['order_number'],
             'customer' => array_filter([
@@ -149,22 +204,7 @@ class PagarMe {
                 ],
             ]),
             'items'    => $items,
-            'payments' => [[
-                'payment_method' => 'credit_card',
-                'credit_card'    => [
-                    'installments'         => max(1, (int) $installments),
-                    'statement_descriptor' => 'PLANT CERVEJA',
-                    'card_token'           => $cardToken,
-                    'threed_secure_mode'   => 'with_fallback',
-                    'threed_secure'        => [
-                        'mpi'         => 'pagarme',
-                        'success_url' => $successUrl,
-                    ],
-                    'card'                 => [
-                        'billing_address' => $addrObj,
-                    ],
-                ],
-            ]],
+            'payments' => [$paymentEntry],
         ];
 
         $result = $this->request('POST', '/orders', $payload);
@@ -286,6 +326,37 @@ class PagarMe {
             'expires_in'       => $expiresIn,
             'pagarme_order_id' => $result['id'] ?? null,
         ];
+    }
+
+    /**
+     * Obtém token de sessão 3DS da Stone (válido ~20 s).
+     * Deve ser chamado imediatamente antes de cada tentativa de autenticação.
+     */
+    public function get3dsToken(): string {
+        $url = 'https://3ds.stone.com.br/v2/tds-token';
+        $ch  = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER     => ['Authorization: Basic ' . base64_encode($this->secretKey . ':')],
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_SSL_VERIFYPEER => true,
+        ]);
+        $body = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err  = curl_error($ch);
+        curl_close($ch);
+        if ($body === false || $err) {
+            throw new \RuntimeException('3DS token: falha de conexão — ' . $err);
+        }
+        if ($code >= 400) {
+            throw new \RuntimeException('3DS token: HTTP ' . $code . ' — ' . $body);
+        }
+        $data = json_decode($body, true) ?? [];
+        $token = $data['tds_token'] ?? '';
+        if (!$token) {
+            throw new \RuntimeException('3DS token: resposta sem tds_token — ' . $body);
+        }
+        return $token;
     }
 
     /**

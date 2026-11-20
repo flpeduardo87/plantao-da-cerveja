@@ -202,8 +202,12 @@ match ($method) {
         if ($d['payment_method'] === 'credit_card') {
             $cardToken    = trim($d['card_token'] ?? '');
             $installments = max(1, (int)($d['installments'] ?? 1));
-            if (!$cardToken) {
-                json_err('Token do cartão ausente.');
+            $tdsTransId   = trim($d['tds_transaction_id'] ?? '');
+            $cardRaw      = is_array($d['card_raw'] ?? null) ? $d['card_raw'] : null;
+            $use3ds       = $tdsTransId && $cardRaw && isset($cardRaw['number']);
+
+            if (!$cardToken && !$use3ds) {
+                json_err('Token do cartão ou dados 3DS ausentes.');
             }
             try {
                 require_once __DIR__ . '/../lib/pagarme.php';
@@ -224,7 +228,7 @@ match ($method) {
                         'address_state'   => $d['address_state'] ?? '',
                         'address_zip'     => preg_replace('/\D/', '', $d['address_cep'] ?? ''),
                         'items'           => $lineItems,
-                    ], $cardToken, $installments);
+                    ], $use3ds ? '' : $cardToken, $installments, $use3ds ? $cardRaw : null, $use3ds ? $tdsTransId : null);
 
                     $pmPaid   = ($result['status'] === 'paid');
                     $pm3dsUrl = $result['threed_secure_url'] ?? null;

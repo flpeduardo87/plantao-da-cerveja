@@ -11,6 +11,17 @@ if ($method === 'GET' && ($sub ?? '') === 'config') {
     json_ok(['public_key' => defined('PAGARME_PUBLIC_KEY') ? PAGARME_PUBLIC_KEY : '']);
 }
 
+// ── Token de sessão 3DS (Stone SDK) ──────────────────────────────────────────
+if ($method === 'GET' && ($sub ?? '') === '3ds-token') {
+    if (!$pm->isConfigured()) json_err('Pagar.me não configurado', 503);
+    try {
+        $token = $pm->get3dsToken();
+        json_ok(['tds_token' => $token]);
+    } catch (\Throwable $e) {
+        json_err('3DS token indisponível: ' . $e->getMessage(), 503);
+    }
+}
+
 if ($method !== 'POST') json_err('Method not allowed', 405);
 if (($sub ?? '') !== 'webhook') json_err('Not found', 404);
 
