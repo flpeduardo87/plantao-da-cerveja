@@ -1523,6 +1523,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
       </div>
     </div>
     <div class="pm-deposit hidden" id="pm-deposit"></div>
+    <div id="pm-desc" style="font-size:13.5px;color:var(--fg-2);line-height:1.6;padding:0 2px 10px;display:none"></div>
     <button class="pm-add-btn" id="pm-add-btn" onclick="addFromModal()">
       <i data-lucide="shopping-bag" width="18" height="18"></i>
       <span id="pm-add-txt">Adicionar à sacola • R$ 0,00</span>
@@ -1609,7 +1610,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
         <!-- Atendimento -->
         <div class="site-footer-col">
           <h4>Atendimento</h4>
-          <button class="footer-wa" onclick="">
+          <button class="footer-wa" onclick="window.open('https://wa.me/5547997240801','_blank')"  aria-label="Fale pelo WhatsApp">
             <span class="footer-wa-ic">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.533 5.857L.057 23.636a.5.5 0 0 0 .613.612l5.834-1.47A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.885 0-3.655-.52-5.17-1.426l-.362-.214-3.747.944.97-3.682-.232-.376A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
             </span>
@@ -2606,7 +2607,7 @@ function cardHTML(p){
   const inCart = cart.some(i=>i.id===p.id);
   const imgSrc = p.image_url || prodImg(p.id,148,112);
   const discPct = p.disc ? Number(p.disc) : (p.old && p.price < p.old ? Math.round((1 - p.price/p.old)*100) : 0);
-  return `<div class="pcard">
+  return `<div class="pcard" onclick="openProdModal(${p.id})" style="cursor:pointer">
     <div class="pcard-img">
       <img src="${imgSrc}" alt="${esc(p.name)}" loading="lazy">
       ${discPct?`<span class="disc-badge">-${discPct}%</span>`:''}
@@ -2675,6 +2676,8 @@ function openProdModal(id, e){
   const dep = document.getElementById('pm-deposit');
   if(p.has_deposit&&p.deposit_value>0){ dep.textContent='+ R$ '+fmt(p.deposit_value)+' casco incluído'; dep.classList.remove('hidden'); }
   else dep.classList.add('hidden');
+  const descEl = document.getElementById('pm-desc');
+  if(descEl){ const d = p.description||''; descEl.textContent=d; descEl.style.display=d?'':'none'; }
   _updateModalQty();
   const hBtn = document.getElementById('pm-heart-btn');
   if(hBtn){ const isFav = getFavs().includes(String(p.id)); hBtn.classList.toggle('active', isFav); }
@@ -3202,8 +3205,15 @@ function renderCoStep(){
       <label class="pay-opt${payMethod==='dinheiro'?' selected':''}" onclick="selPay('dinheiro')">
         <input type="radio" name="pay" ${payMethod==='dinheiro'?'checked':''}>
         <span class="pay-icon"><i data-lucide="banknote" width="22" height="22"></i></span>
-        <div class="pay-info"><strong>Dinheiro</strong><span>Troco para quanto?</span></div>
+        <div class="pay-info"><strong>Dinheiro</strong><span>Pagamento na entrega</span></div>
       </label>
+      ${payMethod==='dinheiro'?`
+      <div class="card-form" style="margin-top:-8px;margin-bottom:8px">
+        <div class="form-group" style="margin:0">
+          <label>Precisa de troco? Para quanto?</label>
+          <input id="troco-val" class="form-input" inputmode="decimal" placeholder="Ex: 50,00 (deixe em branco se não precisar)">
+        </div>
+      </div>`:''}
       <div class="step-btns" style="margin-top:4px">
         <button class="btn-back" onclick="coStep=2;renderCoStep()" aria-label="Voltar"><i data-lucide="arrow-left" width="18" height="18"></i></button>
         <button class="btn-primary btn-next" id="pay-btn" ${payMethod?'':'disabled'} onclick="finalizarPedido()">Confirmar Pedido <i data-lucide="check" width="16" height="16"></i></button>
@@ -3432,7 +3442,7 @@ async function finalizarPedido(){
     payment_method: payMap[payMethod]||'pix',
     delivery_type: chosenWhen==='imediata'?'immediate':'scheduled',
     scheduled_at: chosenScheduledAt || null,
-    notes: '',
+    notes: payMethod==='dinheiro' ? (()=>{ const t=(document.getElementById('troco-val')?.value||'').trim(); return t?'Troco para: R$ '+t:''; })() : '',
     items: cart.map(i=>({product_id:i.id,product_name:i.name,quantity:i.qty,unit_price:i.price})),
   };
   // Pagamento via cartão de crédito
