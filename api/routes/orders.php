@@ -6,6 +6,23 @@
 
 $pdo = db();
 
+// Tabela oficial de taxas de entrega por bairro
+$BAIRROS_FRETE = [
+    'Piedade'                                                  => 9.00,
+    "Campo d'Água Verde"                                       => 9.00,
+    'Alto das Palmeiras'                                       => 7.00,
+    'Centro'                                                   => 8.00,
+    'Boa Vista'                                                => 9.00,
+    'Industrial II'                                            => 10.00,
+    'Alto da Tijuca'                                           => 9.00,
+    'Industrial 1 (Cristo Rei)'                                => 7.00,
+    'Industrial 1 (Loteamento Santa Cruz / Cohab 1 / Cohab 4)' => 8.00,
+    'Industrial 1 (Alto do Frigorífico)'                       => 9.00,
+    'Sossego'                                                  => 7.00,
+    'Água Verde'                                               => 10.00,
+    'Cohab II'                                                 => 10.00,
+];
+
 match ($method) {
     // ── List / Single ────────────────────────────────────────────────────────
     'GET' => (function () use ($pdo, $id) {
@@ -14,7 +31,7 @@ match ($method) {
             $phone = preg_replace('/\D/', '', $_GET['phone']);
             $s = $pdo->prepare(
                 'SELECT o.order_number, o.status, o.payment_status, o.created_at, o.total, o.payment_method, o.delivery_type,
-                        o.address_street, o.address_number,
+                        o.address_street, o.address_number, o.address_neighborhood,
                         GROUP_CONCAT(
                             JSON_OBJECT(
                                 "product_name", oi.product_name,
@@ -90,7 +107,7 @@ match ($method) {
     })(),
 
     // ── Create order ─────────────────────────────────────────────────────────
-    'POST' => (function () use ($pdo) {
+    'POST' => (function () use ($pdo, $BAIRROS_FRETE) {
         $d = body();
 
         // Optional: link order to logged-in customer
@@ -104,18 +121,25 @@ match ($method) {
         }
 
         // Validate required fields
-        $required = ['customer_name','customer_phone','items','payment_method'];
+        $required = ['customer_name','customer_phone','items','payment_method','address_neighborhood'];
         foreach ($required as $f) {
-            if (empty($d[$f])) json_err("Field '$f' is required");
+            if (empty($d[$f])) json_err("Campo '$f' é obrigatório.");
         }
         if (!is_array($d['items']) || count($d['items']) === 0) json_err('items must be a non-empty array');
 
+        // Valida bairro e obtém taxa de entrega correspondente
+        $neighborhood = trim($d['address_neighborhood']);
+        if (!array_key_exists($neighborhood, $BAIRROS_FRETE)) {
+            json_err('Bairro inválido ou fora da área de entrega.');
+        }
+        $deliveryFee = (float)$BAIRROS_FRETE[$neighborhood];
+
         // Fetch live prices from DB to avoid price tampering
-        $ids         = array_filter(array_column($d['items'], 'product_id'), 'is_numeric');
-        $priceMap    = [];
+        $ids      = array_filter(array_column($d['items'], 'product_id'), 'is_numeric');
+        $priceMap = [];
         if ($ids) {
-            $ph  = implode(',', array_fill(0, count($ids), '?'));
-            $ps  = $pdo->prepare("SELECT id, name, price FROM products WHERE id IN ($ph) AND active = 1");
+            $ph = implode(',', array_fill(0, count($ids), '?'));
+            $ps = $pdo->prepare("SELECT id, name, price FROM products WHERE id IN ($ph) AND active = 1");
             $ps->execute(array_values($ids));
             foreach ($ps->fetchAll() as $p) $priceMap[$p['id']] = $p;
         }
@@ -127,7 +151,6 @@ match ($method) {
             $qty   = max(1, (int)($item['quantity'] ?? $item['qty'] ?? 1));
             $pname = $item['product_name'] ?? $item['name'] ?? '';
 
-            // Use DB price if product found, else use submitted price (for custom items)
             $price = isset($priceMap[$pid])
                 ? (float)$priceMap[$pid]['price']
                 : (float)($item['unit_price'] ?? $item['price'] ?? 0);
@@ -141,14 +164,13 @@ match ($method) {
 
         if (!$lineItems) json_err('No valid items');
 
-        // Fetch delivery fee and min order from settings
-        $cfg = $pdo->query("SELECT setting_key, setting_value FROM store_settings WHERE setting_key IN ('delivery_fee','min_order','store_open','fonnte_token','store_whatsapp','pix_key')")->fetchAll(\PDO::FETCH_KEY_PAIR);
+        // Fetch min order and store status from settings
+        $cfg = $pdo->query("SELECT setting_key, setting_value FROM store_settings WHERE setting_key IN ('min_order','store_open','fonnte_token','store_whatsapp','pix_key')")->fetchAll(\PDO::FETCH_KEY_PAIR);
         if (($cfg['store_open'] ?? '1') === '0') json_err('Loja fechada no momento', 503);
 
         $minOrder = (float)($cfg['min_order'] ?? 0);
         if ($subtotal < $minOrder) json_err("Pedido mínimo é R$ " . number_format($minOrder, 2, ',', '.'));
 
-        $deliveryFee = (float)($cfg['delivery_fee'] ?? 0);
         $total       = round($subtotal + $deliveryFee, 2);
         $orderNumber = 'PC' . date('ymd') . strtoupper(substr(uniqid(), -4));
 
@@ -171,7 +193,7 @@ match ($method) {
                 $d['address_street'] ?? null,
                 $d['address_number'] ?? null,
                 $d['address_complement'] ?? null,
-                $d['address_neighborhood'] ?? null,
+                $neighborhood,
                 $d['address_reference'] ?? null,
                 round($subtotal, 2),
                 $deliveryFee,
@@ -215,6 +237,7 @@ match ($method) {
                 if (!$pm->isConfigured()) {
                     $pmDebugErr = 'NOT_CONFIGURED: PAGARME_SECRET_KEY ausente em config.php';
                 } else {
+                    $zipClean = preg_replace('/\D/', '', $d['address_cep'] ?? '');
                     $result = $pm->createCreditCardOrder([
                         'order_number'    => $orderNumber,
                         'total'           => $total,
@@ -224,9 +247,9 @@ match ($method) {
                         'customer_email'  => $d['customer_email'] ?? '',
                         'address_street'  => $d['address_street'] ?? '',
                         'address_number'  => $d['address_number'] ?? '',
-                        'address_city'    => $d['address_city'] ?? '',
-                        'address_state'   => $d['address_state'] ?? '',
-                        'address_zip'     => preg_replace('/\D/', '', $d['address_cep'] ?? ''),
+                        'address_city'    => !empty($d['address_city']) ? $d['address_city'] : 'Canoinhas',
+                        'address_state'   => !empty($d['address_state']) ? $d['address_state'] : 'SC',
+                        'address_zip'     => strlen($zipClean) === 8 ? $zipClean : '89460000',
                         'items'           => $lineItems,
                     ], $use3ds ? '' : $cardToken, $installments, $use3ds ? $cardRaw : null, $use3ds ? $tdsTransId : null);
 
@@ -236,11 +259,9 @@ match ($method) {
                         $pdo->prepare("UPDATE orders SET payment_status='paid', status='accepted' WHERE id=?")
                             ->execute([$orderId]);
                     } elseif ($pm3dsUrl) {
-                        // 3DS authentication required — keep order as processing
                         $pdo->prepare("UPDATE orders SET payment_status='processing', status='accepted' WHERE id=?")
                             ->execute([$orderId]);
                     } elseif ($result['status'] === 'pending') {
-                        // Payment processing / waiting confirmation
                         $pdo->prepare("UPDATE orders SET payment_status='processing', status='accepted' WHERE id=?")
                             ->execute([$orderId]);
                     } elseif ($result['status'] === 'failed') {
@@ -253,14 +274,13 @@ match ($method) {
                 $pmDebugErr = $pmErr->getMessage();
             }
             if ($pmDebugErr) {
-                // Cancelar pedido e informar erro
                 $pdo->prepare("UPDATE orders SET payment_status='failed', status='cancelled' WHERE id=?")->execute([$orderId]);
                 json_err($pmDebugErr);
             }
         }
 
-        // Pagar.me PIX — gera QR code (best-effort, nao bloqueia criacao do pedido)
-        $pixQrCode   = null;
+        // Pagar.me PIX — gera QR code
+        $pixQrCode    = null;
         $pixExpiresIn = 1800;
         $pixError    = null;
         if ($d['payment_method'] === 'pix') {
@@ -279,17 +299,16 @@ match ($method) {
                         'customer_email' => $d['customer_email'] ?? '',
                         'items'          => $lineItems,
                     ]);
-                    $pixQrCode   = $pixResult['qr_code'];
+                    $pixQrCode    = $pixResult['qr_code'];
                     $pixExpiresIn = $pixResult['expires_in'] ?? 1800;
                 }
             } catch (\Throwable $pixErr) {
                 $pixError = $pixErr->getMessage();
                 error_log('Pagar.me PIX error: ' . $pixError);
             }
-            error_log('Pagar.me PIX qr_code=' . ($pixQrCode ? 'found' : 'null') . ' error=' . ($pixError ?? 'none'));
         }
 
-        // WhatsApp via Fonnte (best-effort, never blocks order creation)
+        // WhatsApp via Fonnte
         $fonnteToken = $cfg['fonnte_token'] ?? '';
         $ownerPhone  = preg_replace('/\D/', '', $cfg['store_whatsapp'] ?? '');
         if ($fonnteToken && $ownerPhone) {
@@ -299,10 +318,11 @@ match ($method) {
                 . "*Cliente:* {$d['customer_name']}\n"
                 . "*Fone:* {$d['customer_phone']}\n"
                 . "*Endereço:* {$d['address_street']}, {$d['address_number']}" . (!empty($d['address_complement']) ? " - {$d['address_complement']}" : '') . "\n"
+                . "*Bairro:* {$neighborhood}\n"
                 . (!empty($d['address_reference']) ? "*Ref:* {$d['address_reference']}\n" : '')
                 . "\n*Itens:*\n{$itemsText}\n\n"
                 . "*Subtotal:* R$ " . number_format($subtotal, 2, ',', '.') . "\n"
-                . ($deliveryFee > 0 ? "*Taxa de entrega:* R$ " . number_format($deliveryFee, 2, ',', '.') . "\n" : '')
+                . ($deliveryFee > 0 ? "*Taxa de entrega ({$neighborhood}):* R$ " . number_format($deliveryFee, 2, ',', '.') . "\n" : '')
                 . "*Total:* R$ " . number_format($total, 2, ',', '.') . "\n"
                 . "*Pagamento:* {$payLabel}";
 
@@ -316,7 +336,7 @@ match ($method) {
             ]));
         }
 
-        // Web Push notification (best-effort)
+        // Web Push notification
         try {
             require_once __DIR__ . '/../lib/webpush.php';
             $vapid = $pdo->query(
@@ -327,7 +347,7 @@ match ($method) {
                 $pvs  = $vapid['vapid_subject'] ?? 'mailto:admin@plantaodacerveja.com.br';
                 $msg  = json_encode([
                     'title' => '🍺 Novo pedido!',
-                    'body'  => "#{$orderNumber} · {$d['customer_name']} · R$ " . number_format($total, 2, ',', '.'),
+                    'body'  => "#{$orderNumber} · {$d['customer_name']} ({$neighborhood}) · R$ " . number_format($total, 2, ',', '.'),
                 ]);
                 foreach ($subs as $s2) {
                     @wp_send(
