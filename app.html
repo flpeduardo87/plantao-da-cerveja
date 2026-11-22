@@ -99,17 +99,18 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 
 /* ── LOCATION MODAL ── */
 #loc-overlay{
-  position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.65);
-  display:flex;align-items:flex-start;justify-content:center;
-  padding:140px 16px 24px;overflow-y:auto;
+  position:fixed;inset:0;z-index:310;background:rgba(0,0,0,.65);
+  display:flex;align-items:center;justify-content:center;
+  padding:12px;overflow:hidden;
   animation:fadeIn .2s ease;
 }
-@media(max-width:520px){#loc-overlay{align-items:flex-end;padding:16px 0 70px;overflow-y:visible;}}
+@media(max-width:520px){#loc-overlay{align-items:flex-end;padding:8px 8px max(8px,env(safe-area-inset-bottom));}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{transform:translateY(28px);opacity:0}to{transform:translateY(0);opacity:1}}
 .loc-card{
   background:#fff;border-radius:16px;
-  padding:28px 24px 24px;width:100%;max-width:440px;
+  padding:16px;width:100%;max-width:540px;max-height:100%;
+  display:flex;flex-direction:column;min-height:0;
   text-align:center;position:relative;
   box-shadow:0 20px 60px rgba(0,0,0,.35);
   animation:slideUp .22s ease;
@@ -119,16 +120,26 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
   background:none;border:none;cursor:pointer;
   color:var(--fg-2);font-size:20px;line-height:1;padding:4px;
 }
-.loc-pin-icon{
-  width:60px;height:60px;border-radius:50%;background:var(--amber);
-  display:flex;align-items:center;justify-content:center;
-  margin:0 auto 14px;color:#111;
+.loc-ask{font-size:20px;font-weight:700;margin:0 36px 4px;color:var(--fg);}
+.loc-sub{font-size:13px;color:var(--fg-2);margin-bottom:10px;line-height:1.4;}
+.loc-list{
+  overflow-y:auto;overscroll-behavior-y:contain;min-height:0;
+  margin-bottom:10px;border:1px solid var(--border);border-radius:var(--r-sm);
 }
-.loc-ask{font-size:20px;font-weight:700;margin-bottom:6px;color:var(--fg);}
-.loc-sub{font-size:13px;color:var(--fg-2);margin-bottom:20px;line-height:1.5;}
+.loc-option{
+  display:grid;grid-template-columns:16px minmax(0,1fr) auto;align-items:center;gap:8px;
+  min-height:44px;margin:0;padding:6px 10px;text-align:left;cursor:pointer;
+  font-size:14px;line-height:1.2;color:var(--fg);
+}
+.loc-option + .loc-option{border-top:1px solid var(--border);}
+.loc-option:has(input:checked){background:var(--amber-bg);}
+.loc-option:focus-within{outline:2px solid var(--fg);outline-offset:-2px;}
+.loc-option input{width:16px;height:16px;accent-color:var(--amber-dk);}
+.loc-option-price{white-space:nowrap;font-size:13px;font-weight:700;}
+.co-neighborhood-button{display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;cursor:pointer;}
+.co-neighborhood-button svg,.co-neighborhood-button i{flex-shrink:0;}
 .divider{display:flex;align-items:center;gap:8px;margin:12px 0;color:var(--fg-3,#9CA3AF);font-size:12px;font-weight:500;}
 .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
-#loc-bairro{margin-bottom:10px;}
 .btn-loc-confirm{
   display:block;width:100%;padding:14px;border-radius:999px;border:none;
   background:#E5E7EB;color:#9CA3AF;font:600 14px 'Inter',sans-serif;
@@ -1498,17 +1509,14 @@ try{if(localStorage.getItem('age_ok')==='1')document.documentElement.classList.a
 </div>
 
 <!-- ═══ LOCATION OVERLAY ═══ -->
-<div id="loc-overlay" class="hidden" role="dialog" aria-modal="true" aria-label="Informar endereço de entrega">
+<div id="loc-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="loc-title">
   <div class="loc-card">
-    <button class="loc-close-btn" onclick="locSkip()" aria-label="Fechar">×</button>
-    <div id="loc-form">
-      <div class="loc-pin-icon"><i data-lucide="map-pin" width="26" height="26"></i></div>
-      <div class="loc-ask">Onde vamos entregar?</div>
-      <div class="loc-sub">Escolha o bairro para ver a taxa de entrega.</div>
-      <select class="form-input" id="loc-bairro" aria-label="Bairro de entrega"></select>
-      <button class="btn-loc-confirm" id="loc-confirm-btn" onclick="confirmNeighborhood()" disabled>Confirmar bairro</button>
-      <button class="btn-loc-skip" onclick="locSkip()">Ver produtos sem informar localização</button>
-    </div>
+    <button type="button" class="loc-close-btn" onclick="locSkip()" aria-label="Fechar">×</button>
+    <h2 class="loc-ask" id="loc-title">Bairro de entrega</h2>
+    <p class="loc-sub">Escolha o bairro para ver a taxa de entrega.</p>
+    <div class="loc-list" id="loc-bairro" role="radiogroup" aria-labelledby="loc-title"></div>
+    <button type="button" class="btn-loc-confirm" id="loc-confirm-btn" onclick="confirmNeighborhood()" disabled>Confirmar bairro</button>
+    <button type="button" class="btn-loc-skip" id="loc-skip-btn" onclick="locSkip()">Ver produtos sem informar localização</button>
   </div>
 </div>
 
@@ -2051,31 +2059,54 @@ function deliveryFeeText() {
   const fee = deliveryFee();
   return fee === null ? 'Selecione o bairro' : fee === 0 ? 'Grátis' : `R$ ${fmt(fee)}`;
 }
-function fillNeighborhoods(select, selected) {
-  select.replaceChildren(new Option('Selecione o bairro', ''));
+function renderNeighborhoodOptions() {
+  const list = document.getElementById('loc-bairro');
+  list.replaceChildren();
   for (const [name, cents] of Object.entries(deliveryRates)) {
-    select.add(new Option(`${name} · ${cents ? 'R$ ' + fmt(cents / 100) : 'Grátis'}`, name));
+    const option = document.createElement('label');
+    option.className = 'loc-option';
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'loc-neighborhood';
+    radio.value = name;
+    radio.checked = name === deliveryNeighborhood;
+    const text = document.createElement('span');
+    text.textContent = name;
+    const price = document.createElement('span');
+    price.className = 'loc-option-price';
+    price.textContent = cents ? 'R$ ' + fmt(cents / 100) : 'Grátis';
+    option.append(radio, text, price);
+    list.append(option);
   }
-  select.value = Object.hasOwn(deliveryRates, selected) ? selected : '';
+  document.getElementById('loc-confirm-btn').disabled = !deliveryNeighborhood;
 }
 function chooseNeighborhood(name) {
   deliveryNeighborhood = Object.hasOwn(deliveryRates, name) ? name : '';
   const label = deliveryNeighborhood || 'Informe seu bairro';
   document.getElementById('loc-field-txt').textContent = label;
   document.getElementById('dh-loc-txt').textContent = label;
-  const select = document.getElementById('loc-bairro');
-  select.value = deliveryNeighborhood;
-  document.getElementById('loc-confirm-btn').disabled = !select.value;
+
   try { localStorage.setItem('loc_addr', deliveryNeighborhood); } catch {}
 }
 function confirmNeighborhood() {
-  chooseNeighborhood(document.getElementById('loc-bairro').value);
+  const selected = document.querySelector('#loc-bairro input:checked');
+  if (!selected) return;
+  chooseNeighborhood(selected.value);
+  const checkoutLabel = document.getElementById('co-bairro-txt');
+  if (checkoutLabel) {
+    checkoutLabel.textContent = deliveryNeighborhood;
+    document.getElementById('os-fee').textContent = deliveryFeeText();
+    document.getElementById('os-fee').classList.toggle('gratis', deliveryFee() === 0);
+    const amount = orderTotalText(cartTotal());
+    document.querySelector('.os-val').textContent = amount;
+    document.querySelector('.os-total .val').textContent = amount;
+  }
   locSkip();
   if (!document.getElementById('s-cart').classList.contains('hidden')) renderCartPage();
   if (document.getElementById('cart-drawer-overlay').classList.contains('open')) renderDrawerCart();
 }
-document.getElementById('loc-bairro').addEventListener('change', event => {
-  document.getElementById('loc-confirm-btn').disabled = !event.target.value;
+document.getElementById('loc-bairro').addEventListener('change', () => {
+  document.getElementById('loc-confirm-btn').disabled = false;
 });
 let MIN_ORDER = 0;
 
@@ -2235,17 +2266,41 @@ function denyAge(){
   lucide.createIcons();
 }
 
-async function openNeighborhoodPicker(){
+let neighborhoodOpener;
+async function openNeighborhoodPicker(opener = document.activeElement){
   if (!Object.keys(deliveryRates).length) await loadStoreSettings();
   if (!Object.keys(deliveryRates).length) {
     toast('Não foi possível carregar os bairros. Tente novamente.');
     return;
   }
+  neighborhoodOpener = opener;
+  renderNeighborhoodOptions();
+  document.getElementById('loc-skip-btn').hidden = !document.getElementById('checkout-overlay').classList.contains('hidden');
   show('loc-overlay');
+  const selected = document.querySelector('#loc-bairro input:checked');
+  (selected || document.querySelector('.loc-close-btn')).focus();
 }
 function locSkip(){
   hide('loc-overlay');
+  neighborhoodOpener?.focus({preventScroll:true});
 }
+document.getElementById('loc-overlay').addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    locSkip();
+  }
+  if (event.key !== 'Tab') return;
+  const controls = [...event.currentTarget.querySelectorAll('button:not(:disabled):not([hidden]), input:checked')];
+  if (!event.currentTarget.querySelector('input:checked')) {
+    controls.splice(1, 0, document.querySelector('#loc-bairro input'));
+  }
+  const first = controls[0];
+  const last = controls.at(-1);
+  if (document.activeElement === (event.shiftKey ? first : last)) {
+    event.preventDefault();
+    (event.shiftKey ? last : first)?.focus();
+  }
+});
 async function enterStore(){
   hide('loc-overlay');
   document.getElementById('bnav').style.display='flex';
@@ -2333,7 +2388,6 @@ async function loadStoreSettings(){
         }
         deliveryRates = cfg.delivery_rates || {};
         const saved = localStorage.getItem('loc_addr') || '';
-        fillNeighborhoods(document.getElementById('loc-bairro'), saved);
         chooseNeighborhood(saved);
         if(cfg.min_order    !== undefined) MIN_ORDER    = parseFloat(cfg.min_order)||0;
       }
@@ -3093,7 +3147,10 @@ function renderCoStep(){
       <form onsubmit="event.preventDefault();nextStep(1)">
       <h2 class="form-section-title"><i data-lucide="map-pin" width="16" height="16"></i> Endereço de entrega</h2>
       <div class="form-group"><label for="co-bairro">Bairro *</label>
-        <select class="form-input" id="co-bairro" required></select>
+        <button type="button" class="form-input co-neighborhood-button" id="co-bairro" aria-haspopup="dialog" onclick="openNeighborhoodPicker(this)">
+          <span id="co-bairro-txt">${esc(deliveryNeighborhood || 'Selecione o bairro')}</span>
+          <i data-lucide="chevron-down" width="16" height="16" aria-hidden="true"></i>
+        </button>
       </div>
       <div class="form-group"><label for="co-rua">Rua *</label>
         <input class="form-input" id="co-rua" required autocomplete="shipping address-line1" placeholder="Nome da rua" value="${esc(coData.rua||'').replaceAll('"', '&quot;')}">
@@ -3281,18 +3338,6 @@ function renderCoStep(){
       </div>`;
   }
   el.innerHTML = `<div class="co-scroll${coStep < 4 ? ' co-form-step' : ''}">${summaryHtml}${content}</div>`;
-  const neighborhoodSelect = document.getElementById('co-bairro');
-  if (neighborhoodSelect) {
-    fillNeighborhoods(neighborhoodSelect, deliveryNeighborhood || coData.bairro);
-    neighborhoodSelect.addEventListener('change', () => {
-      chooseNeighborhood(neighborhoodSelect.value);
-      document.getElementById('os-fee').textContent = deliveryFeeText();
-      document.getElementById('os-fee').classList.toggle('gratis', deliveryFee() === 0);
-      const amount = orderTotalText(cartTotal());
-      document.querySelector('.os-val').textContent = amount;
-      document.querySelector('.os-total .val').textContent = amount;
-    });
-  }
   const telEl = document.getElementById('co-tel');
   if(telEl) telEl.addEventListener('input',function(){
     let v=this.value.replace(/\D/g,'');
@@ -3313,7 +3358,7 @@ function nextStep(from){
   if(from===1){
     const rua=document.getElementById('co-rua').value.trim();
     const num=document.getElementById('co-num').value.trim();
-    const bairro=document.getElementById('co-bairro').value.trim();
+    const bairro=deliveryNeighborhood;
     if(!Object.hasOwn(deliveryRates, bairro)||!rua||!num){ toast('Selecione o bairro e informe a rua e o número.'); return; }
     chooseNeighborhood(bairro);
     coData.rua=rua; coData.num=num;
