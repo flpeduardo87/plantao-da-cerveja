@@ -1420,6 +1420,15 @@ label{display:block;font-size:13px;font-weight:500;color:var(--fg-2);margin-bott
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <symbol id="icon-delivery-moto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2.5" y="4.5" width="6" height="6" rx="1"/>
+    <circle cx="5.5" cy="18" r="2.5"/>
+    <circle cx="19" cy="18" r="2.5"/>
+    <path d="M2.5 14.5c.8-1.5 2-2 3.5-2h5l2 4h3.5M19 18l-3-10h-3"/>
+    <path d="M8 18h4l1-1.5"/>
+  </symbol>
+</svg>
 <script>
 try{if(localStorage.getItem('age_ok')==='1')document.documentElement.classList.add('age-ok');}catch{}
 </script>
@@ -1595,7 +1604,7 @@ try{if(localStorage.getItem('age_ok')==='1')document.documentElement.classList.a
     <div class="store-info-card">
       <h1 class="store-name">Plantão da Cerveja</h1>
       <div class="store-benefits">
-        <div class="benefit-item"><span class="benefit-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="2.5"/><circle cx="18.5" cy="17" r="2.5"/><path d="M8 17h8"/><path d="M10 12h7l-2.5-5H12z"/><path d="M10 12l-2 5"/><path d="M17 12l2 5"/><path d="M12 7l1-3h-4"/><path d="M19.5 9.5l.5-2.5"/></svg></span><span>Até <strong>20 min</strong></span></div>
+        <div class="benefit-item"><span class="benefit-ic"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-delivery-moto"/></svg></span><span>Até <strong>20 min</strong></span></div>
         <div class="benefit-item"><span class="benefit-ic"><i data-lucide="package" width="13" height="13"></i></span><span>Mín. <strong>R$ 20</strong></span></div>
         <div class="benefit-item"><div class="online-badge" id="store-badge"><span class="online-dot" id="store-dot"></span><span id="store-badge-txt">Online</span></div></div>
       </div>
@@ -2863,7 +2872,7 @@ function renderDrawerCart(){
     </div>
     <div class="summary-card">
       <div class="sum-row"><span class="sum-label">Subtotal</span><span class="sum-val">R$ ${fmt(subtotal)}</span></div>
-      <div class="sum-row"><span class="sum-label"><i data-lucide="truck" width="14" height="14"></i> Entrega</span><span class="sum-val${freteClass}">${freteTxt}</span></div>
+      <div class="sum-row"><span class="sum-label"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-delivery-moto"/></svg> Entrega</span><span class="sum-val${freteClass}">${freteTxt}</span></div>
       <div class="sum-row total-row"><span class="sum-label">Total</span><span class="sum-val">${orderTotalText(subtotal)}</span></div>
     </div>`;
   footer.classList.remove('hidden');
@@ -2939,7 +2948,7 @@ function renderCartPage(){
     </div>
     <div class="cart-ctas">
       <button class="btn-finalizar" onclick="openWhen()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="2.5"/><circle cx="18.5" cy="17" r="2.5"/><path d="M8 17h8"/><path d="M10 12h7l-2.5-5H12z"/><path d="M10 12l-2 5"/><path d="M17 12l2 5"/><path d="M12 7l1-3h-4"/><path d="M19.5 9.5l.5-2.5"/></svg> Finalizar pedido
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-delivery-moto"/></svg> Finalizar pedido
       </button>
       <button class="btn-continuar" onclick="goHome()">
         <i data-lucide="plus" width="16" height="16"></i> Continuar comprando
@@ -3137,7 +3146,7 @@ function renderCoStep(){
       <div class="os-details" id="os-details" ${summaryOpen ? '' : 'hidden'}>
         ${cart.map(i=>`<div class="os-item"><span>${i.name} ×${i.qty}</span><span>R$ ${fmt(i.price*i.qty)}</span></div>`).join('')}
         <div class="os-meta"><span>Subtotal</span><span>R$ ${fmt(subtotal)}</span></div>
-        <div class="os-meta"><span><i data-lucide="truck" width="13" height="13"></i> Frete</span><span id="os-fee"${deliveryFee()===0?' class="gratis"':''}>${deliveryFeeText()}</span></div>
+        <div class="os-meta"><span><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-delivery-moto"/></svg> Frete</span><span id="os-fee"${deliveryFee()===0?' class="gratis"':''}>${deliveryFeeText()}</span></div>
       </div>
       <div class="os-total"><span class="label">Total</span><span class="val">${orderTotalText(subtotal)}</span></div>
     </div>`;
@@ -3302,7 +3311,7 @@ function renderCoStep(){
     content=`
       <div class="track-screen" id="track-screen">
         <div class="track-header">
-          <div class="track-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="2.5"/><circle cx="18.5" cy="17" r="2.5"/><path d="M8 17h8"/><path d="M10 12h7l-2.5-5H12z"/><path d="M10 12l-2 5"/><path d="M17 12l2 5"/><path d="M12 7l1-3h-4"/><path d="M19.5 9.5l.5-2.5"/></svg></div>
+          <div class="track-icon"><svg width="32" height="32" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-delivery-moto"/></svg></div>
           <div class="track-title">Pedido Confirmado!</div>
           <div class="track-order-num">${lastOrder.order_number?`#${esc(lastOrder.order_number)}`:'&nbsp;'}</div>
           <div class="track-status-badge" id="track-badge"><i data-lucide="clock" width="12" height="12"></i> Aguardando confirmação</div>
@@ -3317,7 +3326,7 @@ function renderCoStep(){
             <div class="tl-info"><div class="tl-label" id="tl-lbl-1">Em preparo</div><div class="tl-sub">A loja está separando seu pedido</div></div>
           </div>
           <div class="tl-step" id="tl-2">
-            <div class="tl-left"><div class="tl-dot" id="tl-dot-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="2.5"/><circle cx="18.5" cy="17" r="2.5"/><path d="M8 17h8"/><path d="M10 12h7l-2.5-5H12z"/><path d="M10 12l-2 5"/><path d="M17 12l2 5"/><path d="M12 7l1-3h-4"/><path d="M19.5 9.5l.5-2.5"/></svg></div><div class="tl-line" id="tl-line-2"></div></div>
+            <div class="tl-left"><div class="tl-dot" id="tl-dot-2"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-delivery-moto"/></svg></div><div class="tl-line" id="tl-line-2"></div></div>
             <div class="tl-info"><div class="tl-label" id="tl-lbl-2">A caminho</div><div class="tl-sub">Entregador saiu para sua localização</div></div>
           </div>
           <div class="tl-step" id="tl-3">
