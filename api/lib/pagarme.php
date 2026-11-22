@@ -100,7 +100,6 @@ class PagarMe {
      * @param string|null $tdsTransId    tds_server_trans_id retornado pelo SDK 3DS.
      */
     public function createCreditCardOrder(array $order, string $cardToken, int $installments = 1, ?array $rawCard = null, ?string $tdsTransId = null): array {
-        $amountCents = (int) round((float) $order['total'] * 100);
         $phone       = preg_replace('/\D/', '', $order['customer_phone']);
         $areaCode    = strlen($phone) >= 11 ? substr($phone, 0, 2) : '11';
         $number      = strlen($phone) >= 11 ? substr($phone, 2) : substr($phone, 2);
@@ -120,18 +119,12 @@ class PagarMe {
             $cleanPhone = preg_replace('/\D/', '', $order['customer_phone'] ?? '');
             $email = $cleanPhone . '@noemail.plantaodacerveja.com.br';
         }
-        $zip     = preg_replace('/\D/', '', $order['address_cep'] ?? $order['address_zip'] ?? '');
-        $street  = $order['address_street'] ?? '';
-        $num     = $order['address_number'] ?? '0';
-        $city    = $order['address_city'] ?? '';
-        $state   = strtoupper(substr($order['address_state'] ?? '', 0, 2)) ?: 'SP';
-
-        $addressLine1 = trim($num . ', ' . $street) ?: '0, Rua nao informada';
+        $billing = $order['billing_address'];
         $addrObj = [
-            'line_1'   => $addressLine1,
-            'zip_code' => $zip ?: '00000000',
-            'city'     => $city ?: 'São Paulo',
-            'state'    => $state,
+            'line_1'   => trim($billing['line_1']),
+            'zip_code' => $billing['zip_code'],
+            'city'     => trim($billing['city']),
+            'state'    => $billing['state'],
             'country'  => 'BR',
         ];
 

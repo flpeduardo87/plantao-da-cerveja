@@ -1,4 +1,4 @@
-const CACHE = 'plantao-v6';
+const CACHE = 'plantao-v7';
 const PRECACHE = [
   '/manifest.json',
   '/favicon-icone.webp',
@@ -17,7 +17,7 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
+  if (e.request.method !== 'GET' || e.request.cache === 'no-store') return;
   const url = new URL(e.request.url);
   if (url.pathname.startsWith('/admin/')) return;
   if (url.origin !== self.location.origin) return;

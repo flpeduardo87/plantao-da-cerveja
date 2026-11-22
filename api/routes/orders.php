@@ -4,6 +4,8 @@
 // POST /orders            — create order [public]
 // PATCH /orders/{id}      — update status [admin]
 
+require_once __DIR__ . '/../lib/delivery.php';
+
 $pdo = db();
 
 match ($method) {
@@ -142,14 +144,47 @@ match ($method) {
         if (!$lineItems) json_err('No valid items');
 
         // Fetch delivery fee and min order from settings
-        $cfg = $pdo->query("SELECT setting_key, setting_value FROM store_settings WHERE setting_key IN ('delivery_fee','min_order','store_open','fonnte_token','store_whatsapp','pix_key')")->fetchAll(\PDO::FETCH_KEY_PAIR);
+        $cfg = $pdo->query("SELECT setting_key, setting_value FROM store_settings WHERE setting_key IN ('delivery_rates','min_order','store_open','fonnte_token','store_whatsapp','pix_key')")->fetchAll(\PDO::FETCH_KEY_PAIR);
         if (($cfg['store_open'] ?? '1') === '0') json_err('Loja fechada no momento', 503);
 
         $minOrder = (float)($cfg['min_order'] ?? 0);
         if ($subtotal < $minOrder) json_err("Pedido mínimo é R$ " . number_format($minOrder, 2, ',', '.'));
 
-        $deliveryFee = (float)($cfg['delivery_fee'] ?? 0);
-        $total       = round($subtotal + $deliveryFee, 2);
+        $neighborhood = $d['address_neighborhood'] ?? null;
+        $rates = deliveryRates($cfg['delivery_rates'] ?? null);
+        if (!is_string($neighborhood) || $neighborhood === ''
+            || !is_string($d['address_street'] ?? null) || trim($d['address_street']) === ''
+            || !is_string($d['address_number'] ?? null) || trim($d['address_number']) === '') {
+            json_err('Selecione um bairro atendido e informe a rua e o número da entrega.');
+        }
+        if (!array_key_exists($neighborhood, $rates)) {
+            json_err('O bairro selecionado não está disponível. Escolha um bairro atendido.', 409);
+        }
+        if (($d['delivery_fee_cents'] ?? null) !== $rates[$neighborhood]) {
+            json_err('A taxa de entrega mudou. Confira o novo valor antes de confirmar.', 409);
+        }
+
+        $deliveryFee = $rates[$neighborhood] / 100;
+        $total = round($subtotal + $deliveryFee, 2);
+
+        if ($d['payment_method'] === 'credit_card') {
+            $billing = $d['billing_address'] ?? [];
+            if (!is_array($billing)
+                || !is_string($billing['zip_code'] ?? null) || !preg_match('/^[0-9]{8}$/D', $billing['zip_code'])
+                || !is_string($billing['state'] ?? null) || !preg_match('/^[A-Z]{2}$/D', $billing['state'])
+                || !is_string($billing['city'] ?? null) || trim($billing['city']) === ''
+                || !is_string($billing['line_1'] ?? null) || trim($billing['line_1']) === '') {
+                json_err('Informe o endereço de cobrança do cartão, incluindo CEP, cidade e UF.');
+            }
+            $cardToken    = trim($d['card_token'] ?? '');
+            $installments = max(1, (int)($d['installments'] ?? 1));
+            $tdsTransId   = trim($d['tds_transaction_id'] ?? '');
+            $cardRaw      = is_array($d['card_raw'] ?? null) ? $d['card_raw'] : null;
+            $use3ds       = $tdsTransId && $cardRaw && isset($cardRaw['number']);
+            if (!$cardToken && !$use3ds) {
+                json_err('Token do cartão ou dados 3DS ausentes.');
+            }
+        }
         $orderNumber = 'PC' . date('ymd') . strtoupper(substr(uniqid(), -4));
 
         $pdo->beginTransaction();
@@ -171,7 +206,7 @@ match ($method) {
                 $d['address_street'] ?? null,
                 $d['address_number'] ?? null,
                 $d['address_complement'] ?? null,
-                $d['address_neighborhood'] ?? null,
+                $neighborhood,
                 $d['address_reference'] ?? null,
                 round($subtotal, 2),
                 $deliveryFee,
@@ -196,19 +231,15 @@ match ($method) {
             json_err('Erro ao salvar pedido: ' . $e->getMessage(), 500);
         }
 
+        $paymentItems = $lineItems;
+        if ($deliveryFee > 0) {
+            $paymentItems[] = ['product_id' => 'delivery-fee', 'name' => 'Taxa de entrega', 'qty' => 1, 'price' => $deliveryFee];
+        }
+
         // Pagar.me checkout transparente (cartão de crédito)
         $pmDebugErr  = null;
         $pmPaid      = false;
         if ($d['payment_method'] === 'credit_card') {
-            $cardToken    = trim($d['card_token'] ?? '');
-            $installments = max(1, (int)($d['installments'] ?? 1));
-            $tdsTransId   = trim($d['tds_transaction_id'] ?? '');
-            $cardRaw      = is_array($d['card_raw'] ?? null) ? $d['card_raw'] : null;
-            $use3ds       = $tdsTransId && $cardRaw && isset($cardRaw['number']);
-
-            if (!$cardToken && !$use3ds) {
-                json_err('Token do cartão ou dados 3DS ausentes.');
-            }
             try {
                 require_once __DIR__ . '/../lib/pagarme.php';
                 $pm = new PagarMe();
@@ -222,12 +253,8 @@ match ($method) {
                         'customer_phone'  => preg_replace('/\D/', '', $d['customer_phone']),
                         'customer_cpf'    => preg_replace('/\D/', '', $d['customer_cpf'] ?? ''),
                         'customer_email'  => $d['customer_email'] ?? '',
-                        'address_street'  => $d['address_street'] ?? '',
-                        'address_number'  => $d['address_number'] ?? '',
-                        'address_city'    => $d['address_city'] ?? '',
-                        'address_state'   => $d['address_state'] ?? '',
-                        'address_zip'     => preg_replace('/\D/', '', $d['address_cep'] ?? ''),
-                        'items'           => $lineItems,
+                        'billing_address' => $billing,
+                        'items'           => $paymentItems,
                     ], $use3ds ? '' : $cardToken, $installments, $use3ds ? $cardRaw : null, $use3ds ? $tdsTransId : null);
 
                     $pmPaid   = ($result['status'] === 'paid');
@@ -277,7 +304,7 @@ match ($method) {
                         'customer_phone' => preg_replace('/\D/', '', $d['customer_phone']),
                         'customer_cpf'   => preg_replace('/\D/', '', $d['customer_cpf'] ?? ''),
                         'customer_email' => $d['customer_email'] ?? '',
-                        'items'          => $lineItems,
+                        'items'          => $paymentItems,
                     ]);
                     $pixQrCode   = $pixResult['qr_code'];
                     $pixExpiresIn = $pixResult['expires_in'] ?? 1800;
@@ -298,7 +325,7 @@ match ($method) {
             $msg = "🍺 *Novo Pedido #{$orderNumber}*\n\n"
                 . "*Cliente:* {$d['customer_name']}\n"
                 . "*Fone:* {$d['customer_phone']}\n"
-                . "*Endereço:* {$d['address_street']}, {$d['address_number']}" . (!empty($d['address_complement']) ? " - {$d['address_complement']}" : '') . "\n"
+                . "*Endereço:* {$d['address_street']}, {$d['address_number']}" . (!empty($d['address_complement']) ? " - {$d['address_complement']}" : '') . " · {$neighborhood}\n"
                 . (!empty($d['address_reference']) ? "*Ref:* {$d['address_reference']}\n" : '')
                 . "\n*Itens:*\n{$itemsText}\n\n"
                 . "*Subtotal:* R$ " . number_format($subtotal, 2, ',', '.') . "\n"

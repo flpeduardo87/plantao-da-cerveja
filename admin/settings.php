@@ -68,10 +68,6 @@
                 <input type="number" id="s-min-order" min="0" step="0.01" placeholder="20,00">
               </div>
               <div class="field">
-                <label>Taxa de entrega (R$)</label>
-                <input type="number" id="s-delivery-fee" min="0" step="0.01" placeholder="0,00">
-              </div>
-              <div class="field">
                 <label>Tempo mínimo de entrega (min)</label>
                 <input type="number" id="s-time-min" min="0" placeholder="15">
               </div>
@@ -90,6 +86,33 @@
               </div>
             </div>
             <button type="submit" class="btn btn-primary">Salvar configurações</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="ch-icon amber"><i data-lucide="map-pin" width="14" height="14"></i></div>
+          <h2>Taxas de entrega por bairro</h2>
+        </div>
+        <div class="card-body">
+          <form onsubmit="saveDeliveryRates(event)">
+            <div class="field" style="margin-bottom:14px">
+              <label for="s-delivery-rates">Bairros e valores em reais</label>
+              <textarea id="s-delivery-rates" rows="13" required aria-describedby="delivery-rates-format"></textarea>
+              <small id="delivery-rates-format">Informe um bairro por linha no formato Centro | 8,00.</small>
+            </div>
+            <div class="form-grid" style="margin-bottom:14px">
+              <div class="field">
+                <label for="delivery-admin-email">E-mail do administrador</label>
+                <input id="delivery-admin-email" type="email" autocomplete="username" required>
+              </div>
+              <div class="field">
+                <label for="delivery-admin-password">Senha do administrador</label>
+                <input id="delivery-admin-password" type="password" autocomplete="current-password" required>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar taxas</button>
           </form>
         </div>
       </div>
@@ -296,7 +319,9 @@ async function loadSettings() {
     const data = await api('/settings');
     document.getElementById('s-store-name').value   = data.store_name || '';
     document.getElementById('s-min-order').value    = data.min_order || '';
-    document.getElementById('s-delivery-fee').value = data.delivery_fee || '';
+    document.getElementById('s-delivery-rates').value = Object.entries(data.delivery_rates || {})
+      .map(([name, cents]) => name + ' | ' + (cents / 100).toFixed(2).replace('.', ',')).join('\n');
+    document.getElementById('delivery-admin-email').value = getUser()?.email || '';
     document.getElementById('s-time-min').value     = data.delivery_time_min || '';
     document.getElementById('s-time-max').value     = data.delivery_time_max || '';
     document.getElementById('s-open').checked       = data.store_open === '1' || data.store_open === 1;
@@ -319,7 +344,6 @@ async function saveStore(e) {
     await api('/settings', { method: 'PUT', body: JSON.stringify({
       store_name:        document.getElementById('s-store-name').value,
       min_order:         document.getElementById('s-min-order').value,
-      delivery_fee:      document.getElementById('s-delivery-fee').value,
       delivery_time_min: document.getElementById('s-time-min').value,
       delivery_time_max: document.getElementById('s-time-max').value,
       store_open:        document.getElementById('s-open').checked ? '1' : '0',
@@ -327,6 +351,35 @@ async function saveStore(e) {
     toast('Configurações salvas');
   } catch (e) { toast(e.message, 'error'); }
   finally { btn.disabled = false; btn.textContent = 'Salvar configurações'; }
+}
+
+async function saveDeliveryRates(e) {
+  e.preventDefault();
+  const btn = e.submitter;
+  const password = document.getElementById('delivery-admin-password');
+  const rates = Object.create(null);
+  btn.disabled = true;
+  try {
+    for (const line of document.getElementById('s-delivery-rates').value.split(/\r?\n/)) {
+      if (!line.trim()) continue;
+      const match = line.match(/^([^|]+)\|\s*(\d{1,6})(?:[,.](\d{1,2}))?\s*$/);
+      if (!match || !match[1].trim()) throw new Error('Use o formato Bairro | 8,00 em cada linha.');
+      const name = match[1].trim();
+      if (Object.hasOwn(rates, name)) throw new Error('Bairro duplicado: ' + name);
+      rates[name] = Number(match[2]) * 100 + Number((match[3] || '').padEnd(2, '0'));
+    }
+    await api('/settings', { method: 'PUT', body: JSON.stringify({
+      delivery_rates: rates,
+      delivery_admin_email: document.getElementById('delivery-admin-email').value,
+      delivery_admin_password: password.value,
+    }) });
+    toast('Taxas de entrega salvas');
+  } catch (error) {
+    toast(error.message, 'error');
+  } finally {
+    password.value = '';
+    btn.disabled = false;
+  }
 }
 
 async function saveHours() {

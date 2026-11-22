@@ -71,7 +71,6 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 
 /* ── AGE GATE ── */
 .age-ok #s-age{display:none!important;}
-.age-ok.loc-ok #loc-overlay{display:none!important;}
 #s-age{
   background:#000000;align-items:center;justify-content:center;gap:20px;
   padding:max(32px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px))
@@ -129,43 +128,15 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 .loc-sub{font-size:13px;color:var(--fg-2);margin-bottom:20px;line-height:1.5;}
 .divider{display:flex;align-items:center;gap:8px;margin:12px 0;color:var(--fg-3,#9CA3AF);font-size:12px;font-weight:500;}
 .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
-.cep-wrap{position:relative;margin-bottom:10px;}
-.cep-search-ic{
-  position:absolute;left:16px;top:50%;transform:translateY(-50%);
-  color:var(--fg-3,#9CA3AF);display:flex;align-items:center;pointer-events:none;
-}
-.cep-field{
-  width:100%;padding:13px 16px 13px 44px;border-radius:999px;
-  border:1.5px solid var(--border);background:var(--bg-2);
-  font:15px 'Inter',sans-serif;color:var(--fg);
-  outline:none;transition:border-color .15s;box-sizing:border-box;
-}
-.cep-field::placeholder{color:var(--fg-3,#9CA3AF);}
-.cep-field:focus{border-color:var(--amber);background:#fff;}
-.cep-field.err{border-color:var(--red);}
-.btn-cep-confirm{
+#loc-bairro{margin-bottom:10px;}
+.btn-loc-confirm{
   display:block;width:100%;padding:14px;border-radius:999px;border:none;
   background:#E5E7EB;color:#9CA3AF;font:600 14px 'Inter',sans-serif;
   cursor:default;transition:background .15s,color .15s;margin-bottom:4px;
 }
-.btn-cep-confirm:not(:disabled){background:var(--amber);color:#111;cursor:pointer;}
-.btn-cep-confirm:not(:disabled):hover{background:var(--amber-dk);}
+.btn-loc-confirm:not(:disabled){background:var(--amber);color:#111;cursor:pointer;}
+.btn-loc-confirm:not(:disabled):hover{background:var(--amber-dk);}
 .btn-loc-skip{background:none;border:none;color:var(--fg-2);font:400 13px 'Inter',sans-serif;cursor:pointer;margin-top:4px;padding:6px 12px;text-decoration:underline;}
-#loc-confirmed{display:none;flex-direction:column;align-items:center;gap:12px;}
-.conf-check-wrap{
-  width:72px;height:72px;border-radius:50%;background:var(--amber);
-  display:flex;align-items:center;justify-content:center;
-  margin:0 auto 4px;
-}
-.conf-title{font-size:20px;font-weight:700;color:var(--fg);margin:0;}
-.conf-addr{font-size:13px;color:var(--fg-2);line-height:1.5;margin:0;}
-.conf-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  font-size:12px;font-weight:600;color:#166534;
-  background:#DCFCE7;border-radius:999px;
-  padding:5px 12px;
-}
-
 /* ── STORE HERO ── */
 .store-hero{position:relative;background:var(--bg-2);}
 .store-banner{
@@ -1383,8 +1354,7 @@ label{display:block;font-size:13px;font-weight:500;color:var(--fg-2);margin-bott
 </head>
 <body>
 <script>
-try{if(localStorage.getItem('age_ok')==='1')document.documentElement.classList.add('age-ok');
-if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('loc-ok');}catch{}
+try{if(localStorage.getItem('age_ok')==='1')document.documentElement.classList.add('age-ok');}catch{}
 </script>
 
 <!-- ═══ DESKTOP HEADER ═══ -->
@@ -1398,7 +1368,7 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
       <input type="text" id="dh-in" placeholder="Pesquise sua bebida favorita" oninput="search(this.value)">
     </div>
     <div class="dh-right">
-      <button class="dh-loc" onclick="show('loc-overlay')"><i data-lucide="map-pin" width="14" height="14"></i> Informe seu endereço</button>
+      <button class="dh-loc" onclick="openNeighborhoodPicker()"><i data-lucide="map-pin" width="14" height="14"></i> <span id="dh-loc-txt">Informe seu bairro</span></button>
       <button class="dh-cart-btn" onclick="goToAccount()" style="background:var(--bg-2);color:var(--fg)">
         <i data-lucide="user" width="16" height="16"></i> Conta
       </button>
@@ -1441,8 +1411,8 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
         <span class="di-ic"><i data-lucide="user" width="18" height="18"></i></span> Minha conta
       </button>
       <div class="drawer-sep"></div>
-      <button class="drawer-item" onclick="closeDrawer();show('loc-overlay')">
-        <span class="di-ic"><i data-lucide="map-pin" width="18" height="18"></i></span> Informe seu endereço
+      <button class="drawer-item" onclick="closeDrawer();openNeighborhoodPicker()">
+        <span class="di-ic"><i data-lucide="map-pin" width="18" height="18"></i></span> Informe seu bairro
         <span class="di-chev"><i data-lucide="chevron-right" width="16" height="16"></i></span>
       </button>
       <button class="drawer-item" onclick="closeDrawer()">
@@ -1478,21 +1448,10 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
     <div id="loc-form">
       <div class="loc-pin-icon"><i data-lucide="map-pin" width="26" height="26"></i></div>
       <div class="loc-ask">Onde vamos entregar?</div>
-      <div class="loc-sub">Informe sua localização para calcular o frete e o prazo de entrega.</div>
-      <button class="btn-primary" id="geo-btn" onclick="useGeo()"><i data-lucide="map-pin" width="16" height="16"></i> Usar minha localização</button>
-      <div class="divider">ou informe o CEP</div>
-      <div class="cep-wrap">
-        <span class="cep-search-ic"><i data-lucide="search" width="16" height="16"></i></span>
-        <input class="cep-field" id="cep-in" type="text" inputmode="numeric" maxlength="9" placeholder="Digite seu CEP" oninput="onCepInput(this)">
-      </div>
-      <button class="btn-cep-confirm" id="cep-confirm-btn" onclick="confirmCep()" disabled>Confirmar localização</button>
+      <div class="loc-sub">Escolha o bairro para ver a taxa de entrega.</div>
+      <select class="form-input" id="loc-bairro" aria-label="Bairro de entrega"></select>
+      <button class="btn-loc-confirm" id="loc-confirm-btn" onclick="confirmNeighborhood()" disabled>Confirmar bairro</button>
       <button class="btn-loc-skip" onclick="locSkip()">Ver produtos sem informar localização</button>
-    </div>
-    <div id="loc-confirmed">
-      <div class="conf-check-wrap"><i data-lucide="check" width="32" height="32" style="color:#000"></i></div>
-      <div class="conf-title">Entregamos na sua região!</div>
-      <div class="conf-addr" id="conf-addr">—</div>
-      <div class="conf-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="2.5"/><circle cx="18.5" cy="17" r="2.5"/><path d="M8 17h8"/><path d="M10 12h7l-2.5-5H12z"/><path d="M10 12l-2 5"/><path d="M17 12l2 5"/><path d="M12 7l1-3h-4"/><path d="M19.5 9.5l.5-2.5"/></svg> Entrega rápida · Frete grátis</div>
     </div>
   </div>
 </div>
@@ -1576,9 +1535,9 @@ if(localStorage.getItem('loc_ok')==='1')document.documentElement.classList.add('
         <div class="benefit-item"><span class="benefit-ic"><i data-lucide="package" width="13" height="13"></i></span><span>Mín. <strong>R$ 20</strong></span></div>
         <div class="benefit-item"><div class="online-badge" id="store-badge"><span class="online-dot" id="store-dot"></span><span id="store-badge-txt">Online</span></div></div>
       </div>
-      <button class="loc-field-btn" onclick="document.getElementById('loc-form').style.display='';document.getElementById('loc-confirmed').style.display='none';show('loc-overlay')" id="loc-field-btn">
+      <button class="loc-field-btn" onclick="openNeighborhoodPicker()" id="loc-field-btn">
         <span class="loc-pin"><i data-lucide="map-pin" width="15" height="15"></i></span>
-        <span class="loc-txt" id="loc-field-txt">Informe sua localização</span>
+        <span class="loc-txt" id="loc-field-txt">Informe seu bairro</span>
         <span class="loc-chevron"><i data-lucide="chevron-right" width="14" height="14"></i></span>
       </button>
     </div>
@@ -2024,7 +1983,45 @@ const CAT_COLORS = {
   'mercearia':['#F1F5F9','#334155'],'mercearia-img':['#F1F5F9','#334155'],
   'tabacos':['#E7E5E4','#57534E'],
 };
-let DELIVERY_FEE = 0;
+let deliveryRates = {};
+let deliveryNeighborhood = '';
+function deliveryFee() {
+  return Object.hasOwn(deliveryRates, deliveryNeighborhood) ? deliveryRates[deliveryNeighborhood] / 100 : null;
+}
+function orderTotalText(subtotal) {
+  const fee = deliveryFee();
+  return fee === null ? 'R$ ' + fmt(subtotal) + ' + frete' : 'R$ ' + fmt(subtotal + fee);
+}
+function deliveryFeeText() {
+  const fee = deliveryFee();
+  return fee === null ? 'Selecione o bairro' : fee === 0 ? 'Grátis' : `R$ ${fmt(fee)}`;
+}
+function fillNeighborhoods(select, selected) {
+  select.replaceChildren(new Option('Selecione o bairro', ''));
+  for (const [name, cents] of Object.entries(deliveryRates)) {
+    select.add(new Option(`${name} · ${cents ? 'R$ ' + fmt(cents / 100) : 'Grátis'}`, name));
+  }
+  select.value = Object.hasOwn(deliveryRates, selected) ? selected : '';
+}
+function chooseNeighborhood(name) {
+  deliveryNeighborhood = Object.hasOwn(deliveryRates, name) ? name : '';
+  const label = deliveryNeighborhood || 'Informe seu bairro';
+  document.getElementById('loc-field-txt').textContent = label;
+  document.getElementById('dh-loc-txt').textContent = label;
+  const select = document.getElementById('loc-bairro');
+  select.value = deliveryNeighborhood;
+  document.getElementById('loc-confirm-btn').disabled = !select.value;
+  try { localStorage.setItem('loc_addr', deliveryNeighborhood); } catch {}
+}
+function confirmNeighborhood() {
+  chooseNeighborhood(document.getElementById('loc-bairro').value);
+  locSkip();
+  if (!document.getElementById('s-cart').classList.contains('hidden')) renderCartPage();
+  if (document.getElementById('cart-drawer-overlay').classList.contains('open')) renderDrawerCart();
+}
+document.getElementById('loc-bairro').addEventListener('change', event => {
+  document.getElementById('loc-confirm-btn').disabled = !event.target.value;
+});
 let MIN_ORDER = 0;
 
 const DEMO_DATA = {
@@ -2170,8 +2167,7 @@ function passAge(){
     g.classList.add('hidden');
     // Enter store immediately, then show location popup if not set
     await enterStore();
-    const locOk = localStorage.getItem('loc_ok')==='1';
-    if(!locOk) show('loc-overlay');
+    if(!deliveryNeighborhood) openNeighborhoodPicker();
   }, 280);
 }
 function denyAge(){
@@ -2184,87 +2180,16 @@ function denyAge(){
   lucide.createIcons();
 }
 
-function onCepInput(el){
-  el.classList.remove('err');
-  let v = el.value.replace(/\D/g,'');
-  if(v.length>5) v=v.slice(0,5)+'-'+v.slice(5,8);
-  el.value = v;
-  const btn = document.getElementById('cep-confirm-btn');
-  if(btn){ btn.disabled = v.replace(/\D/g,'').length < 8; }
+async function openNeighborhoodPicker(){
+  if (!Object.keys(deliveryRates).length) await loadStoreSettings();
+  if (!Object.keys(deliveryRates).length) {
+    toast('Não foi possível carregar os bairros. Tente novamente.');
+    return;
+  }
+  show('loc-overlay');
 }
 function locSkip(){
   hide('loc-overlay');
-  document.getElementById('loc-form').style.display='';
-  document.getElementById('loc-confirmed').style.display='none';
-}
-document.getElementById('cep-in').addEventListener('input',function(){ onCepInput(this); });
-function useGeo(){
-  const b = document.getElementById('geo-btn');
-  if(!navigator.geolocation){ toast('GPS não disponível neste dispositivo.','error'); return; }
-  b.innerHTML='<i data-lucide="loader-2" width="16" height="16" class="spin"></i> Localizando...'; b.disabled=true; lucide.createIcons();
-  navigator.geolocation.getCurrentPosition(
-    async (pos)=>{
-      const {latitude:lat,longitude:lon} = pos.coords;
-      try {
-        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1`,{signal:AbortSignal.timeout(6000)});
-        const d = await r.json();
-        const a = d.address||{};
-        const rua = a.road||a.pedestrian||a.footway||'';
-        const bairro = a.suburb||a.neighbourhood||a.city_district||'';
-        const cidade = a.city||a.town||a.village||a.county||'';
-        const uf = a.state_code||(a.state||'').slice(0,2).toUpperCase();
-        const parts = [rua,bairro,cidade+(uf?'/'+uf:'')].filter(Boolean);
-        const addr = parts.join(' — ') || d.display_name || 'Localização confirmada';
-        const cep = (a.postcode||'').replace(/\D/g,'');
-        if(cep.length>=8){
-          try{
-            const cv = await fetch(`https://viacep.com.br/ws/${cep}/json/`,{signal:AbortSignal.timeout(4000)});
-            const cd = await cv.json();
-            if(!cd.erro) window._viaCepData = cd;
-          }catch{}
-        }
-        showConfirmed(addr);
-      } catch {
-        showConfirmed('Localização GPS confirmada');
-      }
-    },
-    ()=>{ b.innerHTML='<i data-lucide="map-pin" width="16" height="16"></i> Usar minha localização'; b.disabled=false; lucide.createIcons(); toast('GPS não pôde ser obtido. Digite seu CEP.','error'); },
-    {timeout:10000,maximumAge:60000}
-  );
-}
-async function confirmCep(){
-  const inp = document.getElementById('cep-in');
-  const v = inp.value.replace(/\D/g,'');
-  if(v.length<8){ inp.classList.add('err'); return; }
-  inp.classList.remove('err'); inp.disabled=true;
-  try {
-    const r = await fetch(`https://viacep.com.br/ws/${v}/json/`,{signal:AbortSignal.timeout(5000)});
-    const d = await r.json();
-    if(d.erro){ inp.disabled=false; toast('CEP não encontrado. Verifique e tente novamente.','error'); return; }
-    window._viaCepData = d;
-    const parts = [d.logradouro, d.bairro, d.localidade+(d.uf?'/'+d.uf:'')].filter(Boolean);
-    showConfirmed(parts.join(' — '));
-  } catch {
-    showConfirmed(`CEP ${v.slice(0,5)}-${v.slice(5)} confirmado`);
-  } finally { inp.disabled=false; }
-}
-function showConfirmed(addr){
-  document.getElementById('loc-form').style.display='none';
-  const c = document.getElementById('loc-confirmed');
-  c.style.display='flex';
-  document.getElementById('conf-addr').textContent = addr;
-  // Update loc-field-btn with address snippet
-  const fieldTxt = document.getElementById('loc-field-txt');
-  if(fieldTxt) fieldTxt.textContent = addr.split(' — ')[1] || addr.split(' — ')[0] || addr;
-  // Auto-dismiss after 1.2s
-  const addrSnippet = addr.split(' — ')[1] || addr.split(' — ')[0] || addr;
-  setTimeout(()=>{
-    try { localStorage.setItem('loc_ok','1'); localStorage.setItem('loc_addr',addrSnippet); } catch {}
-    hide('loc-overlay');
-    document.getElementById('loc-form').style.display='';
-    c.style.display='none';
-    lucide.createIcons();
-  }, 1200);
 }
 async function enterStore(){
   hide('loc-overlay');
@@ -2333,9 +2258,12 @@ async function enterStore(){
       buildCats(); buildCatGrid(); renderSections();
     }
   } catch(e){ /* keep demo data */ }
-  // Fetch store settings: open status, delivery fee, min order
+  await loadStoreSettings();
+}
+
+async function loadStoreSettings(){
   try {
-    const res = await fetch(API+'/settings',{signal:AbortSignal.timeout(5000)});
+    const res = await fetch(API+'/settings',{cache:'no-store',signal:AbortSignal.timeout(5000)});
     if(res.ok){
       const cfg = await res.json();
       if(cfg){
@@ -2348,7 +2276,10 @@ async function enterStore(){
           dot.classList.toggle('closed',!isOpen);
           txt.textContent = isOpen ? 'PEDIDOS ONLINE' : 'LOJA FECHADA';
         }
-        if(cfg.delivery_fee !== undefined) DELIVERY_FEE = parseFloat(cfg.delivery_fee)||0;
+        deliveryRates = cfg.delivery_rates || {};
+        const saved = localStorage.getItem('loc_addr') || '';
+        fillNeighborhoods(document.getElementById('loc-bairro'), saved);
+        chooseNeighborhood(saved);
         if(cfg.min_order    !== undefined) MIN_ORDER    = parseFloat(cfg.min_order)||0;
       }
     }
@@ -2796,9 +2727,8 @@ function renderDrawerCart(){
     return;
   }
   const subtotal = cartTotal();
-  const grandTotal = subtotal + DELIVERY_FEE;
-  const freteTxt = DELIVERY_FEE > 0 ? `R$ ${fmt(DELIVERY_FEE)}` : 'Grátis';
-  const freteClass = DELIVERY_FEE > 0 ? '' : ' gratis';
+  const freteTxt = deliveryFeeText();
+  const freteClass = deliveryFee() === 0 ? ' gratis' : '';
   body.innerHTML=`
     <div class="cart-items-card">
       ${cart.map(i=>`
@@ -2819,7 +2749,7 @@ function renderDrawerCart(){
     <div class="summary-card">
       <div class="sum-row"><span class="sum-label">Subtotal</span><span class="sum-val">R$ ${fmt(subtotal)}</span></div>
       <div class="sum-row"><span class="sum-label"><i data-lucide="truck" width="14" height="14"></i> Entrega</span><span class="sum-val${freteClass}">${freteTxt}</span></div>
-      <div class="sum-row total-row"><span class="sum-label">Total</span><span class="sum-val">R$ ${fmt(grandTotal)}</span></div>
+      <div class="sum-row total-row"><span class="sum-label">Total</span><span class="sum-val">${orderTotalText(subtotal)}</span></div>
     </div>`;
   footer.classList.remove('hidden');
   footer.innerHTML=`
@@ -2857,9 +2787,6 @@ function renderCartPage(){
     return;
   }
   const subtotal = cartTotal();
-  const grandTotal = subtotal + DELIVERY_FEE;
-  const freteTxt2 = DELIVERY_FEE > 0 ? `R$ ${fmt(DELIVERY_FEE)}` : 'Grátis';
-  const freteClass2 = DELIVERY_FEE > 0 ? '' : ' gratis';
   const totalItems = cart.reduce((s,i)=>s+i.qty,0);
   el.innerHTML = `
     <div class="cart-items-card">
@@ -2890,9 +2817,9 @@ function renderCartPage(){
       <span class="cart-subtotal-label">Subtotal <strong>(${totalItems} ${totalItems===1?'item':'itens'})</strong></span>
       <span class="cart-subtotal-val">R$ ${fmt(subtotal)}</span>
     </div>
-    <div class="cart-addr-row" onclick="show('loc-overlay')">
+    <div class="cart-addr-row" onclick="openNeighborhoodPicker()">
       <span class="cart-addr-ic"><i data-lucide="map-pin" width="18" height="18"></i></span>
-      <span class="cart-addr-txt" id="cart-addr-txt">${localStorage.getItem('loc_addr')||'Informe seu endereço'}</span>
+      <span class="cart-addr-txt" id="cart-addr-txt">${esc(deliveryNeighborhood || 'Informe seu bairro')} · ${deliveryFeeText()}</span>
       <span class="cart-addr-chev"><i data-lucide="chevron-right" width="16" height="16"></i></span>
     </div>
     <div class="cart-ctas">
@@ -2918,7 +2845,7 @@ function openWhen(){
   chosenWhen = 'imediata';
   hide('s-cart');
   coStep = 0; coData = {}; payMethod = null;
-  try{const a=JSON.parse(localStorage.getItem('plantao_addr')||'{}');if(a.cep)coData.cep=a.cep;if(a.rua)coData.rua=a.rua;if(a.num)coData.num=a.num;if(a.comp)coData.comp=a.comp;if(a.bairro)coData.bairro=a.bairro;if(a.ref)coData.ref=a.ref;if(a.tel)coData.tel=a.tel;}catch{}
+  try{const a=JSON.parse(localStorage.getItem('plantao_addr')||'{}');if(a.rua)coData.rua=a.rua;if(a.num)coData.num=a.num;if(a.comp)coData.comp=a.comp;if(a.bairro)coData.bairro=a.bairro;if(a.ref)coData.ref=a.ref;if(a.tel)coData.tel=a.tel;}catch{}
   try{if(acctToken){const n=localStorage.getItem('acct_name')||'';const e=localStorage.getItem('acct_email')||'';if(n)coData.nome=n;if(e)coData.email=e;}}catch{}
   show('checkout-overlay');
   renderCoStep();
@@ -2963,7 +2890,6 @@ function openCheckout(){
   // Prefill last saved address
   try{
     const a=JSON.parse(localStorage.getItem('plantao_addr')||'{}');
-    if(a.cep) coData.cep=a.cep;
     if(a.rua) coData.rua=a.rua;
     if(a.num) coData.num=a.num;
     if(a.comp) coData.comp=a.comp;
@@ -2992,7 +2918,7 @@ function renderCoStep(){
   const el = document.getElementById('co-body');
   _updateCoStepper();
   const subtotal = cartTotal();
-  const grandTotal = subtotal + DELIVERY_FEE;
+  const grandTotal = subtotal + (deliveryFee() ?? 0);
   /* ── step 0: Meu pedido ── */
   if(coStep===0){
     const totalItems=cart.reduce((s,i)=>s+i.qty,0);
@@ -3037,15 +2963,15 @@ function renderCoStep(){
   const summaryHtml = `
     <div class="order-summary">
       <button class="os-toggle" id="os-toggle" onclick="toggleSummary()">
-        <span><i data-lucide="package" width="14" height="14"></i> ${cart.reduce((s,i)=>s+i.qty,0)} item(s) · <span class="os-val">R$ ${fmt(grandTotal)}</span></span>
+        <span><i data-lucide="package" width="14" height="14"></i> ${cart.reduce((s,i)=>s+i.qty,0)} item(s) · <span class="os-val">${orderTotalText(subtotal)}</span></span>
         <span class="os-arrow"><i data-lucide="chevron-down" width="16" height="16"></i></span>
       </button>
       <div class="os-details" id="os-details">
         ${cart.map(i=>`<div class="os-item"><span>${i.name} ×${i.qty}</span><span>R$ ${fmt(i.price*i.qty)}</span></div>`).join('')}
         <div class="os-meta"><span>Subtotal</span><span>R$ ${fmt(subtotal)}</span></div>
-        <div class="os-meta"><span><i data-lucide="truck" width="13" height="13"></i> Frete</span><span${DELIVERY_FEE>0?'':' class="gratis"'}>${DELIVERY_FEE>0?'R$ '+fmt(DELIVERY_FEE):'GRÁTIS'}</span></div>
+        <div class="os-meta"><span><i data-lucide="truck" width="13" height="13"></i> Frete</span><span id="os-fee"${deliveryFee()===0?' class="gratis"':''}>${deliveryFeeText()}</span></div>
       </div>
-      <div class="os-total"><span class="label">Total</span><span class="val">R$ ${fmt(grandTotal)}</span></div>
+      <div class="os-total"><span class="label">Total</span><span class="val">${orderTotalText(subtotal)}</span></div>
     </div>`;
   const stepperHtml = ``;
   /* legacy inline stepper hidden – using co-stepper header instead */
@@ -3070,25 +2996,22 @@ function renderCoStep(){
   if(coStep===1){
     content=`
       <div class="form-section-title"><i data-lucide="map-pin" width="16" height="16"></i> Para onde será entregue</div>
-      <div class="form-group"><label>CEP *</label>
-        <input class="form-input" id="co-cep" type="text" inputmode="numeric" maxlength="9" placeholder="00000-000" value="${coData.cep||''}">
+      <div class="form-group"><label for="co-bairro">Bairro *</label>
+        <select class="form-input" id="co-bairro"></select>
       </div>
       <div class="form-group"><label>Rua *</label>
-        <input class="form-input" id="co-rua" placeholder="Nome da rua" value="${coData.rua||''}">
+        <input class="form-input" id="co-rua" placeholder="Nome da rua" value="${esc(coData.rua||'').replaceAll('"', '&quot;')}">
       </div>
       <div class="form-row">
         <div class="form-group"><label>Número *</label>
-          <input class="form-input" id="co-num" inputmode="numeric" placeholder="123" value="${coData.num||''}">
+          <input class="form-input" id="co-num" inputmode="numeric" placeholder="123" value="${esc(coData.num||'').replaceAll('"', '&quot;')}">
         </div>
         <div class="form-group"><label>Complemento</label>
-          <input class="form-input" id="co-comp" placeholder="Apto, bloco…" value="${coData.comp||''}">
+          <input class="form-input" id="co-comp" placeholder="Apto, bloco…" value="${esc(coData.comp||'').replaceAll('"', '&quot;')}">
         </div>
       </div>
-      <div class="form-group"><label>Bairro *</label>
-        <input class="form-input" id="co-bairro" placeholder="Seu bairro" value="${coData.bairro||''}">
-      </div>
       <div class="form-group"><label>Referência</label>
-        <input class="form-input" id="co-ref" placeholder="Ponto de referência" value="${coData.ref||''}">
+        <input class="form-input" id="co-ref" placeholder="Ponto de referência" value="${esc(coData.ref||'').replaceAll('"', '&quot;')}">
       </div>
       <div class="step-btns">
         <button class="btn-back" onclick="coStep=0;renderCoStep()" aria-label="Voltar"><i data-lucide="arrow-left" width="18" height="18"></i></button>
@@ -3118,7 +3041,8 @@ function renderCoStep(){
       <div style="background:var(--bg-2);border-radius:var(--r-sm);padding:12px;margin-bottom:16px;font-size:13px">
         <div style="font-weight:600;margin-bottom:4px">Plantão da Cerveja</div>
         <div style="color:var(--fg-2)">${orderDate}</div>
-        <div style="margin-top:6px">Cliente: <strong>${coData.nome||'—'}</strong></div>
+        <div style="margin-top:6px">Cliente: <strong>${esc(coData.nome||'—')}</strong></div>
+        <div>Entrega em <strong>${esc(coData.bairro||'')}</strong></div>
         <table class="review-table" style="margin-top:10px">
           <tr><th>Item</th><th>Qtd</th><th>Total</th></tr>
           ${cart.map(i=>`<tr><td>${esc(i.name)}</td><td>${i.qty}</td><td>R$ ${fmt(i.price*i.qty)}</td></tr>`).join('')}
@@ -3127,7 +3051,7 @@ function renderCoStep(){
           <span style="color:var(--fg-2)">Subtotal</span><span>R$ ${fmt(rev_sub)}</span>
         </div>
         <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:3px">
-          <span style="color:var(--fg-2)">Frete</span><span style="${DELIVERY_FEE>0?'':'color:var(--green-dk);font-weight:500'}">${DELIVERY_FEE>0?'R$ '+fmt(DELIVERY_FEE):'GRÁTIS'}</span>
+          <span style="color:var(--fg-2)">Frete</span><span style="${deliveryFee()===0?'color:var(--green-dk);font-weight:500':''}">${deliveryFeeText()}</span>
         </div>
         <div style="display:flex;justify-content:space-between;margin-top:8px;font-weight:600">
           <span>TOTAL</span><span style="font-weight:600">R$ ${fmt(rev_total)}</span>
@@ -3197,6 +3121,25 @@ function renderCoStep(){
           <input id="cc-cpf" class="form-input" inputmode="numeric" autocomplete="off"
             placeholder="000.000.000-00" maxlength="14" oninput="fmtCPF(this)">
         </div>
+        <div class="form-section-title">Endereço de cobrança do cartão</div>
+        <div class="form-group" style="margin:0">
+          <label for="cc-billing-line">Número, rua e bairro *</label>
+          <input id="cc-billing-line" class="form-input" autocomplete="billing address-line1" maxlength="256">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label for="cc-billing-cep">CEP de cobrança *</label>
+          <input id="cc-billing-cep" class="form-input" inputmode="numeric" autocomplete="billing postal-code" maxlength="9" placeholder="00000-000">
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="margin:0">
+            <label for="cc-billing-city">Cidade *</label>
+            <input id="cc-billing-city" class="form-input" autocomplete="billing address-level2" maxlength="64">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label for="cc-billing-state">UF *</label>
+            <input id="cc-billing-state" class="form-input" autocomplete="billing address-level1" maxlength="2">
+          </div>
+        </div>
         <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--fg-3)">
           <i data-lucide="lock" width="12" height="12"></i>
           Dados criptografados com segurança via Pagar.me
@@ -3259,38 +3202,17 @@ function renderCoStep(){
       </div>`;
   }
   el.innerHTML = `<div class="co-scroll">${summaryHtml}${content}</div>`;
-  const cepEl = document.getElementById('co-cep');
-  if(cepEl) {
-    cepEl.addEventListener('input',function(){
-      let v=this.value.replace(/\D/g,'');
-      if(v.length>5)v=v.slice(0,5)+'-'+v.slice(5,8);
-      this.value=v;
+  const neighborhoodSelect = document.getElementById('co-bairro');
+  if (neighborhoodSelect) {
+    fillNeighborhoods(neighborhoodSelect, deliveryNeighborhood || coData.bairro);
+    neighborhoodSelect.addEventListener('change', () => {
+      chooseNeighborhood(neighborhoodSelect.value);
+      document.getElementById('os-fee').textContent = deliveryFeeText();
+      document.getElementById('os-fee').classList.toggle('gratis', deliveryFee() === 0);
+      const amount = orderTotalText(cartTotal());
+      document.querySelector('.os-val').textContent = amount;
+      document.querySelector('.os-total .val').textContent = amount;
     });
-    cepEl.addEventListener('input', async function(){
-      const digits = this.value.replace(/\D/g,'');
-      if(digits.length !== 8) return;
-      try {
-        const r = await fetch(`https://viacep.com.br/ws/${digits}/json/`,{signal:AbortSignal.timeout(5000)});
-        const d = await r.json();
-        if(!d.erro){
-          const rua = document.getElementById('co-rua');
-          const bairro = document.getElementById('co-bairro');
-          if(rua && !rua.value) rua.value = d.logradouro || '';
-          if(bairro && !bairro.value) bairro.value = d.bairro || '';
-          window._viaCepCity = d.localidade || '';
-          window._viaCepState = d.uf || '';
-        }
-      } catch {}
-    });
-    if(window._viaCepData && !cepEl.value){
-      const d = window._viaCepData;
-      setTimeout(()=>{
-        const rua = document.getElementById('co-rua');
-        const bairro = document.getElementById('co-bairro');
-        if(rua && !rua.value) rua.value = d.logradouro || '';
-        if(bairro && !bairro.value) bairro.value = d.bairro || '';
-      }, 50);
-    }
   }
   const telEl = document.getElementById('co-tel');
   if(telEl) telEl.addEventListener('input',function(){
@@ -3309,17 +3231,14 @@ function toggleSummary(){
 }
 function nextStep(from){
   if(from===1){
-    const cep=document.getElementById('co-cep').value.replace(/\D/g,'');
     const rua=document.getElementById('co-rua').value.trim();
     const num=document.getElementById('co-num').value.trim();
     const bairro=document.getElementById('co-bairro').value.trim();
-    if(cep.length<8||!rua||!num||!bairro){ toast('Preencha todos os campos obrigatórios.'); return; }
-    coData.cep=document.getElementById('co-cep').value;
+    if(!Object.hasOwn(deliveryRates, bairro)||!rua||!num){ toast('Selecione o bairro e informe a rua e o número.'); return; }
+    chooseNeighborhood(bairro);
     coData.rua=rua; coData.num=num;
     coData.comp=document.getElementById('co-comp').value;
     coData.bairro=bairro; coData.ref=document.getElementById('co-ref').value;
-    coData.cidade = window._viaCepCity || '';
-    coData.uf = window._viaCepState || '';
     coStep=2;
   } else if(from===2){
     const nome=document.getElementById('co-nome').value.trim();
@@ -3388,8 +3307,6 @@ async function tokenizeCard(publicKey){
   const expParts = exp.split('/');
   if(expParts.length!==2||expParts[0].length!==2||expParts[1].length!==2) throw new Error('Validade inválida. Use MM/AA.');
   if(!cvv||cvv.length<3) throw new Error('CVV inválido.');
-  const billingZip = (coData.cep||'').replace(/\D/g,'') || '00000000';
-  const billingLine1 = [(coData.num||''), (coData.rua||'Rua nao informada'), (coData.bairro||'Centro')].filter(Boolean).join(', ');
   const r = await fetch(`https://api.pagar.me/core/v5/tokens?appId=${encodeURIComponent(publicKey)}`,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
@@ -3401,13 +3318,6 @@ async function tokenizeCard(publicKey){
         exp_month: parseInt(expParts[0],10),
         exp_year: 2000+parseInt(expParts[1],10),
         cvv: cvv,
-        billing_address:{
-          line_1: billingLine1 || '0, Rua nao informada, Centro',
-          zip_code: billingZip,
-          city: coData.cidade || window._viaCepCity || 'São Paulo',
-          state: coData.uf || window._viaCepState || 'SP',
-          country:'BR',
-        },
       }
     })
   });
@@ -3424,6 +3334,7 @@ function selPay(v){
 }
 async function finalizarPedido(){
   if(!payMethod){ toast('Escolha uma forma de pagamento.'); return; }
+  if(!Object.hasOwn(deliveryRates, coData.bairro)){ coStep=1; renderCoStep(); return; }
   const btn = document.getElementById('pay-btn');
   btn.disabled=true; btn.innerHTML='<span style="display:flex;align-items:center;gap:8px"><span style="width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block"></span>Processando…</span>';
   const payMap = {pix:'pix',maquininha:'machine',credito:'credit_card',dinheiro:'cash'};
@@ -3431,14 +3342,12 @@ async function finalizarPedido(){
     customer_name: coData.nome,
     customer_phone: coData.tel,
     customer_email: coData.email||'',
-    address_cep: coData.cep,
     address_street: coData.rua,
     address_number: coData.num,
     address_complement: coData.comp||'',
     address_neighborhood: coData.bairro,
     address_reference: coData.ref||'',
-    address_city: coData.cidade||'',
-    address_state: coData.uf||'',
+    delivery_fee_cents: deliveryRates[coData.bairro],
     payment_method: payMap[payMethod]||'pix',
     delivery_type: chosenWhen==='imediata'?'immediate':'scheduled',
     scheduled_at: chosenScheduledAt || null,
@@ -3467,8 +3376,17 @@ async function finalizarPedido(){
       payload.customer_cpf = cpfVal;
       payload.installments = parseInt(document.getElementById('cc-inst')?.value||'1',10);
 
-      const billingZip  = (coData.cep||'').replace(/\D/g,'')||'00000000';
-      const billingLine1 = [(coData.num||''),(coData.rua||'Rua nao informada'),(coData.bairro||'Centro')].filter(Boolean).join(', ');
+      const billingAddress = {
+        line_1: document.getElementById('cc-billing-line').value.trim(),
+        zip_code: document.getElementById('cc-billing-cep').value.replace(/\D/g,''),
+        city: document.getElementById('cc-billing-city').value.trim(),
+        state: document.getElementById('cc-billing-state').value.trim().toUpperCase(),
+        country: 'BR',
+      };
+      if (!billingAddress.line_1 || billingAddress.zip_code.length !== 8 || !billingAddress.city || !/^[A-Z]{2}$/.test(billingAddress.state)) {
+        throw new Error('Preencha o endereço de cobrança, incluindo CEP, cidade e UF.');
+      }
+      payload.billing_address = billingAddress;
       const rawCard = {
         number: num, holder_name: name,
         exp_month: parseInt(expParts[0],10),
@@ -3514,9 +3432,9 @@ async function finalizarPedido(){
                       holder_name: rawCard.holder_name,
                       exp_month: rawCard.exp_month,
                       exp_year:  rawCard.exp_year,
-                      billing_address:{ line_1: billingLine1||'0, Rua nao informada, Centro', zip_code: billingZip, city: coData.cidade||'São Paulo', state: coData.uf||'SP', country:'BR' },
+                      billing_address: billingAddress,
                     },
-                    amount: Math.round(total*100),
+                    amount: Math.round((cartTotal() + deliveryFee()) * 100),
                   },
                 }],
                 customer:{ name: coData.nome||name, email: customerEmail },
@@ -3570,13 +3488,20 @@ async function finalizarPedido(){
       body:JSON.stringify(payload),
     });
     const j = await r.json();
+    if (r.status === 409) {
+      await loadStoreSettings();
+      coStep = 1;
+      renderCoStep();
+      toast(j.error);
+      return;
+    }
     if(!r.ok||!j.success) throw new Error(j.error||j.message||'Erro ao registrar pedido.');
     try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, phone: coData.tel, ts: Date.now()})); }catch{}
-    try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
+    try{ localStorage.setItem('plantao_addr', JSON.stringify({rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
     if(j.threed_secure_url){
       // 3DS authentication required — save order and redirect
       try{ localStorage.setItem('plantao_last_order', JSON.stringify({id:j.id||j.order?.id, order_number:j.order_number||j.order?.order_number, phone:coData.tel, ts:Date.now()})); }catch{}
-      try{ localStorage.setItem('plantao_addr', JSON.stringify({cep:coData.cep,rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
+      try{ localStorage.setItem('plantao_addr', JSON.stringify({rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
       cart=[]; saveCart(); updateBadge();
       window.location.href = j.threed_secure_url;
       return;
@@ -4117,16 +4042,10 @@ function setNavActive(id){
 // Restore session: skip age gate and show store; popup if loc not set
 try {
   const ageOk = localStorage.getItem('age_ok') === '1';
-  const locOk = localStorage.getItem('loc_ok') === '1';
   if (ageOk) {
     document.getElementById('s-age')?.classList.add('hidden');
     enterStore().then(()=>{
-      if(!locOk) show('loc-overlay');
-      else {
-        // Restore saved address in loc-field-btn
-        const saved = localStorage.getItem('loc_addr');
-        if(saved){ const el=document.getElementById('loc-field-txt'); if(el) el.textContent=saved; }
-      }
+      if(!deliveryNeighborhood) openNeighborhoodPicker();
       // If there's a recent active order, start background polling so banner stays current
       try {
         const lo = JSON.parse(localStorage.getItem('plantao_last_order')||'{}');
