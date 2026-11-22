@@ -357,13 +357,13 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
   transition:background .12s,color .12s,border-color .12s;white-space:nowrap;}
 .brand-pill.active{background:var(--amber);color:#111;border-color:var(--amber);font-weight:700;}
 .pcard{
-  flex-shrink:0;width:148px;background:var(--bg);
+  flex-shrink:0;width:148px;background:var(--bg-2);
   border-radius:var(--r-sm);border:1.5px solid var(--border);
   overflow:hidden;position:relative;box-shadow:var(--sh-sm);
   display:flex;flex-direction:column;
 }
 .pcard-img{
-  width:100%;height:112px;background:var(--bg-2);
+  width:100%;height:112px;background:var(--bg);
   position:relative;overflow:hidden;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box;
 }
@@ -376,7 +376,7 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 }
 .pcard-body{padding:8px 8px 10px;display:flex;flex-direction:column;flex:1;}
 .pname{font-size:15px;font-weight:700;color:var(--fg);line-height:1.35;}
-.pold{font-size:12px;color:var(--fg-3);text-decoration:line-through;margin-top:4px;}
+.pold{font-size:12px;color:var(--fg-2);text-decoration:line-through;margin-top:4px;}
 .prow{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:6px;}
 .pnew{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;}
 .addbtn{
@@ -388,8 +388,8 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 .addbtn:hover{background:var(--green-dk);}
 .addbtn:active{transform:scale(.88);}
 .addbtn.in{background:var(--amber);color:#111;}
-.pvariant{font-size:11px;color:var(--fg-3);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pdeposit{display:inline-block;margin-top:4px;font-size:10.5px;background:var(--bg-2);border:1px solid var(--border);border-radius:999px;padding:1px 7px;color:var(--fg-3);}
+.pvariant{font-size:11px;color:var(--fg-2);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pdeposit{display:inline-block;margin-top:4px;font-size:10.5px;background:var(--bg);border:1px solid var(--border);border-radius:999px;padding:1px 7px;color:var(--fg-2);}
 
 /* ── PRODUCT MODAL ── */
 #prod-modal-overlay{
@@ -792,6 +792,35 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
   #checkout-overlay{animation:none;}
   #checkout-overlay .os-arrow{transition:none;}
 }
+.co-items-heading,.co-item-actions{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.co-items-heading .form-section-title{margin:0;}
+.co-item-list{list-style:none;display:grid;gap:12px;}
+.co-item{
+  background:var(--bg);border:1.5px solid var(--border);
+  border-radius:var(--r-sm);padding:14px;
+}
+.co-item-product{display:grid;grid-template-columns:56px minmax(0,1fr) 44px;align-items:center;gap:12px;}
+.co-item-product .ci-thumb{width:56px;height:56px;}
+.co-item-product .ci-name{overflow-wrap:anywhere;line-height:1.4;}
+.co-item-product .ci-variant{margin:4px 0 0;}
+.co-item-actions{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+.co-item-actions .qty-btn{width:44px;height:44px;}
+.co-item-actions .qplus{background:var(--amber);color:var(--fg);}
+.co-item-actions .qplus:hover{background:var(--amber-dk);}
+.co-item-actions .ci-total{white-space:nowrap;}
+.co-item-remove,.co-items-clear{
+  min-height:44px;border:0;background:none;color:var(--fg-2);cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;font:inherit;
+}
+.co-item-remove{width:44px;border-radius:var(--r-sm);}
+.co-items-clear{font-size:13px;padding-inline:8px;}
+.co-item-remove:hover,.co-items-clear:hover{background:var(--bg-2);color:var(--fg);}
+.co-items-subtotal{margin:0;}
+.co-items-subtotal .os-total{border-top:0;min-height:48px;align-items:center;}
+.co-items-empty{padding:16px;background:var(--bg);border-radius:var(--r-sm);color:var(--fg-2);}
+.co-items-buttons{display:grid;gap:10px;margin-top:4px;}
 .co-delivery-info{color:var(--fg-2);font-size:13px;margin-bottom:14px;}
 
 .order-summary{
@@ -1365,9 +1394,9 @@ label{display:block;font-size:13px;font-weight:500;color:var(--fg-2);margin-bott
 .acct-empty-state .es-title{font-size:15px;font-weight:600;color:var(--fg);margin-top:14px;}
 .acct-empty-state .es-sub{font-size:13px;margin-top:4px;line-height:1.5;}
 .acct-favs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px;}
-.fav-card{background:#fff;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .15s;}
+.fav-card{background:var(--bg-2);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .15s;}
 .fav-card:active{box-shadow:0 2px 8px rgba(0,0,0,.1);}
-.fav-card-img{width:100%;height:130px;object-fit:contain;display:block;background:var(--bg-2);padding:8px;box-sizing:border-box;}
+.fav-card-img{width:100%;height:130px;object-fit:contain;display:block;background:var(--bg);padding:8px;box-sizing:border-box;}
 .fav-card-body{padding:8px 10px 10px;}
 .fav-card-name{font-size:13px;font-weight:600;color:var(--fg);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .fav-card-price{font-size:14px;font-weight:700;color:var(--fg);margin-top:4px;}
@@ -2983,37 +3012,51 @@ function renderCoStep(){
     const totalItems=cart.reduce((s,i)=>s+i.qty,0);
     el.innerHTML=`
       <div class="co-scroll">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px">
-          <span style="font-size:16px;font-weight:700">Itens do pedido (${totalItems})</span>
-          <button onclick="cart=[];saveCart();updateBadge();renderCoStep()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:var(--fg-2);font-size:13px"><i data-lucide="trash-2" width="14" height="14"></i> Limpar</button>
+        <div class="co-items-heading">
+          <h2 class="form-section-title"><i data-lucide="shopping-bag" width="16" height="16"></i> Itens do pedido</h2>
+          ${cart.length ? '<button type="button" class="co-items-clear" onclick="cart=[];saveCart();updateBadge();renderCoStep()">Limpar pedido</button>' : ''}
         </div>
-        <div class="cart-items-card" style="margin:0 16px;border-radius:16px;overflow:hidden;background:#fff">
-          ${cart.map(i=>{const variant=[i.unit_type,i.size].filter(Boolean).join(' · ');return`<div class="ci-row">
-            <div class="ci-thumb"><img src="${i.image_url||prodImg(i.id,88,88)}" alt="${esc(i.name)}"></div>
-            <div class="ci-info"><div class="ci-name">${esc(i.name)}</div>${variant?`<div class="ci-variant">${esc(variant)}</div>`:''}<div class="ci-unit-price">R$ ${fmt(i.price)}</div></div>
-            <div class="ci-right">
-              <div style="display:flex;align-items:center;gap:6px">
-                <div class="ci-qty-pill">
-                  <button class="qty-btn" onclick="changeQty(${Number(i.id)},-1);renderCoStep()">−</button>
-                  <span class="qty-num">${Number(i.qty)}</span>
-                  <button class="qty-btn qplus" onclick="changeQty(${Number(i.id)},1);renderCoStep()">+</button>
+        ${cart.length ? `
+        <ul class="co-item-list">
+          ${cart.map(i => {
+            const variant = [i.unit_type,i.size].filter(Boolean).join(' · ');
+            const name = esc(i.name);
+            const label = name.replaceAll('"', '&quot;');
+            return `<li class="co-item">
+              <div class="co-item-product">
+                <div class="ci-thumb"><img src="${i.image_url||prodImg(i.id,88,88)}" alt=""></div>
+                <div>
+                  <div class="ci-name">${name}</div>
+                  ${variant ? `<div class="ci-variant">${esc(variant)}</div>` : ''}
+                  ${i.qty > 1 ? `<div class="ci-variant">R$ ${fmt(i.price)} por unidade</div>` : ''}
                 </div>
-                <button class="ci-del" onclick="removeFromCart(${Number(i.id)});renderCoStep()"><i data-lucide="trash-2" width="16" height="16"></i></button>
+                <button type="button" class="co-item-remove" aria-label="Remover ${label}" onclick="removeFromCart(${Number(i.id)});renderCoStep()">
+                  <i data-lucide="trash-2" width="18" height="18"></i>
+                </button>
               </div>
-              <div class="ci-total">R$ ${fmt(i.price*i.qty)}</div>
-            </div>
-          </div>`}).join('')}
-        </div>
-        <div class="cart-subtotal-row" style="margin:12px 16px;border-radius:16px;background:#FEF9C3;">
-          <span class="cart-subtotal-label">Subtotal <strong>(${totalItems} ${totalItems===1?'item':'itens'})</strong></span>
-          <span class="cart-subtotal-val">R$ ${fmt(subtotal)}</span>
-        </div>
-        <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:10px">
-          <button class="btn-finalizar" onclick="coStep=1;renderCoStep()">
-            <i data-lucide="map-pin" width="20" height="20"></i> Continuar para entrega
-          </button>
-          <button class="btn-continuar" onclick="closeCheckout()">
-            <i data-lucide="plus" width="16" height="16"></i> Continuar comprando
+              <div class="co-item-actions">
+                <div class="ci-qty-pill" role="group" aria-label="Quantidade de ${label}">
+                  <button type="button" class="qty-btn" aria-label="Diminuir quantidade" onclick="changeQty(${Number(i.id)},-1);renderCoStep()">−</button>
+                  <span class="qty-num">${Number(i.qty)}</span>
+                  <button type="button" class="qty-btn qplus" aria-label="Aumentar quantidade" onclick="changeQty(${Number(i.id)},1);renderCoStep()">+</button>
+                </div>
+                <strong class="ci-total">R$ ${fmt(i.price*i.qty)}</strong>
+              </div>
+            </li>`;
+          }).join('')}
+        </ul>
+        <div class="order-summary co-items-subtotal">
+          <div class="os-total">
+            <span class="label">Subtotal · ${totalItems} ${totalItems === 1 ? 'item' : 'itens'}</span>
+            <span class="val">R$ ${fmt(subtotal)}</span>
+          </div>
+        </div>` : '<p class="co-items-empty">Sua sacola está vazia.</p>'}
+        <div class="co-items-buttons">
+          ${cart.length ? `<button type="button" class="btn-primary" onclick="coStep=1;renderCoStep()">
+            Continuar para entrega
+          </button>` : ''}
+          <button type="button" class="btn-continuar" onclick="closeCheckout();goHome()">
+            Continuar comprando
           </button>
         </div>
       </div>`;
