@@ -1730,10 +1730,10 @@ try{if(localStorage.getItem('age_ok')==='1')document.documentElement.classList.a
     <div style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;color:#6b7280;"><i data-lucide="lock" width="12" height="12"></i> Seguro</div>
   </div>
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:24px 20px;gap:16px;text-align:center;">
-    <p style="font-size:14px;color:#4b5563;margin:0;">Escaneie o QR code ou use o <strong>Pix Copia e Cola</strong></p>
+    <p id="pix-instructions" style="font-size:14px;color:#4b5563;margin:0;">Escaneie o QR code ou use o <strong>Pix Copia e Cola</strong></p>
     <div id="pix-qr" style="width:200px;height:200px;background:#f3f4f6;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px;"></div>
-    <div style="width:100%;background:#f3f4f6;border-radius:10px;padding:12px;">
-      <p style="font-size:11px;font-weight:500;color:#6b7280;margin-bottom:6px;text-align:left;">Pix Copia e Cola</p>
+    <div id="pix-copy-area" style="width:100%;background:#f3f4f6;border-radius:10px;padding:12px;">
+      <p id="pix-copy-label" style="font-size:11px;font-weight:500;color:#6b7280;margin-bottom:6px;text-align:left;">Pix Copia e Cola</p>
       <div style="display:flex;gap:8px;align-items:center;">
         <input id="pix-code-input" type="text" readonly style="flex:1;min-width:0;font-size:11px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;color:#374151;" />
         <button id="pix-copy-btn" onclick="copyPixCode()" style="flex-shrink:0;padding:8px 14px;background:#00BDAE;color:#fff;border:none;border-radius:8px;font:600 13px sans-serif;cursor:pointer;white-space:nowrap;">Copiar</button>
@@ -3496,6 +3496,9 @@ async function finalizarPedido(){
       return;
     }
     if(!r.ok||!j.success) throw new Error(j.error||j.message||'Erro ao registrar pedido.');
+    if (payMethod === 'pix' && !j.pix_qr_code && !j.pix_qr_url && !j.pix_key) {
+      throw new Error('O pedido foi registrado, mas o Pix não foi gerado. Consulte a loja antes de tentar novamente.');
+    }
     try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, phone: coData.tel, ts: Date.now()})); }catch{}
     try{ localStorage.setItem('plantao_addr', JSON.stringify({rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
     if(j.threed_secure_url){
@@ -3505,18 +3508,17 @@ async function finalizarPedido(){
       cart=[]; saveCart(); updateBadge();
       window.location.href = j.threed_secure_url;
       return;
-    } else if(j.pix_qr_code){
+    } else if(j.pix_qr_code || j.pix_qr_url){
       cart=[]; saveCart(); updateBadge();
       btn.disabled=false;
       btn.innerHTML='Confirmar Pedido <i data-lucide="check" width="16" height="16"></i>';
-      showPixOverlay(j.pix_qr_code, j.order_number||j.order?.order_number, j.pix_expires_in||1800);
+      showPixOverlay(j.pix_qr_code, j.order_number||j.order?.order_number, j.pix_expires_in||1800, j.pix_qr_url);
     } else if(j.pix_key){
       cart=[]; saveCart(); updateBadge();
       btn.disabled=false;
       btn.innerHTML='Confirmar Pedido <i data-lucide="check" width="16" height="16"></i>';
       showPixOverlay(j.pix_key, j.order_number||j.order?.order_number, 0);
     } else {
-      if(j.pix_error) toast('PIX indisponivel: ' + j.pix_error, 'warning');
       coStep=4;
       renderCoStep();
       document.getElementById('co-body').scrollTop=0;
@@ -3561,19 +3563,50 @@ function closePay(){
 let _pixPollTimer = null;
 let _pixCountTimer = null;
 
-function showPixOverlay(pixCode, orderNumber, expiresIn) {
+function showPixOverlay(pixCode, orderNumber, expiresIn, qrUrl) {
   const isStatic = !expiresIn;
   const overlay = document.getElementById('pix-overlay');
   overlay.classList.remove('hidden');
   overlay.style.display = 'flex';
   lucide.createIcons();
   document.getElementById('pix-code-input').value = pixCode || '';
+  document.getElementById('pix-copy-area').style.display = pixCode ? '' : 'none';
+  document.getElementById('pix-copy-label').textContent = isStatic ? 'Chave Pix' : 'Pix Copia e Cola';
+  const instructions = document.getElementById('pix-instructions');
   const qrEl = document.getElementById('pix-qr');
-  qrEl.innerHTML = '';
-  if(pixCode && window.QRCode){
-    new QRCode(qrEl, {text: pixCode, width:184, height:184, colorDark:'#000000', colorLight:'#f3f4f6', correctLevel: QRCode.CorrectLevel.M});
-  } else if(!pixCode) {
-    qrEl.innerHTML = '<p style="font-size:12px;color:#9ca3af;padding:16px;">Use a chave acima.</p>';
+  qrEl.replaceChildren();
+  qrEl.style.display = 'none';
+  instructions.textContent = isStatic ? 'Copie a chave Pix para pagar pelo aplicativo do seu banco.' : 'Use o Pix Copia e Cola para pagar.';
+  if (!isStatic) {
+    if (qrUrl) {
+      const image = document.createElement('img');
+      image.alt = 'QR Code Pix';
+      image.width = image.height = 184;
+      image.onerror = renderLocalQr;
+      image.onload = () => {
+        qrEl.style.display = 'flex';
+        instructions.textContent = pixCode ? 'Escaneie o QR Code ou use o Pix Copia e Cola.' : 'Escaneie o QR Code para pagar.';
+      };
+      qrEl.append(image);
+      image.src = qrUrl;
+    } else {
+      renderLocalQr();
+    }
+  }
+
+  function renderLocalQr() {
+    qrEl.replaceChildren();
+    if (pixCode && window.QRCode) {
+      try {
+        new QRCode(qrEl, {text: pixCode, width:184, height:184, colorDark:'#000000', colorLight:'#f3f4f6', correctLevel: QRCode.CorrectLevel.M});
+        qrEl.style.display = 'flex';
+        instructions.textContent = 'Escaneie o QR Code ou use o Pix Copia e Cola.';
+      } catch {
+        qrEl.replaceChildren();
+      }
+    } else if (!pixCode) {
+      instructions.textContent = 'Não foi possível exibir o QR Code. Consulte a loja antes de tentar novamente.';
+    }
   }
   const info = document.getElementById('pix-static-info');
   const countdown = document.getElementById('pix-countdown');

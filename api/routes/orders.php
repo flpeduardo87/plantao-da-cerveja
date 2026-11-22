@@ -286,16 +286,17 @@ match ($method) {
             }
         }
 
-        // Pagar.me PIX — gera QR code (best-effort, nao bloqueia criacao do pedido)
-        $pixQrCode   = null;
+        // Pagar.me Pix e chave manual configurada pela loja
+        $pixQrCode    = '';
+        $pixQrUrl     = '';
+        $storePix     = '';
         $pixExpiresIn = 1800;
-        $pixError    = null;
         if ($d['payment_method'] === 'pix') {
             try {
                 require_once __DIR__ . '/../lib/pagarme.php';
                 $pm = new PagarMe();
                 if (!$pm->isConfigured()) {
-                    $pixError = 'NOT_CONFIGURED';
+                    throw new \RuntimeException('Pagar.me não configurado');
                 } else {
                     $pixResult  = $pm->createPixOrder([
                         'order_number'   => $orderNumber,
@@ -306,14 +307,19 @@ match ($method) {
                         'customer_email' => $d['customer_email'] ?? '',
                         'items'          => $paymentItems,
                     ]);
-                    $pixQrCode   = $pixResult['qr_code'];
+                    $pixQrCode    = $pixResult['qr_code'];
+                    $pixQrUrl     = $pixResult['qr_code_url'];
                     $pixExpiresIn = $pixResult['expires_in'] ?? 1800;
                 }
             } catch (\Throwable $pixErr) {
-                $pixError = $pixErr->getMessage();
-                error_log('Pagar.me PIX error: ' . $pixError);
+                error_log("Pagar.me Pix {$orderNumber}: " . $pixErr->getMessage());
+                $storePix = trim($cfg['pix_key'] ?? '');
+                if ($storePix === '') {
+                    $pdo->prepare("UPDATE orders SET payment_status='failed', status='cancelled' WHERE id=?")
+                        ->execute([$orderId]);
+                    json_err('Não foi possível gerar o Pix. Tente novamente ou escolha outra forma de pagamento.', 502);
+                }
             }
-            error_log('Pagar.me PIX qr_code=' . ($pixQrCode ? 'found' : 'null') . ' error=' . ($pixError ?? 'none'));
         }
 
         // WhatsApp via Fonnte (best-effort, never blocks order creation)
@@ -370,13 +376,12 @@ match ($method) {
 
         $resp = ['success' => true, 'id' => $orderId, 'order_number' => $orderNumber, 'total' => $total];
         if (!empty($pm3dsUrl)) $resp['threed_secure_url'] = $pm3dsUrl;
-        if ($pixQrCode) {
-            $resp['pix_qr_code']   = $pixQrCode;
+        if ($pixQrCode || $pixQrUrl) {
+            $resp['pix_qr_code'] = $pixQrCode;
+            $resp['pix_qr_url'] = $pixQrUrl;
             $resp['pix_expires_in'] = $pixExpiresIn;
-        } else {
-            $storePix = trim($cfg['pix_key'] ?? '');
-            if ($storePix) $resp['pix_key'] = $storePix;
-            if ($pixError) $resp['pix_error'] = $pixError;
+        } elseif ($storePix !== '') {
+            $resp['pix_key'] = $storePix;
         }
         json_ok($resp, 201);
     })(),

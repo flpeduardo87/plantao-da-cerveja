@@ -257,8 +257,8 @@ class PagarMe {
     public function createPixOrder(array $order): array {
         $amountCents = (int) round((float) $order['total'] * 100);
         $phone       = preg_replace('/\D/', '', $order['customer_phone']);
-        $areaCode    = strlen($phone) >= 11 ? substr($phone, 0, 2) : '11';
-        $number      = strlen($phone) >= 11 ? substr($phone, 2) : substr($phone, 2);
+        $areaCode    = substr($phone, 0, 2);
+        $number      = substr($phone, 2);
 
         $items = array_values(array_map(function ($item, $idx) {
             return [
@@ -302,14 +302,20 @@ class PagarMe {
         $result = $this->request('POST', '/orders', $payload);
 
         $txn    = $result['charges'][0]['last_transaction'] ?? [];
-        $qrCode = $txn['qr_code'] ?? null;
+        $qrCode = trim($txn['qr_code'] ?? '');
+        $qrUrl = $txn['qr_code_url'] ?? '';
+        if (!preg_match('~^https://api\.pagar\.me/core/v[0-9]+/transactions/[A-Za-z0-9_]+/qrcode\.png$~D', $qrUrl)) {
+            $qrUrl = '';
+        }
 
-        if (!$qrCode) {
-            throw new \RuntimeException('PIX: QR code nao retornado. Resposta: ' . json_encode($result));
+        if (!$qrCode && !$qrUrl) {
+            $status = $txn['status'] ?? $result['status'] ?? 'unknown';
+            throw new \RuntimeException('Pix sem QR Code. Status: ' . $status);
         }
 
         return [
             'qr_code'          => $qrCode,
+            'qr_code_url'      => $qrUrl,
             'expires_in'       => $expiresIn,
             'pagarme_order_id' => $result['id'] ?? null,
         ];
