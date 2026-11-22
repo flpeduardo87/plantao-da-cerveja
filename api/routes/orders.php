@@ -117,12 +117,13 @@ match ($method) {
         $priceMap    = [];
         if ($ids) {
             $ph  = implode(',', array_fill(0, count($ids), '?'));
-            $ps  = $pdo->prepare("SELECT id, name, price FROM products WHERE id IN ($ph) AND active = 1");
+            $ps  = $pdo->prepare("SELECT id, name, price, has_deposit, deposit_value FROM products WHERE id IN ($ph) AND active = 1");
             $ps->execute(array_values($ids));
             foreach ($ps->fetchAll() as $p) $priceMap[$p['id']] = $p;
         }
 
-        $subtotal = 0;
+        $subtotalCents = 0;
+        $includesDeposit = false;
         $lineItems = [];
         foreach ($d['items'] as $item) {
             $pid   = isset($item['product_id']) ? (int)$item['product_id'] : 0;
@@ -137,11 +138,20 @@ match ($method) {
 
             if ($price <= 0 || !$name) continue;
 
-            $lineItems[] = ['product_id' => $pid ?: null, 'name' => $name, 'qty' => $qty, 'price' => $price, 'total' => round($price * $qty, 2)];
-            $subtotal   += $price * $qty;
+            $product = $priceMap[$pid] ?? null;
+            $deposit = !empty($product['has_deposit']) ? max(0, (float)$product['deposit_value']) : 0;
+            $includesDeposit = $includesDeposit || $deposit > 0;
+            $unitCents = (int)round($price * 100) + (int)round($deposit * 100);
+            $lineCents = $unitCents * $qty;
+            $lineItems[] = ['product_id' => $pid ?: null, 'name' => $name, 'qty' => $qty, 'price' => $unitCents / 100, 'total' => $lineCents / 100];
+            $subtotalCents += $lineCents;
         }
 
         if (!$lineItems) json_err('No valid items');
+        if (($includesDeposit || isset($d['items_subtotal_cents'])) && ($d['items_subtotal_cents'] ?? null) !== $subtotalCents) {
+            json_err('O subtotal dos produtos mudou. Atualize a loja e confira a sacola antes de confirmar.', 422);
+        }
+        $subtotal = $subtotalCents / 100;
 
         // Fetch delivery fee and min order from settings
         $cfg = $pdo->query("SELECT setting_key, setting_value FROM store_settings WHERE setting_key IN ('delivery_rates','min_order','store_open','fonnte_token','store_whatsapp','pix_key')")->fetchAll(\PDO::FETCH_KEY_PAIR);
