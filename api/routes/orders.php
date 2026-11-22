@@ -123,7 +123,7 @@ match ($method) {
         }
 
         $subtotalCents = 0;
-        $includesDeposit = false;
+        $hasReturnableItems = false;
         $lineItems = [];
         foreach ($d['items'] as $item) {
             $pid   = isset($item['product_id']) ? (int)$item['product_id'] : 0;
@@ -140,15 +140,20 @@ match ($method) {
 
             $product = $priceMap[$pid] ?? null;
             $deposit = !empty($product['has_deposit']) ? max(0, (float)$product['deposit_value']) : 0;
-            $includesDeposit = $includesDeposit || $deposit > 0;
-            $unitCents = (int)round($price * 100) + (int)round($deposit * 100);
+            $hasReturnableItems = $hasReturnableItems || $deposit > 0;
+            $returning = $deposit > 0 && ($item['return_container'] ?? false) === true;
+            if ($returning) {
+                preg_match('/^.{0,175}/us', $name, $shortName);
+                $name = $shortName[0] . ' (troca de casco)';
+            }
+            $unitCents = (int)round($price * 100) + ($returning ? 0 : (int)round($deposit * 100));
             $lineCents = $unitCents * $qty;
             $lineItems[] = ['product_id' => $pid ?: null, 'name' => $name, 'qty' => $qty, 'price' => $unitCents / 100, 'total' => $lineCents / 100];
             $subtotalCents += $lineCents;
         }
 
         if (!$lineItems) json_err('No valid items');
-        if (($includesDeposit || isset($d['items_subtotal_cents'])) && ($d['items_subtotal_cents'] ?? null) !== $subtotalCents) {
+        if (($hasReturnableItems || isset($d['items_subtotal_cents'])) && ($d['items_subtotal_cents'] ?? null) !== $subtotalCents) {
             json_err('O subtotal dos produtos mudou. Atualize a loja e confira a sacola antes de confirmar.', 422);
         }
         $subtotal = $subtotalCents / 100;

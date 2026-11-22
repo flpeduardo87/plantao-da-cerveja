@@ -473,7 +473,10 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 }
 .pm-heart-btn:hover{border-color:var(--fg-2);}
 .pm-heart-btn.active svg{fill:#EF4444;color:#EF4444;}
-.pm-deposit{font-size:12px;color:var(--fg-2);text-align:center;margin-bottom:10px;}
+.pm-deposit{padding:10px 12px;margin-bottom:12px;border:1px solid var(--border);border-radius:var(--r-sm);}
+.pm-deposit legend{padding:0 4px;font-weight:600;font-size:13px;}
+.pm-deposit label{display:flex;align-items:center;gap:8px;min-height:36px;margin:0;cursor:pointer;}
+.pm-deposit input{accent-color:var(--amber-dk);flex-shrink:0;}
 /* Desktop: wider modal */
 @media(min-width:520px){
   .prod-modal{max-width:480px;padding:28px 24px 32px;}
@@ -1554,7 +1557,11 @@ try{if(localStorage.getItem('age_ok')==='1')document.documentElement.classList.a
         </div>
       </div>
     </div>
-    <div class="pm-deposit hidden" id="pm-deposit"></div>
+    <fieldset class="pm-deposit hidden" id="pm-deposit" onchange="_updateModalQty()">
+      <legend>Casco</legend>
+      <label><input type="radio" name="pm-casco" id="pm-buy-casco" checked> <span id="pm-casco-value">Comprar com casco</span></label>
+      <label><input type="radio" name="pm-casco" id="pm-return-casco"> Vou entregar um casco por unidade</label>
+    </fieldset>
     <div id="pm-desc" style="font-size:13.5px;color:var(--fg-2);line-height:1.6;padding:0 2px 10px;display:none"></div>
     <button class="pm-add-btn" id="pm-add-btn" onclick="addFromModal()">
       <i data-lucide="shopping-bag" width="18" height="18"></i>
@@ -2725,8 +2732,12 @@ function openProdModal(id, e){
   document.getElementById('pm-price').textContent = 'R$ '+fmt(p.price);
   document.getElementById('pm-offer-wrap').innerHTML = discPct ? `<span class="pm-offer">Oferta</span>` : '';
   const dep = document.getElementById('pm-deposit');
-  if(cascoPrice(p)>0){ dep.textContent='+ R$ '+fmt(cascoPrice(p))+' de casco por unidade'; dep.classList.remove('hidden'); }
-  else dep.classList.add('hidden');
+  const deposit = cascoPrice(p);
+  dep.classList.toggle('hidden', deposit === 0);
+  document.getElementById('pm-casco-value').textContent = 'Comprar com casco (+ R$ ' + fmt(deposit) + ' por unidade)';
+  const returning = deposit > 0 && inCart?.return_container === true;
+  document.getElementById('pm-return-casco').checked = returning;
+  document.getElementById('pm-buy-casco').checked = !returning;
   const descEl = document.getElementById('pm-desc');
   if(descEl){ const d = p.description||''; descEl.textContent=d; descEl.style.display=d?'':'none'; }
   _updateModalQty();
@@ -2751,7 +2762,7 @@ function closeProdModal(){
 }
 function _updateModalQty(){
   document.getElementById('pm-qty').textContent=_modalQty;
-  const total = fmt(cartUnitPrice(_modalProd) * _modalQty);
+  const total = fmt(cartUnitPrice(_modalProd, document.getElementById('pm-return-casco').checked) * _modalQty);
   document.getElementById('pm-add-txt').textContent=`Adicionar à sacola · R$ ${total}`;
   lucide.createIcons();
 }
@@ -2762,8 +2773,9 @@ function setProdQty(delta){
 function addFromModal(){
   if(!_modalProd) return;
   const ex = cart.find(x=>x.id===_modalProd.id);
-  if(ex) Object.assign(ex, _modalProd, {qty:_modalQty});
-  else cart.push({..._modalProd,qty:_modalQty});
+  const item = {..._modalProd, qty:_modalQty, return_container:document.getElementById('pm-return-casco').checked};
+  if(ex) Object.assign(ex, item);
+  else cart.push(item);
   saveCart(); updateBadge(); refreshFeed();
   toast(`${_modalProd.name.substring(0,26)}… adicionado!`);
   closeProdModal();
@@ -2792,8 +2804,13 @@ function updateBadge(){
 function cascoPrice(product){
   return Number(product.has_deposit) === 1 ? Math.max(0, Number(product.deposit_value) || 0) : 0;
 }
-function cartUnitPrice(product){
-  return (Math.round(Number(product.price) * 100) + Math.round(cascoPrice(product) * 100)) / 100;
+function cartUnitPrice(product, returning = product.return_container === true){
+  const deposit = returning ? 0 : cascoPrice(product);
+  return (Math.round(Number(product.price) * 100) + Math.round(deposit * 100)) / 100;
+}
+function cascoCartLabel(product){
+  if (!cascoPrice(product)) return '';
+  return product.return_container === true ? 'Troca: entregar um casco por unidade' : 'Inclui R$ ' + fmt(cascoPrice(product)) + ' de casco por unidade';
 }
 function cartTotal(){
   return cart.reduce((cents, item) => cents + Math.round(cartUnitPrice(item) * 100) * item.qty, 0) / 100;
@@ -2882,6 +2899,7 @@ function renderDrawerCart(){
           <div class="ci-thumb"><img src="${i.image_url||prodImg(i.id,56,56)}" alt="${esc(i.name)}"></div>
           <div class="ci-info">
             <div class="ci-name">${esc(i.name)}</div>
+            ${cascoPrice(i) > 0 ? `<div class="ci-variant">${cascoCartLabel(i)}</div>` : ''}
             <div class="ci-price">R$ ${fmt(cartUnitPrice(i))}</div>
             <div class="ci-qty-ctrl">
               <button class="qty-btn" onclick="changeQty(${Number(i.id)},-1)">−</button>
@@ -2944,6 +2962,7 @@ function renderCartPage(){
           <div class="ci-info">
             <div class="ci-name">${esc(i.name)}</div>
             ${variant?`<div class="ci-variant">${esc(variant)}</div>`:''}
+            ${cascoPrice(i) > 0 ? `<div class="ci-variant">${cascoCartLabel(i)}</div>` : ''}
             <div class="ci-unit-price">R$ ${fmt(cartUnitPrice(i))}</div>
           </div>
           <div class="ci-right">
@@ -3124,7 +3143,7 @@ function renderCoStep(){
                   <div class="ci-name">${name}</div>
                   ${variant ? `<div class="ci-variant">${esc(variant)}</div>` : ''}
                   ${i.qty > 1 ? `<div class="ci-variant">R$ ${fmt(cartUnitPrice(i))} por unidade</div>` : ''}
-                  ${cascoPrice(i) > 0 ? `<div class="ci-variant">Inclui R$ ${fmt(cascoPrice(i))} de casco por unidade</div>` : ''}
+                  ${cascoPrice(i) > 0 ? `<div class="ci-variant">${cascoCartLabel(i)}</div>` : ''}
                 </div>
                 <button type="button" class="co-item-remove" aria-label="Remover ${label}" onclick="removeFromCart(${Number(i.id)});renderCoStep()">
                   <i data-lucide="trash-2" width="18" height="18"></i>
@@ -3513,7 +3532,7 @@ async function finalizarPedido(){
     scheduled_at: chosenScheduledAt || null,
     notes: payMethod==='dinheiro' ? (()=>{ const t=(document.getElementById('troco-val')?.value||'').trim(); return t?'Troco para: R$ '+t:''; })() : '',
     items_subtotal_cents: Math.round(cartTotal() * 100),
-    items: cart.map(i=>({product_id:i.id,product_name:i.name,quantity:i.qty,unit_price:i.price})),
+    items: cart.map(i=>({product_id:i.id,product_name:i.name,quantity:i.qty,unit_price:i.price,return_container:i.return_container === true})),
   };
   // Pagamento via cartão de crédito
   if(payMethod==='credito'){
