@@ -503,19 +503,6 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
   z-index:301;
 }
 #cart-drawer-overlay.open #cart-drawer{transform:translateX(0);}
-.cd-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:20px 20px 16px;
-  border-bottom:1px solid var(--border);
-  flex-shrink:0;background:var(--bg);
-}
-.cd-title{font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px;}
-.cd-close{
-  background:none;border:none;cursor:pointer;
-  color:var(--fg-3);display:flex;align-items:center;padding:4px;
-  transition:color .15s;
-}
-.cd-close:hover{color:var(--fg);}
 .cd-body{
   flex:1;min-height:0;overflow-y:auto;
   padding:16px;
@@ -583,47 +570,53 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 .drawer-promo-txt{font-size:15px;font-weight:700;color:var(--fg);line-height:1.3;flex:1;}
 .drawer-promo-chev{color:var(--fg-2);flex-shrink:0;}
 /* ── CART BOTTOM SHEET ── */
-#s-cart{
-  z-index:50;background:rgba(0,0,0,.55);
-  justify-content:flex-end;
+#s-cart{z-index:50;}
+#s-account{z-index:210;}
+.sheet-overlay{
+  background:rgba(0,0,0,.65);align-items:center;justify-content:center;
+  padding:12px;
 }
-#s-cart.slide-right{transform:none;opacity:0;}
-.cart-sheet{
-  background:#fff;border-radius:20px 20px 0 0;
-  max-height:92vh;display:flex;flex-direction:column;
-  width:100%;overflow:hidden;
-  animation:slideUp .25s ease;
-  padding-bottom:env(safe-area-inset-bottom,0px);
+.sheet-overlay.slide-right{transform:none;opacity:0;}
+.sheet-panel{
+  display:flex;flex-direction:column;width:100%;max-width:540px;max-height:100%;
+  min-height:0;overflow:hidden;background:var(--bg);border-radius:var(--r);
+  box-shadow:var(--sh-md);animation:slideUp .22s ease;
 }
-@media(min-width:520px){
-  #s-cart{align-items:center;justify-content:center;padding:16px;}
-  .cart-sheet{border-radius:20px;max-width:480px;max-height:88vh;}
+.sheet-header{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;
+  color:var(--fg);background:var(--bg);
 }
-.page-header{
-  background:#fff;z-index:50;flex-shrink:0;
-  padding:0 16px;
-  border-bottom:1px solid var(--border);
-}
-.ph-inner{display:flex;align-items:center;gap:12px;padding:16px 0;}
-.back-btn{
-  width:36px;height:36px;border-radius:50%;border:none;
-  background:var(--bg-2);cursor:pointer;
+.sheet-title{flex:1;display:flex;align-items:center;gap:8px;font-size:18px;font-weight:700;}
+.sheet-icon-button{
+  width:44px;height:44px;border-radius:50%;border:none;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  color:var(--fg);flex-shrink:0;
+  background:var(--bg-2);color:var(--fg);cursor:pointer;
 }
-.ph-center{flex:1;}
-.ph-cart-hd{display:flex;align-items:center;gap:10px;}
-.ph-cart-hd-ic{color:var(--fg);display:flex;align-items:center;}
-.ph-title{font-size:18px;font-weight:700;color:var(--fg);}
-.ph-sub{font-size:11px;color:var(--fg-2);font-weight:400;}
-.ph-spacer{width:36px;flex-shrink:0;}
-
-.cart-body{
-  flex:1;overflow-y:auto;min-height:0;background:var(--bg-2);
-  -webkit-overflow-scrolling:touch;
-  padding:16px 16px calc(80px + env(safe-area-inset-bottom,0px));
+.sheet-icon-button:hover{background:var(--border);}
+.sheet-scroll{
+  flex:1;min-height:0;overflow-y:auto;overscroll-behavior-y:contain;background:var(--bg-2);
 }
+.sheet-panel :where(button,a,input,select):focus-visible,
+#cart-drawer :where(button,a,input,select):focus-visible{
+  outline:2px solid var(--fg);outline-offset:2px;
+}
+@media(max-width:520px){
+  .sheet-overlay{justify-content:flex-end;padding:8px 8px max(8px,env(safe-area-inset-bottom));}
+  .sheet-panel input:not([type=checkbox]){font-size:16px!important;}
+}
+@media(prefers-reduced-motion:reduce){
+  .sheet-overlay,.sheet-panel{animation:none;transition:none;}
+}
+.cart-body{padding:16px;}
 .cart-body>*+*{margin-top:12px;}
+.cart-body .cart-items-card,#cart-drawer .cart-items-card{border:1.5px solid var(--border);border-radius:var(--r-sm);}
+.cart-body .ci-row{display:grid;grid-template-columns:56px minmax(0,1fr);align-items:center;}
+.cart-body .ci-thumb{width:56px;height:56px;}
+.cart-body .ci-right{
+  grid-column:1/-1;flex-direction:row;justify-content:space-between;align-items:center;
+  padding-top:8px;border-top:1px solid var(--border);
+}
 .cart-items-card{
   background:#fff;border-radius:16px;overflow:hidden;
 }
@@ -681,7 +674,7 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 .cart-subtotal-label{color:var(--fg-2);}
 .cart-subtotal-label strong{color:var(--fg);}
 .cart-subtotal-val{font-size:22px;font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums;}
-.cart-addr-row{
+.cart-addr-row{width:100%;font:inherit;text-align:left;
   display:flex;align-items:center;gap:10px;
   background:#fff;border-radius:999px;padding:14px 18px;
   border:1.5px solid var(--border);cursor:pointer;
@@ -1092,7 +1085,7 @@ label{display:block;font-size:13px;font-weight:500;color:var(--fg-2);margin-bott
 
   /* Top bar replaces bottom nav */
   .bottom-nav{display:none!important;}
-  #s-home,#s-cart{padding-top:64px;}
+  #s-home{padding-top:64px;}
 
   /* Banner: image fills naturally */
   .store-banner{background:#191A12;}
@@ -1145,15 +1138,7 @@ label{display:block;font-size:13px;font-weight:500;color:var(--fg-2);margin-bott
   .sec-more{font-size:14px;}
   .brand-pills{padding-left:40px;padding-right:40px;}
 
-  /* Account screen: centered card on desktop */
-  #s-account{background:var(--bg-2);align-items:center;}
-  #acct-scroll{max-width:520px;background:var(--bg);border-radius:var(--r);margin:32px auto;padding:0 0 32px;min-height:unset;flex:unset;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.10);}
-  .login-wrap{max-width:unset;margin:0;padding:28px 36px 8px;}
-  .login-logo img{width:72px;height:72px;}
-  .login-title{font-size:24px;}
-  .acct-header{border-radius:var(--r) var(--r) 0 0;}
-  .acct-body{padding:0 24px 8px;}
-  .acct-logout{margin-top:16px;}
+
 
   /* Products: CSS grid instead of horizontal scroll */
   .prod-row{
@@ -1177,15 +1162,12 @@ label{display:block;font-size:13px;font-weight:500;color:var(--fg-2);margin-bott
 
   /* Cart page */
   .cart-body{max-width:840px;margin:0 auto;padding:28px 40px;}
-  .cart-page-title{font-size:26px;}
   .ci-name{font-size:14px;}
   .ci-price{font-size:15px;}
   .sum-row{font-size:15px;}
   .sum-row.total-row .sum-label{font-size:17px;}
   .sum-row.total-row .sum-val{font-size:19px;}
 
-  /* Cart page-header (amber bar) */
-  .page-header{position:sticky;top:64px;}
 
   /* Checkout: centered */
   #checkout-overlay{align-items:center;}
@@ -1231,23 +1213,6 @@ label{display:block;font-size:13px;font-weight:500;color:var(--fg-2);margin-bott
 @media(max-width:768px){#track-banner{bottom:76px;right:50%;transform:translateX(50%);font-size:12px;padding:10px 16px;}}
 
 /* ── CUSTOMER ACCOUNT SCREEN ── */
-#s-account{
-  z-index:210;background:rgba(0,0,0,.55);
-  justify-content:flex-end;
-}
-#s-account.slide-right{transform:none;opacity:0;}
-.acct-sheet{
-  background:#fff;border-radius:20px 20px 0 0;
-  max-height:92vh;display:flex;flex-direction:column;
-  width:100%;overflow:hidden;
-  animation:slideUp .25s ease;
-  padding-bottom:env(safe-area-inset-bottom,0px);
-}
-@media(min-width:520px){
-  #s-account{align-items:center;justify-content:center;padding:16px;}
-  .acct-sheet{border-radius:20px;max-width:460px;max-height:88vh;animation:fadeIn .2s ease;padding-bottom:0;}
-}
-#acct-scroll{flex:1;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch;padding-bottom:16px;}
 .acct-header{
   background:var(--amber);
   padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-left,0px)) 32px;
@@ -1279,35 +1244,10 @@ label{display:block;font-size:13px;font-weight:500;color:var(--fg-2);margin-bott
 .osp-delivered{background:#F0FDF4;color:#15803D;}
 .osp-cancelled{background:#FEE2E2;color:#991B1B;}
 
-/* Account modal header (yellow wave) */
-.acct-modal-head{
-  background:var(--amber);border-radius:20px 20px 0 0;
-  flex-shrink:0;padding:18px 20px 46px;position:relative;z-index:1;
-}
-@media(min-width:520px){.acct-modal-head{border-radius:20px 20px 0 0;}}
-.acct-modal-head::after{
-  content:'';position:absolute;bottom:0;left:-5%;width:110%;height:30px;
-  background:#fff;border-radius:50% 50% 0 0/30px 30px 0 0;
-}
-.acct-head-row{display:flex;align-items:center;gap:10px;}
-.acct-head-title-txt{flex:1;font-size:17px;font-weight:700;color:#111;}
-.acct-close-btn{
-  width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.12);
-  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
-  color:#111;flex-shrink:0;
-}
-.acct-logo-wrap{
-  display:flex;justify-content:center;margin-top:-46px;
-  position:relative;z-index:2;flex-shrink:0;margin-bottom:4px;
-}
-.acct-logo-img{
-  width:80px;height:80px;border-radius:50%;object-fit:cover;
-  border:3px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.12);
-}
 /* Account tabs — segmented control */
 .acct-tab-row{
   display:flex;gap:4px;margin-bottom:20px;
-  background:var(--bg-2);border-radius:50px;padding:4px;
+  background:var(--bg);border:1px solid var(--border);border-radius:50px;padding:4px;
 }
 .acct-tab-btn{
   flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
@@ -1353,8 +1293,7 @@ label{display:block;font-size:13px;font-weight:500;color:var(--fg-2);margin-bott
 .acct-vantagens-title{font-size:14px;font-weight:700;color:var(--fg);margin-bottom:3px;}
 .acct-vantagens-sub{font-size:12px;color:var(--fg-2);line-height:1.4;}
 /* Login form */
-.login-wrap{max-width:380px;margin:0 auto;padding:0 16px 20px;text-align:center;}
-.login-title{text-align:center;font-size:22px;font-weight:700;margin-bottom:4px;}
+.login-wrap{max-width:420px;margin:0 auto;padding:16px;text-align:center;}
 .login-sub{text-align:center;font-size:14px;color:var(--fg-2);margin-bottom:20px;}
 .phone-field{
   display:flex;align-items:center;gap:0;
@@ -1390,7 +1329,6 @@ label{display:block;font-size:13px;font-weight:500;color:var(--fg-2);margin-bott
   margin-top:8px;
 }
 /* Account dashboard menu */
-.acct-back-btn{width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.12);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#111;flex-shrink:0;}
 .acct-profile-row{display:flex;align-items:center;gap:14px;padding:15px;margin:12px 16px 4px;border:1.5px solid var(--border);border-radius:14px;}
 .acct-profile-av{width:50px;height:50px;border-radius:50%;background:var(--bg-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--fg-2);}
 .acct-profile-info{flex:1;min-width:0;}
@@ -1407,7 +1345,8 @@ label{display:block;font-size:13px;font-weight:500;color:var(--fg-2);margin-bott
 .acct-menu-sub{font-size:12px;color:var(--fg-2);display:block;margin-top:2px;}
 .acct-menu-chev{color:var(--fg-3);flex-shrink:0;}
 .acct-signout-btn{display:flex;align-items:center;gap:10px;padding:16px;margin:4px 16px 20px;color:#EF4444;font:600 15px 'Inter',sans-serif;background:none;border:none;cursor:pointer;}
-.acct-subscreen{padding-bottom:20px;}
+.acct-subscreen{padding-bottom:16px;}
+.acct-profile-row,.acct-menu-btn{background:var(--bg);border-radius:var(--r-sm);}
 .acct-empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center;color:var(--fg-3);}
 .acct-empty-state .es-title{font-size:15px;font-weight:600;color:var(--fg);margin-top:14px;}
 .acct-empty-state .es-sub{font-size:13px;margin-top:4px;line-height:1.5;}
@@ -1684,20 +1623,13 @@ try{if(localStorage.getItem('age_ok')==='1')document.documentElement.classList.a
 </div>
 
 <!-- ═══ CART BOTTOM SHEET ═══ -->
-<div id="s-cart" class="screen slide-right hidden" onclick="if(event.target===this)hideScreen('s-cart')">
-  <div class="cart-sheet">
-    <div class="page-header">
-      <div class="ph-inner">
-        <div class="ph-center">
-          <div class="ph-cart-hd">
-            <span class="ph-cart-hd-ic"><i data-lucide="shopping-bag" width="22" height="22"></i></span>
-            <span class="ph-title">Minha sacola</span>
-          </div>
-        </div>
-        <button class="back-btn" onclick="hideScreen('s-cart')" aria-label="Fechar"><i data-lucide="x" width="18" height="18"></i></button>
-      </div>
+<div id="s-cart" class="screen sheet-overlay slide-right hidden" role="dialog" aria-modal="true" aria-labelledby="cart-title" onclick="if(event.target===this)hideScreen('s-cart')">
+  <div class="sheet-panel">
+    <div class="sheet-header">
+      <h2 id="cart-title" class="sheet-title"><i data-lucide="shopping-bag" width="20" height="20"></i> Minha sacola</h2>
+      <button type="button" class="sheet-icon-button" onclick="hideScreen('s-cart')" aria-label="Fechar sacola"><i data-lucide="x" width="18" height="18"></i></button>
     </div>
-    <div class="cart-body" id="cart-body"></div>
+    <div class="sheet-scroll cart-body" id="cart-body"></div>
   </div>
 </div>
 
@@ -1711,9 +1643,9 @@ try{if(localStorage.getItem('age_ok')==='1')document.documentElement.classList.a
 <!-- ═══ CART DRAWER (desktop) ═══ -->
 <div id="cart-drawer-overlay" onclick="closeCartDrawer(event)" role="dialog" aria-modal="true" aria-label="Sacola de compras">
   <div id="cart-drawer">
-    <div class="cd-header">
-      <span class="cd-title"><i data-lucide="shopping-bag" width="22" height="22"></i> Sacola</span>
-      <button class="cd-close" onclick="closeCartDrawer()" aria-label="Fechar sacola"><i data-lucide="x" width="22" height="22"></i></button>
+    <div class="sheet-header">
+      <h2 class="sheet-title"><i data-lucide="shopping-bag" width="20" height="20"></i> Minha sacola</h2>
+      <button type="button" class="sheet-icon-button" onclick="closeCartDrawer()" aria-label="Fechar sacola"><i data-lucide="x" width="22" height="22"></i></button>
     </div>
     <div class="cd-body" id="cd-body"></div>
     <div class="cd-footer hidden" id="cd-footer"></div>
@@ -1836,24 +1768,18 @@ try{if(localStorage.getItem('age_ok')==='1')document.documentElement.classList.a
 
 
 <!-- ═══ CUSTOMER ACCOUNT SCREEN ═══ -->
-<div id="s-account" class="screen slide-right hidden" onclick="if(event.target===this)hideScreen('s-account')">
-  <div class="acct-sheet">
-    <div class="acct-modal-head">
-      <div class="acct-head-row">
-        <button id="acct-back-btn" class="acct-back-btn hidden" onclick="acctGoBack()" aria-label="Voltar"><i data-lucide="chevron-left" width="20" height="20"></i></button>
-        <i id="acct-head-icon" data-lucide="user" width="20" height="20"></i>
-        <span class="acct-head-title-txt" id="acct-head-title">Minha conta</span>
-        <button class="acct-close-btn" onclick="hideScreen('s-account')" aria-label="Fechar"><i data-lucide="x" width="18" height="18"></i></button>
-      </div>
+<div id="s-account" class="screen sheet-overlay slide-right hidden" role="dialog" aria-modal="true" aria-labelledby="acct-head-title" onclick="if(event.target===this)hideScreen('s-account')">
+  <div class="sheet-panel">
+    <div class="sheet-header">
+      <button type="button" id="acct-back-btn" class="sheet-icon-button hidden" onclick="acctGoBack()" aria-label="Voltar"><i data-lucide="chevron-left" width="20" height="20"></i></button>
+      <i id="acct-head-icon" data-lucide="user" width="20" height="20"></i>
+      <h2 class="sheet-title" id="acct-head-title">Minha conta</h2>
+      <button type="button" class="sheet-icon-button" onclick="hideScreen('s-account')" aria-label="Fechar conta"><i data-lucide="x" width="18" height="18"></i></button>
     </div>
-    <div class="acct-logo-wrap" id="acct-logo-wrap">
-      <img src="logo-plantao-da-cerveja.jpg" alt="Plantão da Cerveja" class="acct-logo-img">
-    </div>
-  <div id="acct-scroll">
+  <div id="acct-scroll" class="sheet-scroll">
 
     <!-- ── Login / Cadastro ── -->
     <div id="acct-login" class="login-wrap">
-      <div class="login-title">Minha Conta</div>
       <div class="login-sub">Acesse sua conta ou crie um cadastro gratuito.</div>
 
       <!-- Tabs -->
@@ -2008,7 +1934,7 @@ try{if(localStorage.getItem('age_ok')==='1')document.documentElement.classList.a
     </div>
 
   </div>
-  </div><!-- /.acct-sheet -->
+  </div><!-- /.sheet-panel -->
 </div>
 
 <!-- ═══ BOTTOM NAV ═══ -->
@@ -2941,7 +2867,6 @@ function renderCartPage(){
   const el = document.getElementById('cart-body');
   if(!cart.length){
     el.innerHTML=`
-      <div class="cart-page-title">Minha Sacola</div>
       <div style="text-align:center;padding:48px 0;color:var(--fg-2)">
         <div style="margin-bottom:14px"><i data-lucide="shopping-bag" width="56" height="56"></i></div>
         <p style="font-size:15px;font-weight:600">Sua sacola está vazia.</p>
@@ -2982,11 +2907,11 @@ function renderCartPage(){
       <span class="cart-subtotal-label">Subtotal <strong>(${totalItems} ${totalItems===1?'item':'itens'})</strong></span>
       <span class="cart-subtotal-val">R$ ${fmt(subtotal)}</span>
     </div>
-    <div class="cart-addr-row" onclick="openNeighborhoodPicker()">
+    <button type="button" class="cart-addr-row" aria-haspopup="dialog" onclick="openNeighborhoodPicker(this)">
       <span class="cart-addr-ic"><i data-lucide="map-pin" width="18" height="18"></i></span>
       <span class="cart-addr-txt" id="cart-addr-txt">${esc(deliveryNeighborhood || 'Informe seu bairro')} · ${deliveryFeeText()}</span>
       <span class="cart-addr-chev"><i data-lucide="chevron-right" width="16" height="16"></i></span>
-    </div>
+    </button>
     <div class="cart-ctas">
       <button class="btn-finalizar" onclick="openWhen()">
         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-delivery-moto"/></svg> Finalizar pedido
@@ -3252,9 +3177,14 @@ function renderCoStep(){
       ${payMethod==='pix'?`
       <div class="card-form">
         <div class="form-group" style="margin:0">
-          <label for="pix-cpf">CPF do pagador</label>
-          <input id="pix-cpf" class="form-input" inputmode="numeric" autocomplete="off"
+          <label for="pix-cpf">CPF do pagador *</label>
+          <input id="pix-cpf" required class="form-input" inputmode="numeric" autocomplete="off"
             placeholder="000.000.000-00" maxlength="14" oninput="fmtCPF(this)">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label for="pix-email">E-mail do pagador *</label>
+          <input id="pix-email" class="form-input" type="email" autocomplete="email" required maxlength="200"
+            value="${esc(coData.email||'').replaceAll('"', '&quot;')}" oninput="coData.email=this.value">
         </div>
       </div>`:''}
       <label class="pay-opt${payMethod==='maquininha'?' selected':''}">
@@ -3270,29 +3200,29 @@ function renderCoStep(){
       ${payMethod==='credito'?`
       <div class="card-form" id="card-form">
         <div class="form-group" style="margin:0">
-          <label for="cc-num">Número do cartão</label>
+          <label for="cc-num">Número do cartão *</label>
           <div style="position:relative">
-            <input id="cc-num" class="form-input" inputmode="numeric" autocomplete="cc-number"
+            <input id="cc-num" required class="form-input" inputmode="numeric" autocomplete="cc-number"
               placeholder="0000 0000 0000 0000" maxlength="19"
               oninput="fmtCCNum(this);document.getElementById('co-payment-error').hidden=true" style="letter-spacing:.5px">
             <span id="cc-brand" class="card-brand"></span>
           </div>
         </div>
         <div class="form-group" style="margin:0">
-          <label for="cc-name">Nome impresso no cartão</label>
-          <input id="cc-name" class="form-input" autocomplete="cc-name"
+          <label for="cc-name">Nome impresso no cartão *</label>
+          <input id="cc-name" required class="form-input" autocomplete="cc-name"
             placeholder="NOME SOBRENOME" style="text-transform:uppercase"
             oninput="this.value=this.value.toUpperCase()">
         </div>
         <div class="form-row">
           <div class="form-group" style="margin:0">
-            <label for="cc-exp">Validade</label>
-            <input id="cc-exp" class="form-input" inputmode="numeric" autocomplete="cc-exp"
+            <label for="cc-exp">Validade *</label>
+            <input id="cc-exp" required class="form-input" inputmode="numeric" autocomplete="cc-exp"
               placeholder="MM/AA" maxlength="5" oninput="fmtCCExp(this)">
           </div>
           <div class="form-group" style="margin:0">
-            <label for="cc-cvv">CVV</label>
-            <input id="cc-cvv" class="form-input" inputmode="numeric" autocomplete="cc-csc"
+            <label for="cc-cvv">CVV *</label>
+            <input id="cc-cvv" required class="form-input" inputmode="numeric" autocomplete="cc-csc"
               placeholder="123" maxlength="4">
           </div>
         </div>
@@ -3303,27 +3233,27 @@ function renderCoStep(){
           </select>
         </div>
         <div class="form-group" style="margin:0">
-          <label for="cc-cpf">CPF do titular</label>
-          <input id="cc-cpf" class="form-input" inputmode="numeric" autocomplete="off"
+          <label for="cc-cpf">CPF do titular *</label>
+          <input id="cc-cpf" required class="form-input" inputmode="numeric" autocomplete="off"
             placeholder="000.000.000-00" maxlength="14" oninput="fmtCPF(this)">
         </div>
         <h3 class="form-section-title">Endereço de cobrança do cartão</h3>
         <div class="form-group" style="margin:0">
           <label for="cc-billing-line">Número, rua e bairro *</label>
-          <input id="cc-billing-line" class="form-input" autocomplete="billing address-line1" maxlength="256">
+          <input id="cc-billing-line" required class="form-input" autocomplete="billing address-line1" maxlength="256">
         </div>
         <div class="form-group" style="margin:0">
           <label for="cc-billing-cep">CEP de cobrança *</label>
-          <input id="cc-billing-cep" class="form-input" inputmode="numeric" autocomplete="billing postal-code" maxlength="9" placeholder="00000-000">
+          <input id="cc-billing-cep" required class="form-input" inputmode="numeric" autocomplete="billing postal-code" maxlength="9" placeholder="00000-000">
         </div>
         <div class="form-row">
           <div class="form-group" style="margin:0">
             <label for="cc-billing-city">Cidade *</label>
-            <input id="cc-billing-city" class="form-input" autocomplete="billing address-level2" maxlength="64">
+            <input id="cc-billing-city" required class="form-input" autocomplete="billing address-level2" maxlength="64">
           </div>
           <div class="form-group" style="margin:0">
             <label for="cc-billing-state">UF *</label>
-            <input id="cc-billing-state" class="form-input" autocomplete="billing address-level1" maxlength="2">
+            <input id="cc-billing-state" required class="form-input" autocomplete="billing address-level1" maxlength="2">
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--fg-3)">
@@ -3410,7 +3340,12 @@ function nextStep(from){
     const rua=document.getElementById('co-rua').value.trim();
     const num=document.getElementById('co-num').value.trim();
     const bairro=deliveryNeighborhood;
-    if(!Object.hasOwn(deliveryRates, bairro)||!rua||!num){ toast('Selecione o bairro e informe a rua e o número.'); return; }
+    if(!Object.hasOwn(deliveryRates, bairro)||!rua||!num){
+      const field = !Object.hasOwn(deliveryRates, bairro) ? 'co-bairro' : !rua ? 'co-rua' : 'co-num';
+      document.getElementById(field).focus();
+      toast('Selecione o bairro e informe a rua e o número.');
+      return;
+    }
     chooseNeighborhood(bairro);
     coData.rua=rua; coData.num=num;
     coData.comp=document.getElementById('co-comp').value;
@@ -3421,7 +3356,7 @@ function nextStep(from){
     const tel=document.getElementById('co-tel').value.trim();
     const telDigits = tel.replace(/\D/g,'');
     if(!nome){ toast('Nome é obrigatório.'); return; }
-    if(telDigits.length<10||telDigits.length>11){ toast('WhatsApp inválido. Use DDD + número (10 ou 11 dígitos).'); return; }
+    if(telDigits.length<10||telDigits.length>11){ document.getElementById('co-tel').focus(); toast('WhatsApp inválido. Use DDD + número (10 ou 11 dígitos).'); return; }
     coData.nome=nome; coData.tel=tel; coData.email=document.getElementById('co-email').value;
     coStep=3;
   }
@@ -3513,7 +3448,38 @@ async function finalizarPedido(){
   if(!Object.hasOwn(deliveryRates, coData.bairro)){ coStep=1; renderCoStep(); return; }
   const btn = document.getElementById('pay-btn');
   const error = document.getElementById('co-payment-error');
+  if (btn.disabled) return;
   error.hidden = true;
+  let pixCpf;
+  let pixEmail;
+  if (payMethod === 'pix') {
+    const cpfField = document.getElementById('pix-cpf');
+    const emailField = document.getElementById('pix-email');
+    pixCpf = cpfField.value.replace(/\D/g,'');
+    pixEmail = emailField.value.trim();
+    const invalid = pixCpf.length !== 11 ? cpfField
+      : !emailField.checkValidity() || pixEmail.length > 200 ? emailField : null;
+    if (invalid) {
+      error.textContent = invalid === cpfField
+        ? 'Informe o CPF do pagador com 11 dígitos.'
+        : 'Informe um e-mail válido para gerar o Pix.';
+      error.hidden = false;
+      invalid.focus({preventScroll:true});
+      invalid.scrollIntoView({block:'nearest'});
+      return;
+    }
+  }
+  if (payMethod === 'credito') {
+    const required = document.querySelectorAll('#card-form input[required]');
+    const missing = [...required].find(field => !field.value.trim());
+    if (missing) {
+      error.textContent = 'Preencha o campo ' + missing.labels[0].textContent.replace(/ \*$/, '') + '.';
+      error.hidden = false;
+      missing.focus({preventScroll:true});
+      missing.scrollIntoView({block:'nearest'});
+      return;
+    }
+  }
   btn.setAttribute('aria-busy', 'true');
   btn.disabled=true; btn.innerHTML='<span style="display:flex;align-items:center;gap:8px"><span style="width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block"></span>Processando…</span>';
   const payMap = {pix:'pix',maquininha:'machine',credito:'credit_card',dinheiro:'cash'};
@@ -3656,19 +3622,9 @@ async function finalizarPedido(){
       return;
     }
   }
-  if(payMethod==='pix'){
-    const pixCpf = (document.getElementById('pix-cpf')?.value||'').replace(/\D/g,'');
-    if (pixCpf.length !== 11) {
-      error.textContent = 'Informe o CPF do pagador com 11 dígitos.';
-      error.hidden = false;
-      error.scrollIntoView({block:'nearest'});
-      btn.removeAttribute('aria-busy');
-      btn.disabled = false;
-      btn.innerHTML = 'Confirmar pedido <i data-lucide="check" width="16" height="16"></i>';
-      lucide.createIcons();
-      return;
-    }
+  if (payMethod === 'pix') {
     payload.customer_cpf = pixCpf;
+    payload.customer_email = pixEmail;
   }
   const orderHeaders = {'Content-Type':'application/json'};
   if(acctToken) orderHeaders['Authorization'] = 'Bearer '+acctToken;
@@ -4004,8 +3960,6 @@ function acctShowLogin(){
   document.getElementById('acct-login').style.display='';
   document.getElementById('acct-dashboard').style.display='none';
   document.querySelectorAll('.acct-subscreen').forEach(s=>s.style.display='none');
-  const lw = document.getElementById('acct-logo-wrap');
-  if(lw) lw.style.display='';
   acctResetHeader();
   acctTab('login');
 }
@@ -4022,8 +3976,6 @@ function acctShowDashboard(){
   document.getElementById('acct-login').style.display='none';
   document.getElementById('acct-dashboard').style.display='';
   document.querySelectorAll('.acct-subscreen').forEach(s=>s.style.display='none');
-  const lw = document.getElementById('acct-logo-wrap');
-  if(lw) lw.style.display='none';
   acctResetHeader();
   const name = (()=>{try{return localStorage.getItem('acct_name')||'';}catch{return '';}})();
   const phone = (()=>{try{return localStorage.getItem('acct_phone')||localStorage.getItem('acct_email')||'';}catch{return '';}})();

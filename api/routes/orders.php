@@ -112,6 +112,17 @@ match ($method) {
         }
         if (!is_array($d['items']) || count($d['items']) === 0) json_err('items must be a non-empty array');
 
+        if ($d['payment_method'] === 'pix') {
+            $email = is_string($d['customer_email'] ?? null) ? trim($d['customer_email']) : '';
+            if (strlen($email) > 200 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                json_err('Informe um e-mail válido para gerar o Pix.', 422);
+            }
+            $cpf = is_string($d['customer_cpf'] ?? null) ? preg_replace('/\D/', '', $d['customer_cpf']) : '';
+            if (strlen($cpf) !== 11) json_err('Informe o CPF do pagador com 11 dígitos.', 422);
+            $d['customer_cpf'] = $cpf;
+            $d['customer_email'] = $email;
+        }
+
         // Fetch live prices from DB to avoid price tampering
         $ids         = array_filter(array_column($d['items'], 'product_id'), 'is_numeric');
         $priceMap    = [];
