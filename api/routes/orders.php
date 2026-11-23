@@ -176,21 +176,30 @@ match ($method) {
         $minOrder = (float)($cfg['min_order'] ?? 0);
         if ($subtotal < $minOrder) json_err("Pedido mínimo é R$ " . number_format($minOrder, 2, ',', '.'));
 
-        $neighborhood = $d['address_neighborhood'] ?? null;
-        $rates = deliveryRates($cfg['delivery_rates'] ?? null);
-        if (!is_string($neighborhood) || $neighborhood === ''
-            || !is_string($d['address_street'] ?? null) || trim($d['address_street']) === ''
-            || !is_string($d['address_number'] ?? null) || trim($d['address_number']) === '') {
-            json_err('Selecione um bairro atendido e informe a rua e o número da entrega.');
+        $deliveryType = $d['delivery_type'] ?? 'immediate';
+        if (!in_array($deliveryType, ['immediate', 'scheduled', 'pickup'], true)) {
+            json_err('Escolha uma forma de recebimento válida.');
         }
-        if (!array_key_exists($neighborhood, $rates)) {
-            json_err('O bairro selecionado não está disponível. Escolha um bairro atendido.', 409);
-        }
-        if (($d['delivery_fee_cents'] ?? null) !== $rates[$neighborhood]) {
-            json_err('A taxa de entrega mudou. Confira o novo valor antes de confirmar.', 409);
-        }
+        $pickup = $deliveryType === 'pickup';
+        $neighborhood = null;
+        $deliveryFee = 0;
+        if (!$pickup) {
+            $neighborhood = $d['address_neighborhood'] ?? null;
+            $rates = deliveryRates($cfg['delivery_rates'] ?? null);
+            if (!is_string($neighborhood) || $neighborhood === ''
+                || !is_string($d['address_street'] ?? null) || trim($d['address_street']) === ''
+                || !is_string($d['address_number'] ?? null) || trim($d['address_number']) === '') {
+                json_err('Selecione um bairro atendido e informe a rua e o número da entrega.');
+            }
+            if (!array_key_exists($neighborhood, $rates)) {
+                json_err('O bairro selecionado não está disponível. Escolha um bairro atendido.', 409);
+            }
+            if (($d['delivery_fee_cents'] ?? null) !== $rates[$neighborhood]) {
+                json_err('A taxa de entrega mudou. Confira o novo valor antes de confirmar.', 409);
+            }
 
-        $deliveryFee = $rates[$neighborhood] / 100;
+            $deliveryFee = $rates[$neighborhood] / 100;
+        }
         $total = round($subtotal + $deliveryFee, 2);
 
         if ($d['payment_method'] === 'credit_card') {
@@ -228,18 +237,18 @@ match ($method) {
                 trim($d['customer_name']),
                 preg_replace('/\D/', '', $d['customer_phone']),
                 $d['customer_email'] ?? null,
-                $d['address_cep'] ?? null,
-                $d['address_street'] ?? null,
-                $d['address_number'] ?? null,
-                $d['address_complement'] ?? null,
+                $pickup ? null : ($d['address_cep'] ?? null),
+                $pickup ? null : ($d['address_street'] ?? null),
+                $pickup ? null : ($d['address_number'] ?? null),
+                $pickup ? null : ($d['address_complement'] ?? null),
                 $neighborhood,
-                $d['address_reference'] ?? null,
+                $pickup ? null : ($d['address_reference'] ?? null),
                 round($subtotal, 2),
                 $deliveryFee,
                 $total,
                 $d['payment_method'],
-                $d['delivery_type'] ?? 'immediate',
-                !empty($d['scheduled_at']) ? $d['scheduled_at'] : null,
+                $deliveryType,
+                $deliveryType === 'scheduled' && !empty($d['scheduled_at']) ? $d['scheduled_at'] : null,
                 $d['notes'] ?? null,
             ]);
             $orderId = (int)$pdo->lastInsertId();
@@ -357,8 +366,12 @@ match ($method) {
             $msg = "🍺 *Novo Pedido #{$orderNumber}*\n\n"
                 . "*Cliente:* {$d['customer_name']}\n"
                 . "*Fone:* {$d['customer_phone']}\n"
-                . "*Endereço:* {$d['address_street']}, {$d['address_number']}" . (!empty($d['address_complement']) ? " - {$d['address_complement']}" : '') . " · {$neighborhood}\n"
-                . (!empty($d['address_reference']) ? "*Ref:* {$d['address_reference']}\n" : '')
+                . ($pickup
+                    ? "*Recebimento:* Retirada no balcão\n"
+                    : "*Endereço:* {$d['address_street']}, {$d['address_number']}"
+                        . (!empty($d['address_complement']) ? " - {$d['address_complement']}" : '')
+                        . " · {$neighborhood}\n"
+                        . (!empty($d['address_reference']) ? "*Ref:* {$d['address_reference']}\n" : ''))
                 . "\n*Itens:*\n{$itemsText}\n\n"
                 . "*Subtotal:* R$ " . number_format($subtotal, 2, ',', '.') . "\n"
                 . ($deliveryFee > 0 ? "*Taxa de entrega:* R$ " . number_format($deliveryFee, 2, ',', '.') . "\n" : '')

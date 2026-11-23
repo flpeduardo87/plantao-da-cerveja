@@ -105,7 +105,7 @@ function fmtDateShort(s) {
   if (!s) return '—';
   return new Date(s.replace(' ', 'T') + 'Z').toLocaleDateString('pt-BR', {timeZone: 'America/Sao_Paulo'});
 }
-function fmtStatus(s) {
+function fmtStatus(s, deliveryType) {
   const map = {
     new:        { label: 'Novo',       cls: 'badge-new' },
     accepted:   { label: 'Aceito',     cls: 'badge-accepted' },
@@ -115,13 +115,14 @@ function fmtStatus(s) {
     cancelled:  { label: 'Cancelado',  cls: 'badge-cancelled' },
   };
   const m = map[s] || { label: s, cls: '' };
-  return `<span class="badge ${m.cls}">${m.label}</span>`;
+  const pickupLabel = deliveryType === 'pickup' ? { delivering: 'Pronto para retirada', delivered: 'Retirado' }[s] : null;
+  return `<span class="badge ${m.cls}">${pickupLabel || m.label}</span>`;
 }
 function fmtPayment(p) {
   return { pix: 'PIX', credit_card: 'Cartão crédito', debit_card: 'Cartão débito', cash: 'Dinheiro', machine: 'Maquininha' }[p] || p || '—';
 }
-function fmtPaymentStatus(ps, pm) {
-  if (pm === 'cash' || pm === 'machine') return '<span class="pay-st pay-st-na">Na entrega</span>';
+function fmtPaymentStatus(ps, pm, deliveryType) {
+  if (pm === 'cash' || pm === 'machine') return `<span class="pay-st pay-st-na">${deliveryType === 'pickup' ? 'No balcão' : 'Na entrega'}</span>`;
   if (ps === 'paid')    return '<span class="pay-st pay-st-paid">✓ Pago</span>';
   if (ps === 'failed')  return '<span class="pay-st pay-st-failed">✗ Falhou</span>';
   return '<span class="pay-st pay-st-pending">⏳ Aguardando</span>';
@@ -149,14 +150,15 @@ function statusOptions(current) {
   ].map(o => `<option value="${o.v}"${o.v===current?' selected':''}>${o.l}</option>`).join('');
 }
 
-function nextStatusBtn(id, current) {
+function nextStatusBtn(id, current, deliveryType) {
+  const pickup = deliveryType === 'pickup';
   const flow = {
     new:        { next:'accepted',   label:'Aceitar pedido' },
     accepted:   { next:'preparing',  label:'Iniciar preparo' },
-    preparing:  { next:'delivering', label:'Saiu p/ entrega' },
-    delivering: { next:'delivered',  label:'Marcar entregue' },
+    preparing:  { next:'delivering', label:pickup ? 'Marcar pronto para retirada' : 'Saiu p/ entrega' },
+    delivering: { next:'delivered',  label:pickup ? 'Marcar retirado' : 'Marcar entregue' },
   };
-  const badge = fmtStatus(current);
+  const badge = fmtStatus(current, deliveryType);
   const step = flow[current];
   if (!step) return badge;
   return `${badge}<button class="btn-next-step" onclick="changeStatus(${id},'${step.next}')">${step.label} →</button>`;
@@ -189,8 +191,8 @@ async function viewOrder(id) {
           ${o.customer_email ? `<div class="ic-sub">${o.customer_email}</div>` : ''}
         </div>
         <div class="info-cell">
-          <div class="ic-label">Endereço</div>
-          <div class="ic-value">${o.address_street ? o.address_street + ', ' + (o.address_number||'s/n') : '—'}</div>
+          <div class="ic-label">Recebimento</div>
+          <div class="ic-value">${o.delivery_type === 'pickup' ? 'Retirada no balcão' : o.address_street ? o.address_street + ', ' + (o.address_number||'s/n') : '—'}</div>
           <div class="ic-sub">${o.address_neighborhood||''}${o.address_cep ? ' · CEP '+o.address_cep : ''}</div>
           ${o.address_complement ? `<div class="ic-sub">${o.address_complement}</div>` : ''}
           ${o.address_reference  ? `<div class="ic-sub" style="color:var(--fg-3)">Ref: ${o.address_reference}</div>` : ''}
@@ -198,11 +200,11 @@ async function viewOrder(id) {
         <div class="info-cell">
           <div class="ic-label">Pagamento</div>
           <div class="ic-value">${fmtPayment(o.payment_method)}</div>
-          <div style="margin-top:5px">${fmtPaymentStatus(o.payment_status, o.payment_method)}</div>
+          <div style="margin-top:5px">${fmtPaymentStatus(o.payment_status, o.payment_method, o.delivery_type)}</div>
         </div>
         <div class="info-cell">
           <div class="ic-label">Status</div>
-          <div class="ic-value">${fmtStatus(o.status)}</div>
+          <div class="ic-value">${fmtStatus(o.status, o.delivery_type)}</div>
         </div>
         ${o.notes ? `<div class="info-cell" style="grid-column:1/-1"><div class="ic-label">Observações</div><div style="font-size:13px;background:var(--surface-2,#F8FAFC);padding:10px 12px;border-radius:8px;margin-top:4px;border:1px solid var(--border)">${o.notes}</div></div>` : ''}
       </div>
@@ -219,7 +221,7 @@ async function viewOrder(id) {
     footerEl.innerHTML = `
       <button class="btn btn-ghost" onclick="closeModal('modal-order')">Fechar</button>
       <div style="display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap">
-        ${nextStatusBtn(o.id,o.status)}
+        ${nextStatusBtn(o.id,o.status,o.delivery_type)}
         ${o.status!=='delivered'&&o.status!=='cancelled'?`<button class="btn btn-sm btn-danger" onclick="changeStatus(${o.id},'cancelled');closeModal('modal-order')">Cancelar pedido</button>`:''}
       </div>
       <button class="btn btn-ghost btn-sm" onclick="printOrder(_viewingOrder)"><i data-lucide="printer" width="14" height="14"></i> Imprimir</button>
@@ -288,7 +290,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   ${o.customer_phone ? `<div class="info-row">${o.customer_phone}</div>` : ''}
   ${o.customer_email ? `<div class="info-row">${o.customer_email}</div>` : ''}
 </div>
-<div class="sec"><div class="sec-title">Entrega</div>
+<div class="sec"><div class="sec-title">Recebimento</div>
   ${o.address_street
     ? `<div class="info-row"><strong>${o.address_street}, ${o.address_number||'s/n'}</strong></div>
        ${o.address_neighborhood ? `<div class="info-row">${o.address_neighborhood}${o.address_cep?' · CEP '+o.address_cep:''}</div>` : ''}

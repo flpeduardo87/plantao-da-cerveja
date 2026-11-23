@@ -155,7 +155,7 @@
   </div>
 </div>
 
-<script src="assets/app.js?v=6"></script>
+<script src="assets/app.js?v=7"></script>
 <script>
 let allOrders = [];
 let currentPage = 1;
@@ -204,8 +204,9 @@ function fmtDelivery(type) {
 const STATUS_CLS   = { new:'ord-s-new', accepted:'ord-s-accepted', preparing:'ord-s-preparing', delivering:'ord-s-delivering', delivered:'ord-s-delivered', cancelled:'ord-s-cancelled' };
 const STATUS_LABEL = { new:'Novo', accepted:'Aceito', preparing:'Preparando', delivering:'A caminho', delivered:'Entregue', cancelled:'Cancelado' };
 
-function statusBadge(status) {
-  return `<span class="ord-badge ${STATUS_CLS[status]||''}">${STATUS_LABEL[status]||status}</span>`;
+function statusBadge(status, deliveryType) {
+  const pickupLabel = deliveryType === 'pickup' ? { delivering: 'Pronto para retirada', delivered: 'Retirado' }[status] : null;
+  return `<span class="ord-badge ${STATUS_CLS[status]||''}">${pickupLabel || STATUS_LABEL[status] || status}</span>`;
 }
 
 /* ── Filters ── */
@@ -288,10 +289,10 @@ function renderOrders() {
           <div style="font-size:11.5px;color:var(--fg-3)">${o.customer_phone||''}</div>
         </td>
         <td><strong>${fmtMoney(o.total)}</strong></td>
-        <td style="white-space:nowrap">${statusBadge(o.status)}</td>
-        <td style="font-size:12.5px;color:var(--fg-2)">${fmtPayment(o.payment_method)}<br>${fmtPaymentStatus(o.payment_status,o.payment_method)}</td>
+        <td style="white-space:nowrap">${statusBadge(o.status,o.delivery_type)}</td>
+        <td style="font-size:12.5px;color:var(--fg-2)">${fmtPayment(o.payment_method)}<br>${fmtPaymentStatus(o.payment_status,o.payment_method,o.delivery_type)}</td>
         <td style="font-size:12.5px;color:var(--fg-2)">${fmtDelivery(o.delivery_type)}</td>
-        <td style="white-space:nowrap">${nextStatusBtn(o.id,o.status)} <button class="btn btn-ghost btn-sm" onclick="viewOrder(${o.id})">Detalhes</button></td>
+        <td style="white-space:nowrap">${nextStatusBtn(o.id,o.status,o.delivery_type)} <button class="btn btn-ghost btn-sm" onclick="viewOrder(${o.id})">Detalhes</button></td>
       </tr>`).join('');
   }
 
@@ -302,16 +303,16 @@ function renderOrders() {
       <div class="ord-card-left">
         <div class="ord-card-num">#${String(o.order_number).slice(-6)}</div>
         <div class="ord-card-time">${fmtDate(o.created_at)}</div>
-        ${statusBadge(o.status)}
+        ${statusBadge(o.status,o.delivery_type)}
       </div>
       <div class="ord-card-mid">
         <div class="ord-card-name">${o.customer_name}</div>
         <div class="ord-card-meta">${o.customer_phone||''}</div>
-        <div class="ord-card-meta">${fmtPayment(o.payment_method)} · ${fmtDelivery(o.delivery_type)} ${fmtPaymentStatus(o.payment_status,o.payment_method)}</div>
+        <div class="ord-card-meta">${fmtPayment(o.payment_method)} · ${fmtDelivery(o.delivery_type)} ${fmtPaymentStatus(o.payment_status,o.payment_method,o.delivery_type)}</div>
         <div class="ord-card-value">${fmtMoney(o.total)}</div>
       </div>
       <div class="ord-card-actions">
-        ${nextStatusBtn(o.id, o.status)}
+        ${nextStatusBtn(o.id,o.status,o.delivery_type)}
         <button class="btn btn-ghost btn-sm" onclick="viewOrder(${o.id})" style="padding:6px"><i data-lucide="chevron-right" width="16" height="16"></i></button>
       </div>
     </div>`).join('');

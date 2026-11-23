@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS orders (
   payment_status      ENUM('pending','paid','failed','refunded')              NOT NULL DEFAULT 'pending',
   stone_transaction_id VARCHAR(100),
   -- Delivery
-  delivery_type       ENUM('immediate','scheduled') NOT NULL DEFAULT 'immediate',
+  delivery_type       ENUM('immediate','scheduled','pickup') NOT NULL DEFAULT 'immediate',
   scheduled_at        DATETIME,
   -- Status
   status              ENUM('new','accepted','preparing','delivering','delivered','cancelled') NOT NULL DEFAULT 'new',

@@ -570,7 +570,17 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 .drawer-promo-txt{font-size:15px;font-weight:700;color:var(--fg);line-height:1.3;flex:1;}
 .drawer-promo-chev{color:var(--fg-2);flex-shrink:0;}
 /* ── CART BOTTOM SHEET ── */
-#s-cart{z-index:50;}
+#s-cart{z-index:65;}
+#s-cart .sheet-panel{
+  display:grid;grid-template-rows:auto minmax(0,1fr) auto;
+  max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);
+}
+@media(max-width:520px){
+  #s-cart .sheet-panel{
+    max-height:calc(100vh - 8px - max(8px,env(safe-area-inset-bottom)));
+    max-height:calc(100dvh - 8px - max(8px,env(safe-area-inset-bottom)));
+  }
+}
 #s-account{z-index:210;}
 .sheet-overlay{
   background:rgba(0,0,0,.65);align-items:center;justify-content:center;
@@ -698,7 +708,7 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
   transition:border-color .15s;
 }
 .btn-continuar:hover{border-color:var(--fg-2);}
-.cart-ctas{display:flex;flex-direction:column;gap:10px;}
+.cart-ctas{display:flex;flex-direction:column;gap:8px;padding:12px 16px;background:var(--bg);border-top:1px solid var(--border);}
 .when-dt{margin-top:10px;padding:12px 14px;background:var(--bg-2);border-radius:var(--r-sm);}
 .when-dt label{font-size:11.5px;font-weight:700;color:var(--fg-2);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;}
 .when-dt input[type=datetime-local]{width:100%;padding:9px 12px;border:2px solid var(--border);border-radius:8px;font:14px 'Inter',sans-serif;color:var(--fg);background:var(--bg);}
@@ -793,7 +803,7 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 .co-form-step .form-input::placeholder{color:var(--fg-2);opacity:1;}
 .co-form-step .pay-opt:focus-within{outline:2px solid var(--fg);outline-offset:2px;}
 .co-form-step .pay-opt input:focus-visible{outline:none;}
-.co-form-step .pay-opt.selected{border-color:var(--green-dk);}
+.co-form-step .pay-opt.selected,.pay-opt:has(input[name=co-fulfillment]:checked){border-color:var(--green-dk);}
 .co-form-step .card-form .form-section-title{margin-bottom:0;}
 .co-payment-error{
   background:var(--red-lt);color:var(--fg);border-radius:var(--r-sm);
@@ -832,6 +842,10 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 .co-items-subtotal .os-total{border-top:0;min-height:48px;align-items:center;}
 .co-items-empty{padding:16px;background:var(--bg);border-radius:var(--r-sm);color:var(--fg-2);}
 .co-items-buttons{display:grid;gap:10px;margin-top:4px;}
+.co-address-fields{border:0;min-width:0;}
+.co-pickup-card{margin:4px 0 14px;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);font-size:14px;line-height:1.5;}
+.co-pickup-card p + p{margin-top:6px;}
+.co-pickup-card a{color:var(--fg);}
 .co-delivery-info{color:var(--fg-2);font-size:13px;margin-bottom:14px;}
 
 .order-summary{
@@ -1630,6 +1644,7 @@ try{if(localStorage.getItem('age_ok')==='1')document.documentElement.classList.a
       <button type="button" class="sheet-icon-button" onclick="hideScreen('s-cart')" aria-label="Fechar sacola"><i data-lucide="x" width="18" height="18"></i></button>
     </div>
     <div class="sheet-scroll cart-body" id="cart-body"></div>
+    <div class="cart-ctas" id="cart-ctas" hidden></div>
   </div>
 </div>
 
@@ -1701,7 +1716,7 @@ try{if(localStorage.getItem('age_ok')==='1')document.documentElement.classList.a
       </div>
       <span class="co-sep" aria-hidden="true">›</span>
       <div class="co-step-item" id="cs-2">
-        <div class="co-step-top"><span class="co-step-ic"><i data-lucide="map-pin" width="14" height="14"></i></span><span class="co-step-lbl">Entrega</span></div>
+        <div class="co-step-top"><span class="co-step-ic"><i data-lucide="map-pin" width="14" height="14"></i></span><span class="co-step-lbl">Recebimento</span></div>
       </div>
       <span class="co-sep" aria-hidden="true">›</span>
       <div class="co-step-item" id="cs-3">
@@ -2001,6 +2016,25 @@ function deliveryFeeText() {
   const fee = deliveryFee();
   return fee === null ? 'Selecione o bairro' : fee === 0 ? 'Grátis' : `R$ ${fmt(fee)}`;
 }
+const PICKUP_ADDRESS = 'R. Izidoro Gustavo Jarschel, 146 – Tricolin, Canoinhas – SC, 89462-204';
+function checkoutTotalText(subtotal){
+  return coData.pickup ? 'R$ ' + fmt(subtotal) : orderTotalText(subtotal);
+}
+function updateCheckoutFreight(){
+  const fee = document.getElementById('os-fee');
+  fee.textContent = coData.pickup ? 'Sem taxa de entrega' : deliveryFeeText();
+  fee.classList.toggle('gratis', coData.pickup || deliveryFee() === 0);
+  const amount = checkoutTotalText(cartTotal());
+  document.querySelector('.os-val').textContent = amount;
+  document.querySelector('.os-total .val').textContent = amount;
+}
+function chooseCheckoutPickup(pickup){
+  coData.pickup = pickup;
+  const fields = document.getElementById('co-address-fields');
+  fields.hidden = fields.disabled = pickup;
+  document.getElementById('co-pickup-card').hidden = !pickup;
+  updateCheckoutFreight();
+}
 function renderNeighborhoodOptions() {
   const list = document.getElementById('loc-bairro');
   list.replaceChildren();
@@ -2037,11 +2071,7 @@ function confirmNeighborhood() {
   const checkoutLabel = document.getElementById('co-bairro-txt');
   if (checkoutLabel) {
     checkoutLabel.textContent = deliveryNeighborhood;
-    document.getElementById('os-fee').textContent = deliveryFeeText();
-    document.getElementById('os-fee').classList.toggle('gratis', deliveryFee() === 0);
-    const amount = orderTotalText(cartTotal());
-    document.querySelector('.os-val').textContent = amount;
-    document.querySelector('.os-total .val').textContent = amount;
+    updateCheckoutFreight();
   }
   locSkip();
   if (!document.getElementById('s-cart').classList.contains('hidden')) renderCartPage();
@@ -2865,7 +2895,10 @@ function removeDrawerItem(id){
 
 function renderCartPage(){
   const el = document.getElementById('cart-body');
+  const actions = document.getElementById('cart-ctas');
+  actions.hidden = !cart.length;
   if(!cart.length){
+    actions.replaceChildren();
     el.innerHTML=`
       <div style="text-align:center;padding:48px 0;color:var(--fg-2)">
         <div style="margin-bottom:14px"><i data-lucide="shopping-bag" width="56" height="56"></i></div>
@@ -2911,15 +2944,15 @@ function renderCartPage(){
       <span class="cart-addr-ic"><i data-lucide="map-pin" width="18" height="18"></i></span>
       <span class="cart-addr-txt" id="cart-addr-txt">${esc(deliveryNeighborhood || 'Informe seu bairro')} · ${deliveryFeeText()}</span>
       <span class="cart-addr-chev"><i data-lucide="chevron-right" width="16" height="16"></i></span>
-    </button>
-    <div class="cart-ctas">
+    </button>`;
+  actions.innerHTML = `
       <button class="btn-finalizar" onclick="openWhen()">
         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-delivery-moto"/></svg> Finalizar pedido
       </button>
       <button class="btn-continuar" onclick="goHome()">
         <i data-lucide="plus" width="16" height="16"></i> Continuar comprando
       </button>
-    </div>`;
+  `;
   lucide.createIcons();
 }
 function removeFromCart(id){
@@ -3045,7 +3078,7 @@ function renderCoStep(){
   el.dataset.step = String(coStep);
   _updateCoStepper();
   const subtotal = cartTotal();
-  const grandTotal = subtotal + (deliveryFee() ?? 0);
+  const grandTotal = subtotal + (coData.pickup ? 0 : deliveryFee() ?? 0);
   /* ── step 0: Meu pedido ── */
   if(coStep===0){
     const totalItems=cart.reduce((s,i)=>s+i.qty,0);
@@ -3093,7 +3126,7 @@ function renderCoStep(){
         </div>` : '<p class="co-items-empty">Sua sacola está vazia.</p>'}
         <div class="co-items-buttons">
           ${cart.length ? `<button type="button" class="btn-primary" onclick="coStep=1;renderCoStep()">
-            Continuar para entrega
+            Continuar
           </button>` : ''}
           <button type="button" class="btn-continuar" onclick="closeCheckout();goHome()">
             Continuar comprando
@@ -3107,21 +3140,35 @@ function renderCoStep(){
   const summaryHtml = `
     <div class="order-summary">
       <button type="button" class="os-toggle" id="os-toggle" aria-expanded="${summaryOpen}" aria-controls="os-details" onclick="toggleSummary()">
-        <span><i data-lucide="package" width="14" height="14"></i> ${cart.reduce((s,i)=>s+i.qty,0)} item(s) · <span class="os-val">${orderTotalText(subtotal)}</span></span>
+        <span><i data-lucide="package" width="14" height="14"></i> ${cart.reduce((s,i)=>s+i.qty,0)} item(s) · <span class="os-val">${checkoutTotalText(subtotal)}</span></span>
         <span class="os-arrow"><i data-lucide="chevron-down" width="16" height="16"></i></span>
       </button>
       <div class="os-details" id="os-details" ${summaryOpen ? '' : 'hidden'}>
         ${cart.map(i=>`<div class="os-item"><span>${i.name} ×${i.qty}</span><span>R$ ${fmt(cartUnitPrice(i)*i.qty)}</span></div>`).join('')}
         <div class="os-meta"><span>Subtotal</span><span>R$ ${fmt(subtotal)}</span></div>
-        <div class="os-meta"><span><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-delivery-moto"/></svg> Frete</span><span id="os-fee"${deliveryFee()===0?' class="gratis"':''}>${deliveryFeeText()}</span></div>
+        <div class="os-meta"><span><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-delivery-moto"/></svg> Frete</span><span id="os-fee"${coData.pickup || deliveryFee()===0?' class="gratis"':''}>${coData.pickup ? 'Sem taxa de entrega' : deliveryFeeText()}</span></div>
       </div>
-      <div class="os-total"><span class="label">Total</span><span class="val">${orderTotalText(subtotal)}</span></div>
+      <div class="os-total"><span class="label">Total</span><span class="val">${checkoutTotalText(subtotal)}</span></div>
     </div>`;
   let content = '';
   if(coStep===1){
     content=`
       <form onsubmit="event.preventDefault();nextStep(1)">
-      <h2 class="form-section-title"><i data-lucide="map-pin" width="16" height="16"></i> Endereço de entrega</h2>
+      <h2 class="form-section-title"><i data-lucide="map-pin" width="16" height="16"></i> Como você quer receber?</h2>
+      <label class="pay-opt">
+        <input type="radio" name="co-fulfillment" onchange="chooseCheckoutPickup(false)" ${coData.pickup ? '' : 'checked'}>
+        <span class="pay-info"><strong>Receber em casa</strong><span>Frete calculado pelo bairro</span></span>
+      </label>
+      <label class="pay-opt">
+        <input type="radio" name="co-fulfillment" onchange="chooseCheckoutPickup(true)" ${coData.pickup ? 'checked' : ''}>
+        <span class="pay-info"><strong>Retirar na loja</strong><span>Sem taxa de entrega</span></span>
+      </label>
+      <div id="co-pickup-card" class="co-pickup-card" ${coData.pickup ? '' : 'hidden'}>
+        <p><strong>${PICKUP_ADDRESS}</strong></p>
+        <p>Acompanhe o pedido e retire quando ele estiver pronto.</p>
+        <p><a href="tel:+5547997240801">(47) 99724-0801</a></p>
+      </div>
+      <fieldset id="co-address-fields" class="co-address-fields" ${coData.pickup ? 'hidden disabled' : ''}>
       <div class="form-group"><label for="co-bairro">Bairro *</label>
         <button type="button" class="form-input co-neighborhood-button" id="co-bairro" aria-haspopup="dialog" onclick="openNeighborhoodPicker(this)">
           <span id="co-bairro-txt">${esc(deliveryNeighborhood || 'Selecione o bairro')}</span>
@@ -3142,6 +3189,7 @@ function renderCoStep(){
       <div class="form-group"><label for="co-ref">Referência</label>
         <input class="form-input" id="co-ref" placeholder="Ponto de referência" value="${esc(coData.ref||'').replaceAll('"', '&quot;')}">
       </div>
+      </fieldset>
       <div class="step-btns">
         <button type="button" class="btn-back" onclick="coStep=0;renderCoStep()" aria-label="Voltar"><i data-lucide="arrow-left" width="18" height="18"></i></button>
         <button class="btn-primary btn-next" type="submit">Continuar</button>
@@ -3167,7 +3215,7 @@ function renderCoStep(){
       </form>`;
   } else if(coStep===3){
     content=`
-      <p class="co-delivery-info">Entrega em <strong>${esc(coData.bairro||'')}</strong></p>
+      <p class="co-delivery-info">${coData.pickup ? 'Retirada no balcão' : `Entrega em <strong>${esc(coData.bairro||'')}</strong>`}</p>
       <h2 class="form-section-title"><i data-lucide="credit-card" width="16" height="16"></i> Forma de pagamento</h2>
       <label class="pay-opt${payMethod==='pix'?' selected':''}">
         <input type="radio" name="pay" onchange="selPay('pix')" ${payMethod==='pix'?'checked':''}>
@@ -3190,7 +3238,7 @@ function renderCoStep(){
       <label class="pay-opt${payMethod==='maquininha'?' selected':''}">
         <input type="radio" name="pay" onchange="selPay('maquininha')" ${payMethod==='maquininha'?'checked':''}>
         <span class="pay-icon"><i data-lucide="credit-card" width="22" height="22"></i></span>
-        <div class="pay-info"><strong>Pagar na Maquininha</strong><span>Débito ou crédito na entrega</span></div>
+        <div class="pay-info"><strong>Pagar na Maquininha</strong><span>Débito ou crédito ${coData.pickup ? 'no balcão' : 'na entrega'}</span></div>
       </label>
       <label class="pay-opt${payMethod==='credito'?' selected':''}">
         <input type="radio" name="pay" onchange="selPay('credito')" ${payMethod==='credito'?'checked':''}>
@@ -3264,7 +3312,7 @@ function renderCoStep(){
       <label class="pay-opt${payMethod==='dinheiro'?' selected':''}">
         <input type="radio" name="pay" onchange="selPay('dinheiro')" ${payMethod==='dinheiro'?'checked':''}>
         <span class="pay-icon"><i data-lucide="banknote" width="22" height="22"></i></span>
-        <div class="pay-info"><strong>Dinheiro</strong><span>Pagamento na entrega</span></div>
+        <div class="pay-info"><strong>Dinheiro</strong><span>Pagamento ${coData.pickup ? 'no balcão' : 'na entrega'}</span></div>
       </label>
       ${payMethod==='dinheiro'?`
       <div class="card-form">
@@ -3280,6 +3328,7 @@ function renderCoStep(){
       </div>`;
   } else if(coStep===4){
     const lastOrder=(()=>{try{return JSON.parse(localStorage.getItem('plantao_last_order')||'{}')}catch{return {}}})();
+    const pickup = lastOrder.delivery_type === 'pickup';
     content=`
       <div class="track-screen" id="track-screen">
         <div class="track-header">
@@ -3299,20 +3348,20 @@ function renderCoStep(){
           </div>
           <div class="tl-step" id="tl-2">
             <div class="tl-left"><div class="tl-dot" id="tl-dot-2"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-delivery-moto"/></svg></div><div class="tl-line" id="tl-line-2"></div></div>
-            <div class="tl-info"><div class="tl-label" id="tl-lbl-2">A caminho</div><div class="tl-sub">Entregador saiu para sua localização</div></div>
+            <div class="tl-info"><div class="tl-label" id="tl-lbl-2">${pickup ? 'Pronto para retirada' : 'A caminho'}</div><div class="tl-sub">${pickup ? 'Pode retirar seu pedido no balcão' : 'Entregador saiu para sua localização'}</div></div>
           </div>
           <div class="tl-step" id="tl-3">
             <div class="tl-left"><div class="tl-dot" id="tl-dot-3"><i data-lucide="home" width="14" height="14"></i></div></div>
-            <div class="tl-info"><div class="tl-label" id="tl-lbl-3">Entregue</div><div class="tl-sub">Pedido entregue com sucesso!</div></div>
+            <div class="tl-info"><div class="tl-label" id="tl-lbl-3">${pickup ? 'Retirado' : 'Entregue'}</div><div class="tl-sub">${pickup ? 'Pedido retirado com sucesso!' : 'Pedido entregue com sucesso!'}</div></div>
           </div>
         </div>
         <div class="track-eta">
           <div class="track-poll-dot"></div>
-          <span id="track-eta-txt">Previsão: ${chosenWhen==='imediata'?'15–20 minutos':'Conforme agendado'} · Atualizando ao vivo…</span>
+          <span id="track-eta-txt">${pickup ? 'Acompanhe o preparo' : 'Previsão: ' + (chosenWhen==='imediata'?'15–20 minutos':'Conforme agendado')} · Atualizando ao vivo…</span>
         </div>
         <div class="success-info" style="margin-bottom:12px">
           <p>Nome: <strong>${esc(coData.nome||'—')}</strong></p>
-          <p>Entrega: <strong>${esc(coData.rua||'—')}, ${esc(coData.num||'')}</strong></p>
+          <p>${pickup ? 'Retirada: <strong>' + PICKUP_ADDRESS + '</strong>' : `Entrega: <strong>${esc(coData.rua||'—')}, ${esc(coData.num||'')}</strong>`}</p>
           <p>Pagamento: <strong>${{pix:'PIX',maquininha:'Maquininha',credito:'Cartão de Crédito',dinheiro:'Dinheiro'}[payMethod]||'—'}</strong></p>
         </div>
         <button class="btn-primary" onclick="closeCheckout();goHome();refreshFeed()">Continuar comprando</button>
@@ -3337,19 +3386,21 @@ function toggleSummary(){
 }
 function nextStep(from){
   if(from===1){
-    const rua=document.getElementById('co-rua').value.trim();
-    const num=document.getElementById('co-num').value.trim();
-    const bairro=deliveryNeighborhood;
-    if(!Object.hasOwn(deliveryRates, bairro)||!rua||!num){
-      const field = !Object.hasOwn(deliveryRates, bairro) ? 'co-bairro' : !rua ? 'co-rua' : 'co-num';
-      document.getElementById(field).focus();
-      toast('Selecione o bairro e informe a rua e o número.');
-      return;
+    if (!coData.pickup) {
+      const rua=document.getElementById('co-rua').value.trim();
+      const num=document.getElementById('co-num').value.trim();
+      const bairro=deliveryNeighborhood;
+      if(!Object.hasOwn(deliveryRates, bairro)||!rua||!num){
+        const field = !Object.hasOwn(deliveryRates, bairro) ? 'co-bairro' : !rua ? 'co-rua' : 'co-num';
+        document.getElementById(field).focus();
+        toast('Selecione o bairro e informe a rua e o número.');
+        return;
+      }
+      chooseNeighborhood(bairro);
+      coData.rua=rua; coData.num=num;
+      coData.comp=document.getElementById('co-comp').value;
+      coData.bairro=bairro; coData.ref=document.getElementById('co-ref').value;
     }
-    chooseNeighborhood(bairro);
-    coData.rua=rua; coData.num=num;
-    coData.comp=document.getElementById('co-comp').value;
-    coData.bairro=bairro; coData.ref=document.getElementById('co-ref').value;
     coStep=2;
   } else if(from===2){
     const nome=document.getElementById('co-nome').value.trim();
@@ -3445,7 +3496,7 @@ function selPay(v){
 }
 async function finalizarPedido(){
   if(!payMethod){ toast('Escolha uma forma de pagamento.'); return; }
-  if(!Object.hasOwn(deliveryRates, coData.bairro)){ coStep=1; renderCoStep(); return; }
+  if(!coData.pickup && !Object.hasOwn(deliveryRates, coData.bairro)){ coStep=1; renderCoStep(); return; }
   const btn = document.getElementById('pay-btn');
   const error = document.getElementById('co-payment-error');
   if (btn.disabled) return;
@@ -3487,15 +3538,15 @@ async function finalizarPedido(){
     customer_name: coData.nome,
     customer_phone: coData.tel,
     customer_email: coData.email||'',
-    address_street: coData.rua,
-    address_number: coData.num,
-    address_complement: coData.comp||'',
-    address_neighborhood: coData.bairro,
-    address_reference: coData.ref||'',
-    delivery_fee_cents: deliveryRates[coData.bairro],
+    address_street: coData.pickup ? null : coData.rua,
+    address_number: coData.pickup ? null : coData.num,
+    address_complement: coData.pickup ? null : coData.comp||'',
+    address_neighborhood: coData.pickup ? null : coData.bairro,
+    address_reference: coData.pickup ? null : coData.ref||'',
+    delivery_fee_cents: coData.pickup ? 0 : deliveryRates[coData.bairro],
     payment_method: payMap[payMethod]||'pix',
-    delivery_type: chosenWhen==='imediata'?'immediate':'scheduled',
-    scheduled_at: chosenScheduledAt || null,
+    delivery_type: coData.pickup ? 'pickup' : chosenWhen==='imediata'?'immediate':'scheduled',
+    scheduled_at: coData.pickup ? null : chosenScheduledAt || null,
     notes: payMethod==='dinheiro' ? (()=>{ const t=(document.getElementById('troco-val')?.value||'').trim(); return t?'Troco para: R$ '+t:''; })() : '',
     items_subtotal_cents: Math.round(cartTotal() * 100),
     items: cart.map(i=>({product_id:i.id,product_name:i.name,quantity:i.qty,unit_price:i.price,return_container:i.return_container === true})),
@@ -3580,7 +3631,7 @@ async function finalizarPedido(){
                       exp_year:  rawCard.exp_year,
                       billing_address: billingAddress,
                     },
-                    amount: Math.round((cartTotal() + deliveryFee()) * 100),
+                    amount: payload.items_subtotal_cents + payload.delivery_fee_cents,
                   },
                 }],
                 customer:{ name: coData.nome||name, email: customerEmail },
@@ -3646,12 +3697,10 @@ async function finalizarPedido(){
     if (payMethod === 'pix' && !j.pix_qr_code && !j.pix_qr_url && !j.pix_key) {
       throw new Error('O pedido foi registrado, mas o Pix não foi gerado. Consulte a loja antes de tentar novamente.');
     }
-    try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, phone: coData.tel, ts: Date.now()})); }catch{}
-    try{ localStorage.setItem('plantao_addr', JSON.stringify({rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
+    try{ localStorage.setItem('plantao_last_order', JSON.stringify({id: j.order?.id||j.id, order_number: j.order?.order_number||j.order_number, phone: coData.tel, delivery_type: payload.delivery_type, ts: Date.now()})); }catch{}
+    if (!coData.pickup) try{ localStorage.setItem('plantao_addr', JSON.stringify({rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
     if(j.threed_secure_url){
-      // 3DS authentication required — save order and redirect
-      try{ localStorage.setItem('plantao_last_order', JSON.stringify({id:j.id||j.order?.id, order_number:j.order_number||j.order?.order_number, phone:coData.tel, ts:Date.now()})); }catch{}
-      try{ localStorage.setItem('plantao_addr', JSON.stringify({rua:coData.rua,num:coData.num,comp:coData.comp,bairro:coData.bairro,ref:coData.ref,tel:coData.tel})); }catch{}
+      // 3DS authentication required — redirect
       cart=[]; saveCart(); updateBadge();
       window.location.href = j.threed_secure_url;
       return;
@@ -3849,6 +3898,12 @@ const STATUS_LABELS = {
   'cancelled':  'Cancelado',
 };
 
+function orderStatusLabel(status, pickup){
+  if (pickup && ['ready','delivering','on_the_way'].includes(status)) return 'Pronto para retirada';
+  if (pickup && status === 'delivered') return 'Retirado';
+  return STATUS_LABELS[status] || status;
+}
+
 function updateTrackingBanner(){
   try {
     const b = document.getElementById('track-banner');
@@ -3901,7 +3956,7 @@ async function pollOrderStatus(){
     if(!j.success || !j.order) return;
     const status = j.order.status || 'new';
     // Save last known status so modal can restore it when reopened
-    try{ const o=JSON.parse(localStorage.getItem('plantao_last_order')||'{}'); o.last_status=status; localStorage.setItem('plantao_last_order',JSON.stringify(o)); }catch{}
+    try{ const o=JSON.parse(localStorage.getItem('plantao_last_order')||'{}'); o.last_status=status; o.delivery_type=j.order.delivery_type; localStorage.setItem('plantao_last_order',JSON.stringify(o)); }catch{}
     updateTrackUI(status);
   } catch {}
 }
@@ -3912,18 +3967,19 @@ function updateTrackUI(status){
   const etaTxt = document.getElementById('track-eta-txt');
   if(!badge) return;
 
-  badge.textContent = STATUS_LABELS[status] || status;
+  const pickup = JSON.parse(localStorage.getItem('plantao_last_order') || '{}').delivery_type === 'pickup';
+  badge.textContent = orderStatusLabel(status, pickup);
   badge.className = 'track-status-badge';
   if(status === 'delivered') badge.classList.add('delivered');
   if(status === 'cancelled') badge.classList.add('cancelled');
 
   if(status === 'delivered'){
-    if(etaTxt) etaTxt.textContent = 'Pedido entregue com sucesso! Obrigado 🍺';
+    if(etaTxt) etaTxt.textContent = pickup ? 'Pedido retirado com sucesso! Obrigado 🍺' : 'Pedido entregue com sucesso! Obrigado 🍺';
     stopOrderTracking();
     try{const o=JSON.parse(localStorage.getItem('plantao_last_order')||'{}');o.done=true;localStorage.setItem('plantao_last_order',JSON.stringify(o));}catch{}
     updateTrackingBanner();
   } else if(status === 'delivering' || status === 'on_the_way'){
-    if(etaTxt) etaTxt.textContent = 'Entregador a caminho · Atualizando ao vivo…';
+    if(etaTxt) etaTxt.textContent = pickup ? 'Seu pedido está pronto no balcão.' : 'Entregador a caminho · Atualizando ao vivo…';
   } else if(status === 'cancelled'){
     if(etaTxt) etaTxt.textContent = 'Pedido cancelado. Dúvidas? Entre em contato.';
     stopOrderTracking();
@@ -3939,7 +3995,7 @@ function updateTrackUI(status){
     line?.classList.remove('done');
     if(step < 0) continue;
     if(i < step){ dot.classList.add('done'); lbl?.classList.add('done'); line?.classList.add('done'); }
-    else if(i === step){ dot.classList.add(status==='delivered'?'done':'active'); lbl?.classList.add('active'); if(line) line.classList.add(step>0?'done':''); }
+    else if(i === step){ dot.classList.add(status==='delivered'?'done':'active'); lbl?.classList.add('active'); if(line && step>0) line.classList.add('done'); }
   }
 }
 
@@ -4125,15 +4181,15 @@ async function acctTrackOrder(){
   try {
     const r = await fetch(`${API}/orders?order_number=${encodeURIComponent(num)}&phone=${encodeURIComponent(tel)}`);
     const j = await r.json();
-    if(!j.success || !j.orders || !j.orders.length){
+    if(!r.ok || !j.success || !j.order){
       err.textContent='Pedido não encontrado. Verifique o número e telefone.'; err.style.display='';
       btn.disabled=false; btn.textContent='Buscar pedido →'; return;
     }
-    const o = j.orders[0];
+    const o = j.order;
     const st = o.status||'new';
-    const label = STATUS_LABELS[st]||st;
+    const label = orderStatusLabel(st, o.delivery_type === 'pickup');
     res.style.display='';
-    res.innerHTML = `<div class="order-card" onclick="acctOpenOrder('${esc(o.order_number)}')">
+    res.innerHTML = `<div class="order-card" onclick="acctOpenOrder('${esc(o.order_number)}', ${o.delivery_type === 'pickup'})">
       <div class="order-card-top">
         <div><div class="order-num">#${esc(o.order_number)}</div><div class="order-date">${fmtDate(o.created_at)}</div></div>
         <div class="order-total">R$ ${fmt(o.total)}</div>
@@ -4142,7 +4198,7 @@ async function acctTrackOrder(){
       <div style="font-size:12px;color:var(--fg-2);margin-top:8px">Toque para ver detalhes</div>
     </div>`;
     // Pre-fill for tracking
-    try{ const d = JSON.parse(localStorage.getItem('plantao_last_order')||'{}'); d.order_number=o.order_number; d.phone=tel; d.done=false; d.ts=Date.now(); localStorage.setItem('plantao_last_order',JSON.stringify(d)); }catch{}
+    try{ const d = JSON.parse(localStorage.getItem('plantao_last_order')||'{}'); if(d.order_number!==o.order_number) delete d.last_status; d.order_number=o.order_number; d.delivery_type=o.delivery_type; d.phone=tel; d.done=false; d.ts=Date.now(); localStorage.setItem('plantao_last_order',JSON.stringify(d)); }catch{}
     coData.tel = tel;
   } catch {
     err.textContent='Erro de conexão. Tente novamente.'; err.style.display='';
@@ -4163,8 +4219,8 @@ async function acctLoadOrders(){
     }
     list.innerHTML = j.orders.map(o => {
       const st = o.status||'new';
-      const label = STATUS_LABELS[st]||st;
-      return `<div class="order-card" onclick="acctOpenOrder('${esc(o.order_number)}')">
+      const label = orderStatusLabel(st, o.delivery_type === 'pickup');
+      return `<div class="order-card" onclick="acctOpenOrder('${esc(o.order_number)}', ${o.delivery_type === 'pickup'})">
         <div class="order-card-top">
           <div>
             <div class="order-num">#${esc(o.order_number)}</div>
@@ -4181,10 +4237,10 @@ async function acctLoadOrders(){
     list.innerHTML='<div style="text-align:center;padding:24px;color:var(--red)">Erro ao carregar pedidos.</div>';
   }
 }
-function acctOpenOrder(orderNumber){
+function acctOpenOrder(orderNumber, pickup){
   try{
     const last = JSON.parse(localStorage.getItem('plantao_last_order')||'{}');
-    try{ const d = JSON.parse(localStorage.getItem('plantao_last_order')||'{}'); d.order_number=orderNumber; d.done=false; d.ts=Date.now(); localStorage.setItem('plantao_last_order',JSON.stringify(d)); }catch{}
+    try{ const d = JSON.parse(localStorage.getItem('plantao_last_order')||'{}'); if(d.order_number!==orderNumber) delete d.last_status; d.order_number=orderNumber; d.delivery_type=pickup?'pickup':'immediate'; d.done=false; d.ts=Date.now(); localStorage.setItem('plantao_last_order',JSON.stringify(d)); }catch{}
     if(last.phone) coData.tel = last.phone;
     coStep=4; showCheckoutDialog(); renderCoStep(); startOrderTracking();
   } catch {}

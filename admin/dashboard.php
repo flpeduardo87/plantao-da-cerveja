@@ -122,7 +122,7 @@
   </div>
 </div>
 
-<script src="assets/app.js?v=6"></script>
+<script src="assets/app.js?v=7"></script>
 <script>
 let lastNewCount = 0;
 let audioCtx;
@@ -190,7 +190,7 @@ async function loadStats() {
         <td>${o.customer_name}</td>
         <td><strong>${fmtMoney(o.total)}</strong></td>
         <td style="color:var(--fg-2)">${fmtPayment(o.payment_method)}</td>
-        <td>${fmtStatus(o.status)}</td>
+        <td>${fmtStatus(o.status, o.delivery_type)}</td>
         <td style="white-space:nowrap;font-size:12px;color:var(--fg-2)">${fmtDate(o.created_at)}</td>
         <td><button class="btn btn-ghost btn-sm" onclick="viewOrder(${o.id})">Detalhes</button></td>
       </tr>
