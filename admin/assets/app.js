@@ -415,7 +415,9 @@ async function _savePushSub(sub) {
 
 /* Alarme alto de novo pedido: sirene (onda dente-de-serra, volume máximo) + vibração */
 let _alarmCtx;
+function alertsMuted() { try { return localStorage.getItem('alertsMuted') === '1'; } catch { return false; } }
 function playAlarm() {
+  if (alertsMuted()) return;
   try {
     if (!_alarmCtx) _alarmCtx = new (window.AudioContext || window.webkitAudioContext)();
     const ctx = _alarmCtx;
@@ -456,6 +458,7 @@ function playAlarm() {
 /* Repete o alarme enquanto houver pedido "novo" (status new) aguardando aceite */
 let _alarmLoop = null;
 function setAlarmActive(active) {
+  if (alertsMuted()) active = false;
   if (active && !_alarmLoop) {
     _alarmLoop = setInterval(playAlarm, 6000);   // 4,5s de sirene + pausa
   } else if (!active && _alarmLoop) {
@@ -464,6 +467,7 @@ function setAlarmActive(active) {
 }
 
 function sendBrowserNotification(count) {
+  if (alertsMuted()) return;
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
   new Notification('🍺 NOVO PEDIDO!', {
     body: `${count} pedido(s) aguardando confirmação`,
@@ -475,7 +479,30 @@ function sendBrowserNotification(count) {
   });
 }
 
+async function toggleAlerts() {
+  if (alertsMuted()) {
+    try { localStorage.removeItem('alertsMuted'); } catch {}
+    playAlarm();
+    try { await subscribePush(); } catch {}
+    toast('🔔 Alertas reativados');
+  } else {
+    try { localStorage.setItem('alertsMuted', '1'); } catch {}
+    setAlarmActive(false);
+    if (_alarmCtx) { try { _alarmCtx.close(); } catch {} _alarmCtx = null; }
+    if (typeof stopFlash === 'function') stopFlash();
+    if (navigator.vibrate) navigator.vibrate(0);
+    try {
+      const reg = _pushReg || await initPushSW();
+      const sub = reg && await reg.pushManager.getSubscription();
+      if (sub) await sub.unsubscribe();
+    } catch {}
+    toast('🔕 Alertas desativados neste aparelho');
+  }
+  updateNotifyBtn();
+}
+
 async function askNotifyPermission() {
+  try { localStorage.removeItem('alertsMuted'); } catch {}
   playAlarm();
   if (!('Notification' in window)) { toast('Som ativado!'); return; }
   const p = await Notification.requestPermission();
@@ -492,11 +519,18 @@ function updateNotifyBtn() {
   const btn = document.getElementById('btn-notify');
   if (!btn) return;
   if (!('Notification' in window)) { btn.style.display = 'none'; return; }
-  if (Notification.permission === 'granted') {
+  if (Notification.permission === 'granted' && alertsMuted()) {
+    btn.innerHTML = '<i data-lucide="bell-off" width="14" height="14"></i> Alertas desativados';
+    btn.style.color = 'var(--red, #ef4444)';
+    btn.disabled = false;
+    btn.title = 'Clique para reativar os alertas';
+    btn.onclick = toggleAlerts;
+  } else if (Notification.permission === 'granted') {
     btn.innerHTML = '<i data-lucide="bell" width="14" height="14"></i> Alertas ativos';
     btn.style.color = 'var(--green)';
-    btn.disabled = true;
-    btn.onclick = null;
+    btn.disabled = false;
+    btn.title = 'Clique para desativar os alertas';
+    btn.onclick = toggleAlerts;
   } else {
     btn.innerHTML = '<i data-lucide="bell-off" width="14" height="14"></i> Ativar alertas';
     btn.style.color = '';
