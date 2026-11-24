@@ -194,6 +194,9 @@ class PagarMe {
             'payments' => [$paymentEntry],
         ];
 
+        $clientIp = $this->clientIp();
+        if ($clientIp) $payload['ip'] = $clientIp;
+
         $result = $this->request('POST', '/orders', $payload);
 
         $orderStatus  = $result['status'] ?? 'failed';
@@ -381,6 +384,20 @@ class PagarMe {
     }
 
     // ── Interno ──────────────────────────────────────────────────────────────────────
+
+    private function clientIp(): ?string {
+        $candidates = [
+            $_SERVER['HTTP_CF_CONNECTING_IP'] ?? '',
+            trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '')[0]),
+            $_SERVER['REMOTE_ADDR'] ?? '',
+        ];
+        foreach ($candidates as $ip) {
+            if ($ip && filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                return $ip;
+            }
+        }
+        return null;
+    }
 
     private function request(string $method, string $path, array $payload = []): array {
         $url = $this->baseUrl . $path;
