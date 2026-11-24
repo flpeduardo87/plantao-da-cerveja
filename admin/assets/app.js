@@ -409,6 +409,16 @@ function playAlarm() {
   } catch {}
 }
 
+/* Repete o alarme enquanto houver pedido "novo" (status new) aguardando aceite */
+let _alarmLoop = null;
+function setAlarmActive(active) {
+  if (active && !_alarmLoop) {
+    _alarmLoop = setInterval(playAlarm, 6000);   // 4,5s de sirene + pausa
+  } else if (!active && _alarmLoop) {
+    clearInterval(_alarmLoop); _alarmLoop = null;
+  }
+}
+
 function sendBrowserNotification(count) {
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
   new Notification('🍺 NOVO PEDIDO!', {

@@ -155,7 +155,7 @@
   </div>
 </div>
 
-<script src="assets/app.js?v=8"></script>
+<script src="assets/app.js?v=9"></script>
 <script>
 let allOrders = [];
 let currentPage = 1;
@@ -318,6 +318,7 @@ async function loadOrders() {
     else { badge.style.display = 'none'; clearNewAlerts(); }
     if (newOrders > lastNewCount && lastNewCount >= 0) alertNewOrders(newOrders);
     lastNewCount = newOrders;
+    setAlarmActive(newOrders > 0);
 
     renderOrders();
   } catch (e) {

@@ -122,7 +122,7 @@
   </div>
 </div>
 
-<script src="assets/app.js?v=8"></script>
+<script src="assets/app.js?v=9"></script>
 <script>
 let lastNewCount = 0;
 let audioCtx;
@@ -166,6 +166,7 @@ async function loadStats() {
       toast(`${newOrders - lastNewCount} novo(s) pedido(s) aguardando`);
     }
     lastNewCount = newOrders;
+    setAlarmActive(newOrders > 0);
 
     const rows = (recent.data || []).slice(0, 8);
     const tbody = document.getElementById('recent-tbody');
