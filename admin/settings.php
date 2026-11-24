@@ -270,7 +270,7 @@
 }
 </style>
 
-<script src="assets/app.js?v=6"></script>
+<script src="assets/app.js?v=8"></script>
 <script>
 const DAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const DAYS_DEFAULT = {

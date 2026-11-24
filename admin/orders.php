@@ -155,7 +155,7 @@
   </div>
 </div>
 
-<script src="assets/app.js?v=7"></script>
+<script src="assets/app.js?v=8"></script>
 <script>
 let allOrders = [];
 let currentPage = 1;
@@ -169,23 +169,7 @@ const PAGE_TITLE = 'Pedidos · Plantão Admin';
 const urlParams = new URLSearchParams(window.location.search);
 const directOrderId = urlParams.get('id');
 
-function playChime() {
-  try {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    [[523.25, 0], [659.25, 0.15], [783.99, 0.30]].forEach(([freq, delay]) => {
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine'; osc.frequency.value = freq;
-      osc.connect(gain); gain.connect(audioCtx.destination);
-      const t = audioCtx.currentTime + delay;
-      gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(0.35, t + 0.04);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
-      osc.start(t); osc.stop(t + 0.6);
-    });
-  } catch {}
-}
+function playChime() { playAlarm(); }
 
 function flashTitle(count) {
   clearInterval(titleFlashTimer); let on = true;

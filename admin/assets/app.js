@@ -369,19 +369,60 @@ async function _savePushSub(sub) {
   await api('/push', { method: 'POST', body: JSON.stringify(sub.toJSON()) });
 }
 
+/* Alarme alto de novo pedido: sirene (onda dente-de-serra, volume máximo) + vibração */
+let _alarmCtx;
+function playAlarm() {
+  try {
+    if (!_alarmCtx) _alarmCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = _alarmCtx;
+    if (ctx.state === 'suspended') ctx.resume();
+    // Compressor evita distorção e deixa o som mais "cheio"/alto
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -24; comp.knee.value = 12; comp.ratio.value = 12;
+    comp.attack.value = 0.003; comp.release.value = 0.15;
+    const master = ctx.createGain();
+    master.gain.value = 1.0;
+    comp.connect(master); master.connect(ctx.destination);
+
+    const t0 = ctx.currentTime;
+    const BEEPS = 14;          // ~4,5 segundos
+    const STEP  = 0.32;
+    for (let i = 0; i < BEEPS; i++) {
+      const t = t0 + i * STEP;
+      const hi = i % 2 === 0;
+      // duas camadas (fundamental + oitava) para soar estridente
+      [[hi ? 1400 : 950, 'sawtooth', 0.9], [hi ? 2800 : 1900, 'square', 0.35]].forEach(([f, type, vol]) => {
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(f, t);
+        osc.frequency.linearRampToValueAtTime(f * 1.12, t + STEP * 0.9);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.linearRampToValueAtTime(vol, t + 0.01);
+        g.gain.setValueAtTime(vol, t + STEP * 0.8);
+        g.gain.linearRampToValueAtTime(0.0001, t + STEP * 0.98);
+        osc.connect(g); g.connect(comp);
+        osc.start(t); osc.stop(t + STEP);
+      });
+    }
+    if (navigator.vibrate) navigator.vibrate([400, 150, 400, 150, 400, 150, 800]);
+  } catch {}
+}
+
 function sendBrowserNotification(count) {
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
-  new Notification('🍺 Novo pedido!', {
+  new Notification('🍺 NOVO PEDIDO!', {
     body: `${count} pedido(s) aguardando confirmação`,
     icon: '../favicon-icone.webp',
     tag: 'new-order',
     renotify: true,
+    requireInteraction: true,
+    vibrate: [400, 150, 400, 150, 400, 150, 800],
   });
 }
 
 async function askNotifyPermission() {
-  if (typeof playChime === 'function') playChime();
-  else if (typeof beep === 'function') beep();
+  playAlarm();
   if (!('Notification' in window)) { toast('Som ativado!'); return; }
   const p = await Notification.requestPermission();
   if (p === 'granted') {
