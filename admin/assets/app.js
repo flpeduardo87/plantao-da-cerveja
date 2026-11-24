@@ -156,6 +156,16 @@ function askRefund(pmLabel) {
   });
 }
 
+async function markRefunded(id) {
+  if (!confirm('Confirmar que o valor deste pedido foi estornado ao cliente?')) return;
+  try {
+    await api(`/orders/${id}`, { method: 'PUT', body: JSON.stringify({ payment_status: 'refunded' }) });
+    toast('Pagamento marcado como estornado');
+    closeModal('modal-order');
+    if (typeof loadOrders === 'function') loadOrders();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
 async function changeStatus(id, status) {
   if (!status) return;
   try {
@@ -256,6 +266,7 @@ async function viewOrder(id) {
       <div style="display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap">
         ${nextStatusBtn(o.id,o.status,o.delivery_type)}
         ${o.status!=='delivered'&&o.status!=='cancelled'?`<button class="btn btn-sm btn-danger" onclick="changeStatus(${o.id},'cancelled');closeModal('modal-order')">Cancelar pedido</button>`:''}
+        ${o.status==='cancelled'&&o.payment_status==='paid'&&['credit_card','debit_card','pix'].includes(o.payment_method)?`<button class="btn btn-sm" style="background:#EDE9FE;color:#5B21B6;border:none" onclick="markRefunded(${o.id})">↩ Marcar como estornado</button>`:''}
       </div>
       <button class="btn btn-ghost btn-sm" onclick="printOrder(_viewingOrder)"><i data-lucide="printer" width="14" height="14"></i> Imprimir</button>
       <button class="btn btn-sm" style="background:#25D366;color:#fff;border:none;gap:5px" onclick="shareOrderWhatsapp(_viewingOrder)"><i data-lucide="message-circle" width="14" height="14"></i> WhatsApp</button>
