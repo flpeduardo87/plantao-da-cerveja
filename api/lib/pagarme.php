@@ -148,7 +148,7 @@ class PagarMe {
                 'payment_method' => 'credit_card',
                 'credit_card'    => [
                     'installments'         => max(1, (int)$installments),
-                    'statement_descriptor' => 'PLANT CERVEJA',
+                    'statement_descriptor' => 'PLANTAO',
                     'card'                 => $cardObj,
                     'authentication'       => [
                         'type'          => 'threed_secure',
@@ -166,7 +166,7 @@ class PagarMe {
                 'credit_card'    => [
                     'operation_type'       => 'auth_and_capture',
                     'installments'         => max(1, (int)$installments),
-                    'statement_descriptor' => 'PLANT CERVEJA',
+                    'statement_descriptor' => 'PLANTAO',
                     'card_token'           => $cardToken,
                     'card'                 => ['billing_address' => $addrObj],
                 ],
