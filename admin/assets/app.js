@@ -462,9 +462,30 @@ function updateNotifyBtn() {
   lucide.createIcons();
 }
 
+/* Vigia global: em páginas sem monitor próprio (produtos, estoque, etc.) também toca o alarme */
+function initGlobalOrderWatch() {
+  if (window.__ownAlarm) return;          // dashboard/pedidos já cuidam disso
+  let last = -1;
+  const tick = async () => {
+    try {
+      const r = await api('/orders?status=new&limit=1');
+      const n = Number(r.total || 0);
+      const badge = document.getElementById('new-count');
+      if (badge) { badge.textContent = n; badge.style.display = n > 0 ? '' : 'none'; }
+      if (last >= 0 && n > last) { playAlarm(); sendBrowserNotification(n); toast(`${n - last} novo(s) pedido(s) aguardando`); }
+      else if (last < 0 && n > 0) playAlarm();   // já tinha pedido esperando ao abrir a página
+      last = n;
+      setAlarmActive(n > 0);
+    } catch {}
+  };
+  tick();
+  setInterval(tick, 15000);
+}
+
 /* ── Init on load ── */
 document.addEventListener('DOMContentLoaded', () => {
   if (!authGuard()) return;
+  initGlobalOrderWatch();
   initSidebar();
   initStoreStatus();
   initPushSW();

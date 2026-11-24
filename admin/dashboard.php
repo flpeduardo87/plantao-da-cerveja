@@ -122,8 +122,9 @@
   </div>
 </div>
 
-<script src="assets/app.js?v=9"></script>
+<script src="assets/app.js?v=10"></script>
 <script>
+window.__ownAlarm = true;
 let lastNewCount = 0;
 let audioCtx;
 

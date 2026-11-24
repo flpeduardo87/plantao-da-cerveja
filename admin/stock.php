@@ -168,7 +168,7 @@
   </div>
 </div>
 
-<script src="assets/app.js?v=9"></script>
+<script src="assets/app.js?v=10"></script>
 <script>
 let allProducts = [];
 let stockFilter = '';
