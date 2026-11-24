@@ -13,6 +13,7 @@ if ($method === 'GET' && ($sub ?? '') === 'config') {
 
 // ── Token de sessão 3DS (Stone SDK) ──────────────────────────────────────────
 if ($method === 'GET' && ($sub ?? '') === '3ds-token') {
+    $pm = new PagarMe();
     if (!$pm->isConfigured()) json_err('Pagar.me não configurado', 503);
     try {
         $token = $pm->get3dsToken();
