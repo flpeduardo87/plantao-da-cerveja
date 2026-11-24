@@ -46,6 +46,7 @@ $statusMap = [
     'order.canceled'        => ['payment_status' => 'failed', 'status' => 'cancelled'],
     'charge.paid'           => ['payment_status' => 'paid',   'status' => 'accepted'],
     'charge.payment_failed' => ['payment_status' => 'failed', 'status' => null],
+    'charge.refunded'       => ['payment_status' => 'refunded', 'status' => 'cancelled'],
 ];
 
 if (!isset($statusMap[$type])) {
@@ -62,8 +63,21 @@ if (str_starts_with($type, 'order.')) {
 
 if ($orderNumber) {
     $update = $statusMap[$type];
-    $sets   = ['payment_status = ?'];
-    $vals   = [$update['payment_status']];
+    $sets   = [];
+    $vals   = [];
+    $where  = 'order_number = ?';
+
+    if ($update['payment_status'] === 'failed') {
+        // Nunca sobrescreve um pagamento já aprovado ou estornado com "falhou"
+        $sets[] = "payment_status = IF(payment_status IN ('pending','failed'), 'failed', payment_status)";
+    } elseif ($update['payment_status'] === 'refunded') {
+        // Estorno só faz sentido para pagamento que foi aprovado
+        $sets[]  = "payment_status = 'refunded'";
+        $where  .= " AND payment_status IN ('paid','refunded')";
+    } else {
+        $sets[] = 'payment_status = ?';
+        $vals[] = $update['payment_status'];
+    }
 
     if ($update['status']) {
         $sets[] = 'status = ?';
@@ -71,7 +85,7 @@ if ($orderNumber) {
     }
 
     $vals[] = $orderNumber;
-    $pdo->prepare('UPDATE orders SET ' . implode(', ', $sets) . ' WHERE order_number = ?')
+    $pdo->prepare('UPDATE orders SET ' . implode(', ', $sets) . " WHERE $where")
         ->execute($vals);
 }
 

@@ -122,6 +122,7 @@ function fmtPayment(p) {
   return { pix: 'PIX', credit_card: 'Cartão crédito', debit_card: 'Cartão débito', cash: 'Dinheiro', machine: 'Maquininha' }[p] || p || '—';
 }
 function fmtPaymentStatus(ps, pm, deliveryType) {
+  if (ps === 'refunded') return '<span class="pay-st pay-st-refunded">↩ Estornado</span>';
   if (pm === 'cash' || pm === 'machine') return `<span class="pay-st pay-st-na">${deliveryType === 'pickup' ? 'No balcão' : 'Na entrega'}</span>`;
   if (ps === 'paid')    return '<span class="pay-st pay-st-paid">✓ Pago</span>';
   if (ps === 'failed')  return '<span class="pay-st pay-st-failed">✗ Falhou</span>';
@@ -133,11 +134,43 @@ function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
 /* ── Status change (shared) ── */
+/* Pergunta se o pedido pago foi estornado ao cancelar. Resolve: 'refund' | 'only' | null (voltar) */
+function askRefund(pmLabel) {
+  return new Promise(resolve => {
+    const ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px';
+    ov.innerHTML = `<div style="background:#fff;color:#0f172a;border-radius:14px;max-width:380px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.35);font-family:inherit">
+      <div style="font-size:17px;font-weight:700;margin-bottom:8px">Este pedido já foi pago</div>
+      <div style="font-size:14px;color:#475569;margin-bottom:18px">Pagamento: <strong>${pmLabel}</strong>.<br>O valor foi devolvido (estornado) ao cliente?</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button data-v="refund" class="btn btn-danger" style="padding:11px">Sim, foi estornado</button>
+        <button data-v="only" class="btn" style="padding:11px;border:1px solid #cbd5e1;background:#fff">Não, só cancelar o pedido</button>
+        <button data-v="" class="btn" style="padding:9px;background:none;border:none;color:#64748b">Voltar</button>
+      </div></div>`;
+    ov.addEventListener('click', e => {
+      const b = e.target.closest('button[data-v]');
+      if (!b && e.target !== ov) return;
+      document.body.removeChild(ov); resolve(b ? (b.dataset.v || null) : null);
+    });
+    document.body.appendChild(ov);
+  });
+}
+
 async function changeStatus(id, status) {
   if (!status) return;
   try {
-    await api(`/orders/${id}`, { method: 'PUT', body: JSON.stringify({ status }) });
-    toast('Status atualizado');
+    const body = { status };
+    if (status === 'cancelled') {
+      let o = null;
+      try { o = await api(`/orders/${id}`); o = o.data || o; } catch {}
+      if (o && o.payment_status === 'paid' && ['credit_card', 'debit_card', 'pix'].includes(o.payment_method)) {
+        const choice = await askRefund(fmtPayment(o.payment_method));
+        if (!choice) return;
+        if (choice === 'refund') body.payment_status = 'refunded';
+      }
+    }
+    await api(`/orders/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    toast(body.payment_status === 'refunded' ? 'Pedido cancelado e marcado como estornado' : 'Status atualizado');
     if (typeof loadOrders === 'function') loadOrders();
     else if (typeof loadStats === 'function') loadStats();
   } catch (e) { toast(e.message, 'error'); }
