@@ -3641,6 +3641,7 @@ async function finalizarPedido(){
               challengeOverlay.style.display='none';
             }
             const auth = Array.isArray(tdsResult)?tdsResult[0]:tdsResult;
+            payload.tds_note = ('trans_status=' + (auth?.trans_status||'none') + ' tds_id=' + (auth?.tds_server_trans_id||'-') + (auth?.challenge_canceled?' challenge_canceled':'')).slice(0,200);
             if(auth && auth.trans_status==='Y'){
               payload.card_raw = rawCard;
               payload.tds_transaction_id = auth.tds_server_trans_id;
