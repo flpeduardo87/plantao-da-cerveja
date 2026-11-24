@@ -3645,6 +3645,8 @@ async function finalizarPedido(){
               payload.card_raw = rawCard;
               payload.tds_transaction_id = auth.tds_server_trans_id;
               used3ds = true;
+            } else {
+              payload.tds_note = 'trans_status=' + (auth?.trans_status||'none') + (auth?.challenge_canceled?' challenge_canceled':'');
             }
           }
         }
@@ -3653,6 +3655,7 @@ async function finalizarPedido(){
         const challengeOverlay = document.getElementById('tds-challenge-overlay');
         if(challengeOverlay) challengeOverlay.style.display='none';
         console.warn('3DS fallback:', tdsErr?.message||tdsErr);
+        try{ payload.tds_note = ('error=' + [tdsErr?.getCode?.(), tdsErr?.getStatus?.(), tdsErr?.message].filter(Boolean).join('|')).slice(0,200); }catch{}
       }
 
       // ── Fallback: tokenização padrão ─────────────────────────────────────

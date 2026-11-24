@@ -216,6 +216,7 @@ match ($method) {
             $tdsTransId   = trim($d['tds_transaction_id'] ?? '');
             $cardRaw      = is_array($d['card_raw'] ?? null) ? $d['card_raw'] : null;
             $use3ds       = $tdsTransId && $cardRaw && isset($cardRaw['number']);
+            error_log('3DS cartao: ' . ($use3ds ? 'autenticado' : 'sem 3DS') . ' ' . substr(preg_replace('/[^\w=|:. -]/', '', (string)($d['tds_note'] ?? '')), 0, 200));
             if (!$cardToken && !$use3ds) {
                 json_err('Token do cartão ou dados 3DS ausentes.');
             }
