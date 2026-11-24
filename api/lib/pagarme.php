@@ -215,9 +215,27 @@ class PagarMe {
             ?? ($lastTxn['threed_secure_object']['acs_url'] ?? null)
             ?? null;
 
+        if (!$isPaid) {
+            error_log('Pagar.me cartao nao pago: ' . json_encode([
+                'order'      => $order['order_number'] ?? null,
+                'used_3ds'   => (bool)($rawCard && $tdsTransId),
+                'order_st'   => $orderStatus,
+                'charge_st'  => $chargeStatus,
+                'txn_st'     => $txnStatus,
+                'acq_msg'    => $lastTxn['acquirer_message'] ?? null,
+                'acq_code'   => $lastTxn['acquirer_return_code'] ?? null,
+                'antifraud'  => $lastTxn['antifraud_response'] ?? null,
+                'gateway'    => $lastTxn['gateway_response'] ?? null,
+                'brand'      => $lastTxn['card']['brand'] ?? null,
+                'funding'    => $lastTxn['card']['type'] ?? null,
+            ], JSON_UNESCAPED_UNICODE));
+        }
+
         // Decline message from acquirer — only show when truly failed
         $declineMsg = null;
-        if (!$isPaid && !$threedUrl) {
+        if (!$isPaid && !$threedUrl && ($lastTxn['antifraud_response']['status'] ?? '') === 'reproved') {
+            $declineMsg = 'Pagamento não aprovado pela análise de segurança. Tente outro cartão ou pague por PIX.';
+        } elseif (!$isPaid && !$threedUrl) {
             $declineMsg = $lastTxn['acquirer_message']
                 ?? ($lastTxn['gateway_response']['errors'][0]['message'] ?? null)
                 ?? ($lastTxn['gateway_response']['code'] ?? null);
