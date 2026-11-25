@@ -2797,7 +2797,22 @@ function goHome(){
   hideScreen('s-account');
   if(window.innerWidth>=900) document.getElementById('desktop-header').classList.add('dh-shown');
   showScreen('s-home');
-  refreshFeed();
+  // Sai de visão de categoria / busca para o início completo (hero visível)
+  const sIn = document.getElementById('s-in');
+  if (sIn) sIn.value = '';
+  const hero = document.querySelector('.store-hero');
+  if (hero && hero.hidden) {
+    hero.hidden = false;
+    document.querySelector('.store-info-card').hidden = false;
+    document.querySelector('.cat-strip').hidden = false;
+    document.getElementById('cat-grid-wrap').hidden = false;
+    document.getElementById('cat-view-hd').hidden = true;
+  }
+  renderSections();
+  // Ancora no topo (hero) da home
+  const feed = document.getElementById('feed');
+  if (feed) feed.scrollTo({top:0, behavior:'smooth'});
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 function goBack(to){
   hideScreen('s-cart');
