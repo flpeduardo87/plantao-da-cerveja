@@ -473,6 +473,11 @@ button,a,input,select,textarea,[role="button"]{touch-action:manipulation;}
 }
 .pm-heart-btn:hover{border-color:var(--fg-2);}
 .pm-heart-btn.active svg{fill:#EF4444;color:#EF4444;}
+.pm-desc-box{margin:0 0 14px;padding:11px 13px 10px;background:var(--bg-2);border-left:3px solid var(--amber);border-radius:0 var(--r-sm) var(--r-sm) 0;}
+.pm-desc-lb{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--fg-3);margin-bottom:4px;}
+.pm-desc-txt{margin:0;font-size:13.5px;line-height:1.55;color:var(--fg-2);white-space:pre-line;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.pm-desc-txt.open{display:block;-webkit-line-clamp:unset;overflow:visible;}
+.pm-desc-more{margin-top:4px;padding:2px 0;background:none;border:none;font:600 12.5px 'Inter',sans-serif;color:var(--fg);text-decoration:underline;cursor:pointer;}
 .pm-deposit{padding:10px 12px;margin-bottom:12px;border:1px solid var(--border);border-radius:var(--r-sm);}
 .pm-deposit legend{padding:0 4px;font-weight:600;font-size:13px;}
 .pm-deposit label{display:flex;align-items:center;gap:8px;min-height:36px;margin:0;cursor:pointer;}
@@ -1510,12 +1515,16 @@ try{if(localStorage.getItem('age_ok')==='1')document.documentElement.classList.a
         </div>
       </div>
     </div>
+    <div class="pm-desc-box hidden" id="pm-desc-box">
+      <div class="pm-desc-lb">Sobre o produto</div>
+      <p class="pm-desc-txt" id="pm-desc"></p>
+      <button type="button" class="pm-desc-more hidden" id="pm-desc-more" onclick="togglePmDesc()">Ver mais</button>
+    </div>
     <fieldset class="pm-deposit hidden" id="pm-deposit" onchange="_updateModalQty()">
       <legend>Casco</legend>
       <label><input type="radio" name="pm-casco" id="pm-buy-casco" checked> <span id="pm-casco-value">Comprar com casco</span></label>
       <label><input type="radio" name="pm-casco" id="pm-return-casco"> Vou entregar um casco por unidade</label>
     </fieldset>
-    <div id="pm-desc" style="font-size:13.5px;color:var(--fg-2);line-height:1.6;padding:0 2px 10px;display:none"></div>
     <button class="pm-add-btn" id="pm-add-btn" onclick="addFromModal()">
       <i data-lucide="shopping-bag" width="18" height="18"></i>
       <span id="pm-add-txt">Adicionar à sacola • R$ 0,00</span>
@@ -2164,6 +2173,7 @@ async function loadData(){
         image_url:p.image_url||null,
         featured:p.featured==1||p.featured===true,
         brand:p.brand||null, unit_type:p.unit_type||null, size:p.size||null,
+        description:(p.description||'').trim(),
         has_deposit:p.has_deposit==1, deposit_value:parseFloat(p.deposit_value)||0,
       });
     });
@@ -2325,7 +2335,7 @@ async function enterStore(){
       }
       // Popula CATALOG com multi-categoria (produto pode estar em vários buckets)
       prods.forEach(p=>{
-        const pObj={id:p.id,name:p.name,price:parseFloat(p.price),old:p.old_price?parseFloat(p.old_price):null,disc:parseInt(p.discount_pct)||0,image_url:p.image_url||null,featured:p.featured==1||p.featured===true,brand:p.brand||null,unit_type:p.unit_type||null,size:p.size||null,has_deposit:p.has_deposit==1,deposit_value:parseFloat(p.deposit_value)||0};
+        const pObj={id:p.id,name:p.name,price:parseFloat(p.price),old:p.old_price?parseFloat(p.old_price):null,disc:parseInt(p.discount_pct)||0,image_url:p.image_url||null,featured:p.featured==1||p.featured===true,brand:p.brand||null,unit_type:p.unit_type||null,size:p.size||null,description:(p.description||'').trim(),has_deposit:p.has_deposit==1,deposit_value:parseFloat(p.deposit_value)||0};
         const catIds=p.category_ids&&p.category_ids.length?p.category_ids:(p.category_id?[p.category_id]:[]);
         const added=new Set();
         catIds.forEach(cid=>{
@@ -2695,12 +2705,27 @@ function openProdModal(id, e){
   document.getElementById('pm-return-casco').checked = returning;
   document.getElementById('pm-buy-casco').checked = !returning;
   const descEl = document.getElementById('pm-desc');
-  if(descEl){ const d = p.description||''; descEl.textContent=d; descEl.style.display=d?'':'none'; }
+  const descBox = document.getElementById('pm-desc-box');
+  const descMore = document.getElementById('pm-desc-more');
+  if(descEl && descBox){
+    const d = (p.description||'').trim();
+    descEl.textContent = d;
+    descEl.classList.remove('open');
+    descMore.classList.add('hidden');
+    descMore.textContent = 'Ver mais';
+    descBox.classList.toggle('hidden', !d);
+    if(d) requestAnimationFrame(()=>{ if(descEl.scrollHeight > descEl.clientHeight + 1) descMore.classList.remove('hidden'); });
+  }
   _updateModalQty();
   const hBtn = document.getElementById('pm-heart-btn');
   if(hBtn){ const isFav = getFavs().includes(String(p.id)); hBtn.classList.toggle('active', isFav); }
   document.getElementById('prod-modal-overlay').classList.remove('hidden');
   lucide.createIcons();
+}
+function togglePmDesc(){
+  const el=document.getElementById('pm-desc'), b=document.getElementById('pm-desc-more');
+  const open=el.classList.toggle('open');
+  b.textContent=open?'Ver menos':'Ver mais';
 }
 function getFavs(){try{return JSON.parse(localStorage.getItem('favs')||'[]');}catch{return[];}}
 function toggleFav(btn){
