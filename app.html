@@ -2427,6 +2427,9 @@ function enterCatView(slug,name,prodsOrFallback=null){
   let prods;
   if(Array.isArray(prodsOrFallback)){
     prods=prodsOrFallback;
+  } else if(slug==='ofertas-img' && (CATALOG[slug]||[]).length){
+    // Card "Black Friday": categoria real cadastrada no admin (slug ofertas-img)
+    prods=CATALOG[slug];
   } else if(slug==='ofertas'||slug==='ofertas-img'||(typeof prodsOrFallback==='string'&&prodsOrFallback==='ofertas')){
     prods=allProds.filter(p=>p.featured);
   } else {
