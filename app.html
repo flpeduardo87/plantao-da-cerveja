@@ -1483,7 +1483,7 @@ try{if(localStorage.getItem('age_ok')==='1')document.documentElement.classList.a
   <div class="loc-card">
     <button type="button" class="loc-close-btn" onclick="locSkip()" aria-label="Fechar">×</button>
     <h2 class="loc-ask" id="loc-title">Bairro de entrega</h2>
-    <p class="loc-sub">Escolha o bairro para ver a taxa de entrega.</p>
+    <p class="loc-sub">Escolha o bairro onde você quer receber. A taxa de entrega aparece no checkout.</p>
     <div class="loc-list" id="loc-bairro" role="radiogroup" aria-labelledby="loc-title"></div>
     <button type="button" class="btn-loc-confirm" id="loc-confirm-btn" onclick="confirmNeighborhood()" disabled>Confirmar bairro</button>
     <button type="button" class="btn-loc-skip" id="loc-skip-btn" onclick="locSkip()">Ver produtos sem informar localização</button>
@@ -2047,7 +2047,7 @@ function chooseCheckoutPickup(pickup){
 function renderNeighborhoodOptions() {
   const list = document.getElementById('loc-bairro');
   list.replaceChildren();
-  for (const [name, cents] of Object.entries(deliveryRates)) {
+  for (const name of Object.keys(deliveryRates)) {
     const option = document.createElement('label');
     option.className = 'loc-option';
     const radio = document.createElement('input');
@@ -2057,10 +2057,7 @@ function renderNeighborhoodOptions() {
     radio.checked = name === deliveryNeighborhood;
     const text = document.createElement('span');
     text.textContent = name;
-    const price = document.createElement('span');
-    price.className = 'loc-option-price';
-    price.textContent = cents ? 'R$ ' + fmt(cents / 100) : 'Grátis';
-    option.append(radio, text, price);
+    option.append(radio, text);
     list.append(option);
   }
   document.getElementById('loc-confirm-btn').disabled = !deliveryNeighborhood;
