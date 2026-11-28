@@ -85,15 +85,24 @@ if ($orderNumber) {
     }
 
     if ($update['status']) {
-        $sets[] = 'status = ?';
-        $vals[] = $update['status'];
+        if ($update['payment_status'] === 'paid') {
+            // PIX pago fica como "Novo" para tocar o alarme até o lojista aceitar.
+            // Demais métodos: aceita automaticamente, mas nunca volta um pedido já em andamento/cancelado.
+            if (!($prevRow && $prevRow['payment_method'] === 'pix')) {
+                $sets[] = "status = IF(status = 'new', ?, status)";
+                $vals[] = $update['status'];
+            }
+        } else {
+            $sets[] = 'status = ?';
+            $vals[] = $update['status'];
+        }
     }
 
     $vals[] = $orderNumber;
     $pdo->prepare('UPDATE orders SET ' . implode(', ', $sets) . " WHERE $where")
         ->execute($vals);
 
-    // PIX confirmado: agora o pedido entra no painel e o lojista é avisado
+    // PIX confirmado: o pedido entra no painel como "Novo" (toca o alarme) e o lojista é avisado
     if ($update['payment_status'] === 'paid' && $prevRow
         && $prevRow['payment_method'] === 'pix' && $prevRow['payment_status'] !== 'paid') {
         try {
