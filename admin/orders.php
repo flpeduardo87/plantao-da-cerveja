@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Pedidos · Plantão Admin</title>
 <link rel="icon" href="../favicon-icone.webp">
-<link rel="stylesheet" href="assets/style.css?v=9">
+<link rel="stylesheet" href="assets/style.css?v=10">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
@@ -155,7 +155,7 @@
   </div>
 </div>
 
-<script src="assets/app.js?v=14"></script>
+<script src="assets/app.js?v=15"></script>
 <script>
 let allOrders = [];
 let currentPage = 1;
@@ -269,7 +269,7 @@ function renderOrders() {
       <tr class="ord-row-${o.status}">
         <td><strong>#${String(o.order_number).slice(-6)}</strong></td>
         <td style="font-size:12px;color:var(--fg-2);white-space:nowrap">${fmtDate(o.created_at)}</td>
-        <td>
+        <td style="min-width:150px">
           <div style="font-weight:600;font-size:13px">${o.customer_name}</div>
           <div style="font-size:11.5px;color:var(--fg-3)">${o.customer_phone||''}</div>
         </td>
@@ -277,7 +277,7 @@ function renderOrders() {
         <td style="white-space:nowrap">${statusBadge(o.status,o.delivery_type)}</td>
         <td style="font-size:12.5px;color:var(--fg-2)">${fmtPayment(o.payment_method)}<br>${fmtPaymentStatus(o.payment_status,o.payment_method,o.delivery_type)}</td>
         <td style="font-size:12.5px;color:var(--fg-2)">${fmtDelivery(o.delivery_type)}</td>
-        <td style="white-space:nowrap">${nextStatusBtn(o.id,o.status,o.delivery_type)} <button class="btn btn-ghost btn-sm" onclick="viewOrder(${o.id})">Detalhes</button></td>
+        <td style="white-space:nowrap">${nextStatusBtn(o.id,o.status,o.delivery_type,true)} <button class="btn btn-ghost btn-sm" onclick="viewOrder(${o.id})">Detalhes</button></td>
       </tr>`).join('');
   }
 

@@ -9,7 +9,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#F1F5F
   --purple:#7C3AED;--purple-lt:#EDE9FE;
   --fg:#0F172A;--fg-2:#475569;--fg-3:#94A3B8;
   --bg:#F1F5F9;--card:#fff;--border:#E2E8F0;
-  --sidebar-bg:#0F172A;--sidebar-w:240px;
+  --sidebar-bg:#0F172A;--sidebar-w:212px;
 }
 
 .spin{animation:spin-ic 1s linear infinite}

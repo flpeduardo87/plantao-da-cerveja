@@ -193,7 +193,7 @@ function statusOptions(current) {
   ].map(o => `<option value="${o.v}"${o.v===current?' selected':''}>${o.l}</option>`).join('');
 }
 
-function nextStatusBtn(id, current, deliveryType) {
+function nextStatusBtn(id, current, deliveryType, compact = false) {
   const pickup = deliveryType === 'pickup';
   // Fluxo enxuto: Aceitar já vai direto para "Preparando"; entrega é finalizada sozinha pelo servidor.
   const flow = {
@@ -202,16 +202,17 @@ function nextStatusBtn(id, current, deliveryType) {
     preparing:  { next:'delivering', label:pickup ? 'Pronto para retirada' : 'Saiu p/ entrega' },
     delivering: { next:'delivered',  label:pickup ? 'Marcar retirado' : 'Marcar entregue' },
   };
-  const badge = fmtStatus(current, deliveryType);
+  const badge = compact ? '' : fmtStatus(current, deliveryType);
   const step = flow[current];
   if (!step) return badge;
   const refuse = current === 'new'
     ? `<button class="btn-refuse" onclick="changeStatus(${id},'cancelled')">Recusar</button>`
     : '';
-  const auto = current === 'delivering' && !pickup
+  const auto = current === 'delivering' && !pickup && !compact
     ? `<span class="auto-hint" title="O pedido é finalizado automaticamente 30 minutos depois da saída">⏱ finaliza sozinho</span>`
     : '';
-  return `${badge}<button class="btn-next-step" onclick="changeStatus(${id},'${step.next}')">${step.label} →</button>${refuse}${auto}`;
+  const tip = current === 'delivering' && !pickup ? ' title="Finaliza sozinho 30 min depois da saída"' : '';
+  return `${badge}<button class="btn-next-step"${tip} onclick="changeStatus(${id},'${step.next}')">${step.label} →</button>${refuse}${auto}`;
 }
 
 /* ── Order details modal (shared) ── */
