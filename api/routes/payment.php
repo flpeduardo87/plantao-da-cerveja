@@ -63,6 +63,11 @@ if (str_starts_with($type, 'order.')) {
 
 if ($orderNumber) {
     $update = $statusMap[$type];
+
+    // Estado anterior (para avisar o lojista só na 1ª confirmação de um PIX)
+    $prev = $pdo->prepare('SELECT payment_method, payment_status FROM orders WHERE order_number = ?');
+    $prev->execute([$orderNumber]);
+    $prevRow = $prev->fetch() ?: null;
     $sets   = [];
     $vals   = [];
     $where  = 'order_number = ?';
@@ -87,6 +92,15 @@ if ($orderNumber) {
     $vals[] = $orderNumber;
     $pdo->prepare('UPDATE orders SET ' . implode(', ', $sets) . " WHERE $where")
         ->execute($vals);
+
+    // PIX confirmado: agora o pedido entra no painel e o lojista é avisado
+    if ($update['payment_status'] === 'paid' && $prevRow
+        && $prevRow['payment_method'] === 'pix' && $prevRow['payment_status'] !== 'paid') {
+        try {
+            require_once __DIR__ . '/../lib/notify.php';
+            notify_new_order($pdo, $orderNumber);
+        } catch (\Throwable $e) { error_log('notify PIX pago: ' . $e->getMessage()); }
+    }
 }
 
 json_ok(['received' => true]);

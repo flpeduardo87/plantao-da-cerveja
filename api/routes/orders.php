@@ -69,6 +69,10 @@ match ($method) {
             $where .= ' AND o.status = ?';
             $vals[] = $_GET['status'];
         }
+        // PIX só aparece no painel depois de pago (pedidos ainda não aceitos/cancelados sem pagamento ficam ocultos)
+        $where .= " AND NOT (o.payment_method = 'pix'
+                             AND o.payment_status IN ('pending','processing','failed')
+                             AND o.status IN ('new','cancelled'))";
         $limit  = min((int)($_GET['limit']  ?? 50), 200);
         $page   = max(1, (int)($_GET['page'] ?? 1));
         $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : ($page - 1) * $limit;
@@ -358,61 +362,11 @@ match ($method) {
             }
         }
 
-        // WhatsApp via Fonnte (best-effort, never blocks order creation)
-        $fonnteToken = $cfg['fonnte_token'] ?? '';
-        $ownerPhone  = preg_replace('/\D/', '', $cfg['store_whatsapp'] ?? '');
-        if ($fonnteToken && $ownerPhone) {
-            $itemsText = implode("\n", array_map(fn($li) => "• {$li['qty']}x {$li['name']} — R$ " . number_format($li['total'], 2, ',', '.'), $lineItems));
-            $payLabel  = ['pix' => 'PIX', 'cash' => 'Dinheiro', 'machine' => 'Maquininha', 'credit_card' => 'Cartão Crédito'][$d['payment_method']] ?? $d['payment_method'];
-            $msg = "🍺 *Novo Pedido #{$orderNumber}*\n\n"
-                . "*Cliente:* {$d['customer_name']}\n"
-                . "*Fone:* {$d['customer_phone']}\n"
-                . ($pickup
-                    ? "*Recebimento:* Retirada no balcão\n"
-                    : "*Endereço:* {$d['address_street']}, {$d['address_number']}"
-                        . (!empty($d['address_complement']) ? " - {$d['address_complement']}" : '')
-                        . " · {$neighborhood}\n"
-                        . (!empty($d['address_reference']) ? "*Ref:* {$d['address_reference']}\n" : ''))
-                . "\n*Itens:*\n{$itemsText}\n\n"
-                . "*Subtotal:* R$ " . number_format($subtotal, 2, ',', '.') . "\n"
-                . ($deliveryFee > 0 ? "*Taxa de entrega:* R$ " . number_format($deliveryFee, 2, ',', '.') . "\n" : '')
-                . "*Total:* R$ " . number_format($total, 2, ',', '.') . "\n"
-                . "*Pagamento:* {$payLabel}";
-
-            @file_get_contents('https://api.fonnte.com/send', false, stream_context_create([
-                'http' => [
-                    'method'  => 'POST',
-                    'header'  => "Authorization: {$fonnteToken}\r\nContent-Type: application/x-www-form-urlencoded\r\n",
-                    'content' => http_build_query(['target' => $ownerPhone, 'message' => $msg]),
-                    'timeout' => 5,
-                ],
-            ]));
+        // Avisos ao lojista (WhatsApp + push). PIX só avisa depois que o pagamento for confirmado (webhook).
+        if ($d['payment_method'] !== 'pix') {
+            require_once __DIR__ . '/../lib/notify.php';
+            notify_new_order($pdo, $orderNumber);
         }
-
-        // Web Push notification (best-effort)
-        try {
-            require_once __DIR__ . '/../lib/webpush.php';
-            $vapid = $pdo->query(
-                "SELECT setting_key, setting_value FROM store_settings WHERE setting_key IN ('vapid_public','vapid_private_pem','vapid_subject')"
-            )->fetchAll(\PDO::FETCH_KEY_PAIR);
-            if (!empty($vapid['vapid_public']) && !empty($vapid['vapid_private_pem'])) {
-                $subs = $pdo->query("SELECT endpoint, p256dh, auth FROM push_subscriptions")->fetchAll();
-                $pvs  = $vapid['vapid_subject'] ?? 'mailto:admin@plantaodacerveja.com.br';
-                $msg  = json_encode([
-                    'title' => '🍺 Novo pedido!',
-                    'body'  => "#{$orderNumber} · {$d['customer_name']} · R$ " . number_format($total, 2, ',', '.'),
-                ]);
-                foreach ($subs as $s2) {
-                    @wp_send(
-                        ['endpoint' => $s2['endpoint'], 'keys' => ['p256dh' => $s2['p256dh'], 'auth' => $s2['auth']]],
-                        $msg,
-                        $vapid['vapid_public'],
-                        $vapid['vapid_private_pem'],
-                        $pvs
-                    );
-                }
-            }
-        } catch (\Throwable $e2) { /* best-effort */ }
 
         $resp = ['success' => true, 'id' => $orderId, 'order_number' => $orderNumber, 'total' => $total];
         if (!empty($pm3dsUrl)) $resp['threed_secure_url'] = $pm3dsUrl;
