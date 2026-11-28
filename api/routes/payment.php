@@ -86,12 +86,7 @@ if ($orderNumber) {
 
     if ($update['status']) {
         if ($update['payment_status'] === 'paid') {
-            // PIX pago fica como "Novo" para tocar o alarme até o lojista aceitar.
-            // Demais métodos: aceita automaticamente, mas nunca volta um pedido já em andamento/cancelado.
-            if (!($prevRow && $prevRow['payment_method'] === 'pix')) {
-                $sets[] = "status = IF(status = 'new', ?, status)";
-                $vals[] = $update['status'];
-            }
+            // Pago: o pedido continua "Novo" para tocar a sirene até o lojista aceitar (não mexe no status).
         } else {
             $sets[] = 'status = ?';
             $vals[] = $update['status'];
@@ -102,9 +97,10 @@ if ($orderNumber) {
     $pdo->prepare('UPDATE orders SET ' . implode(', ', $sets) . " WHERE $where")
         ->execute($vals);
 
-    // PIX confirmado: o pedido entra no painel como "Novo" (toca o alarme) e o lojista é avisado
+    // Pagamento online confirmado: o pedido entra no painel como "Novo" (toca o alarme) e o lojista é avisado
     if ($update['payment_status'] === 'paid' && $prevRow
-        && $prevRow['payment_method'] === 'pix' && $prevRow['payment_status'] !== 'paid') {
+        && in_array($prevRow['payment_method'], ['pix', 'credit_card', 'debit_card'], true)
+        && $prevRow['payment_status'] !== 'paid') {
         try {
             require_once __DIR__ . '/../lib/notify.php';
             notify_new_order($pdo, $orderNumber);

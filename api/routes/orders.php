@@ -76,10 +76,15 @@ match ($method) {
             $where .= ' AND o.status = ?';
             $vals[] = $_GET['status'];
         }
-        // PIX só aparece no painel depois de pago (pedidos ainda não aceitos/cancelados sem pagamento ficam ocultos)
-        $where .= " AND NOT (o.payment_method = 'pix'
-                             AND o.payment_status IN ('pending','processing','failed')
-                             AND o.status IN ('new','cancelled'))";
+        // Pagamento online só aparece no painel depois de pago (PIX/cartão ainda aguardando ficam ocultos)
+        $where .= " AND NOT (
+                        (o.payment_method = 'pix'
+                           AND o.payment_status IN ('pending','processing','failed')
+                           AND o.status IN ('new','cancelled'))
+                     OR (o.payment_method IN ('credit_card','debit_card')
+                           AND o.payment_status IN ('pending','processing')
+                           AND o.status = 'new')
+                    )";
         $limit  = min((int)($_GET['limit']  ?? 50), 200);
         $page   = max(1, (int)($_GET['page'] ?? 1));
         $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : ($page - 1) * $limit;
@@ -307,15 +312,16 @@ match ($method) {
                     $pmPaid   = ($result['status'] === 'paid');
                     $pm3dsUrl = $result['threed_secure_url'] ?? null;
                     if ($pmPaid) {
-                        $pdo->prepare("UPDATE orders SET payment_status='paid', status='accepted' WHERE id=?")
+                        // Pago: continua "Novo" para tocar a sirene até o lojista aceitar
+                        $pdo->prepare("UPDATE orders SET payment_status='paid' WHERE id=?")
                             ->execute([$orderId]);
                     } elseif ($pm3dsUrl) {
-                        // 3DS authentication required — keep order as processing
-                        $pdo->prepare("UPDATE orders SET payment_status='processing', status='accepted' WHERE id=?")
+                        // 3DS authentication required — aguardando pagamento (oculto no painel até pagar)
+                        $pdo->prepare("UPDATE orders SET payment_status='processing' WHERE id=?")
                             ->execute([$orderId]);
                     } elseif ($result['status'] === 'pending') {
-                        // Payment processing / waiting confirmation
-                        $pdo->prepare("UPDATE orders SET payment_status='processing', status='accepted' WHERE id=?")
+                        // Payment processing / waiting confirmation (oculto no painel até pagar)
+                        $pdo->prepare("UPDATE orders SET payment_status='processing' WHERE id=?")
                             ->execute([$orderId]);
                     } elseif ($result['status'] === 'failed') {
                         $reason = $result['decline_reason'] ?? null;
@@ -369,8 +375,10 @@ match ($method) {
             }
         }
 
-        // Avisos ao lojista (WhatsApp + push). PIX só avisa depois que o pagamento for confirmado (webhook).
-        if ($d['payment_method'] !== 'pix') {
+        // Avisos ao lojista (WhatsApp + push). Pagamento online (PIX/cartão) só avisa depois de confirmado
+        // (cartão aprovado na hora avisa aqui; os demais pelo webhook). Dinheiro/maquininha avisam já.
+        $onlinePay = in_array($d['payment_method'], ['pix', 'credit_card', 'debit_card'], true);
+        if (!$onlinePay || $pmPaid) {
             require_once __DIR__ . '/../lib/notify.php';
             notify_new_order($pdo, $orderNumber);
         }
