@@ -195,16 +195,23 @@ function statusOptions(current) {
 
 function nextStatusBtn(id, current, deliveryType) {
   const pickup = deliveryType === 'pickup';
+  // Fluxo enxuto: Aceitar já vai direto para "Preparando"; entrega é finalizada sozinha pelo servidor.
   const flow = {
-    new:        { next:'accepted',   label:'Aceitar pedido' },
-    accepted:   { next:'preparing',  label:'Iniciar preparo' },
-    preparing:  { next:'delivering', label:pickup ? 'Marcar pronto para retirada' : 'Saiu p/ entrega' },
+    new:        { next:'preparing',  label:'Aceitar' },
+    accepted:   { next:'delivering', label:pickup ? 'Pronto para retirada' : 'Saiu p/ entrega' },
+    preparing:  { next:'delivering', label:pickup ? 'Pronto para retirada' : 'Saiu p/ entrega' },
     delivering: { next:'delivered',  label:pickup ? 'Marcar retirado' : 'Marcar entregue' },
   };
   const badge = fmtStatus(current, deliveryType);
   const step = flow[current];
   if (!step) return badge;
-  return `${badge}<button class="btn-next-step" onclick="changeStatus(${id},'${step.next}')">${step.label} →</button>`;
+  const refuse = current === 'new'
+    ? `<button class="btn-refuse" onclick="changeStatus(${id},'cancelled')">Recusar</button>`
+    : '';
+  const auto = current === 'delivering' && !pickup
+    ? `<span class="auto-hint" title="O pedido é finalizado automaticamente 30 minutos depois da saída">⏱ finaliza sozinho</span>`
+    : '';
+  return `${badge}<button class="btn-next-step" onclick="changeStatus(${id},'${step.next}')">${step.label} →</button>${refuse}${auto}`;
 }
 
 /* ── Order details modal (shared) ── */

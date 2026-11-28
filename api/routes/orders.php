@@ -11,6 +11,13 @@ $pdo = db();
 match ($method) {
     // ── List / Single ────────────────────────────────────────────────────────
     'GET' => (function () use ($pdo, $id) {
+        // Entrega finaliza sozinha 30 min depois de "saiu para entrega" (retirada no balcão continua manual)
+        try {
+            $pdo->exec("UPDATE orders SET status = 'delivered'
+                        WHERE status = 'delivering' AND delivery_type <> 'pickup'
+                          AND updated_at <= (NOW() - INTERVAL 30 MINUTE)");
+        } catch (\Throwable $e) { error_log('auto-entrega: ' . $e->getMessage()); }
+
         // Public tracking by order_number + phone (no auth required)
         if (!empty($_GET['order_number']) && !empty($_GET['phone'])) {
             $phone = preg_replace('/\D/', '', $_GET['phone']);
